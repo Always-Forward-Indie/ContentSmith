@@ -1,0 +1,93 @@
+{
+    "common": {
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "edit": "Редактировать",
+        "delete": "Удалить",
+        "create": "Создать",
+        "new": "Новый",
+        "name": "Название",
+        "title": "Заголовок",
+        "description": "Описание",
+        "actions": "Действия",
+        "search": "Поиск",
+        "loading": "Загрузка...",
+        "error": "Ошибка",
+        "success": "Успешно",
+        "noResults": "Результаты не найдены",
+        "confirmDelete": "Вы уверены, что хотите удалить этот элемент?",
+        "back": "Назад",
+        "next": "Далее",
+        "previous": "Предыдущий",
+        "close": "Закрыть"
+    },
+    "navigation": {
+        "home": "Главная",
+        "dialogues": "Диалоги",
+        "quests": "Квесты",
+        "localization": "Локализация",
+        "analytics": "Аналитика",
+        "settings": "Настройки"
+    },
+    "home": {
+        "title": "ContentSmith",
+        "subtitle": "Студия управления игровым контентом",
+        "dialogues": {
+            "title": "Диалоги",
+            "description": "Создавайте и управляйте интерактивными деревьями диалогов",
+            "openEditor": "Открыть редактор диалогов"
+        },
+        "quests": {
+            "title": "Квесты",
+            "description": "Создавайте и управляйте цепочками квестов и задачами",
+            "openEditor": "Открыть редактор квестов"
+        },
+        "localization": {
+            "title": "Локализация",
+            "description": "Управляйте переводами и локализованным контентом"
+        }
+    },
+    "quests": {
+        "title": "Квесты",
+        "description": "Управляйте и организуйте игровые квесты",
+        "createNew": "Создать квест",
+        "list": "Список квестов",
+        "listDescription": "Просматривайте и управляйте всеми квестами",
+        "newQuest": "Новый квест",
+        "editQuest": "Редактировать квест",
+        "questName": "Название квеста",
+        "questDescription": "Описание квеста",
+        "questNamePlaceholder": "Введите название квеста",
+        "questDescriptionPlaceholder": "Введите описание квеста",
+        "searchPlaceholder": "Поиск квестов...",
+        "id": "ID",
+        "createdAt": "Создан",
+        "updatedAt": "Обновлен",
+        "priority": "Приоритет",
+        "status": "Статус",
+        "giver": "Квестодатель",
+        "selectGiver": "Выберите квестодателя",
+        "noGiver": "Квестодатель не выбран",
+        "steps": "Шаги",
+        "validationErrors": {
+            "nameRequired": "Название квеста обязательно",
+            "nameMinLength": "Название квеста должно содержать минимум 1 символ",
+            "nameMaxLength": "Название квеста должно быть менее 255 символов",
+            "descriptionMaxLength": "Описание должно быть менее 1000 символов"
+        }
+    },
+    "dialogues": {
+        "title": "Диалоги",
+        "description": "Создавайте и управляйте диалоговыми беседами",
+        "createNew": "Создать диалог",
+        "list": "Список диалогов",
+        "listDescription": "Просматривайте и управляйте всеми диалогами",
+        "newDialogue": "Новый диалог",
+        "editDialogue": "Редактировать диалог",
+        "dialogueName": "Название диалога",
+        "dialogueDescription": "Описание диалога",
+        "searchPlaceholder": "Поиск диалогов...",
+        "graph": "Граф",
+        "viewGraph": "Посмотреть граф"
+    }
+}

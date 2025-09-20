@@ -1,11 +1,12 @@
 import { createTRPCRouter } from '../trpc';
 import { dialogueRouter } from './dialogue';
 import { npcRouter } from './npc';
+import { questRouter } from './quest';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
   npc: npcRouter,
-  // quest: questRouter,     // TODO: implement
+  quest: questRouter,
   // localization: localizationRouter, // TODO: implement
 });
 

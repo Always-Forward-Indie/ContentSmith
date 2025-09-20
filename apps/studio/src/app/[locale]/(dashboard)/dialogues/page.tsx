@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +28,7 @@ import {
 import { trpc } from '@/lib/trpc'
 
 export default function DialoguesPage() {
+    const t = useTranslations()
     const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState(1)
 
@@ -45,7 +47,7 @@ export default function DialoguesPage() {
     })
 
     const handleDelete = async (id: number) => {
-        if (confirm('Are you sure you want to delete this dialogue?')) {
+        if (confirm(t('common.confirmDelete'))) {
             await deleteDialogue.mutateAsync({ id })
         }
     }
@@ -53,7 +55,7 @@ export default function DialoguesPage() {
     if (error) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">Error loading dialogues: {error.message}</p>
+                <p className="text-destructive">{t('common.error')}: {error.message}</p>
             </div>
         )
     }
@@ -63,15 +65,15 @@ export default function DialoguesPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Dialogues</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">{t('dialogues.title')}</h1>
                     <p className="text-muted-foreground">
-                        Manage NPC dialogues and conversation trees
+                        {t('dialogues.description')}
                     </p>
                 </div>
                 <Link href="/dialogues/new">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
-                        New Dialogue
+                        {t('dialogues.createNew')}
                     </Button>
                 </Link>
             </div>
@@ -79,14 +81,14 @@ export default function DialoguesPage() {
             {/* Search and Filters */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Search & Filters</CardTitle>
+                    <CardTitle>{t('common.search')} & Filters</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="flex gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search dialogues by slug..."
+                                placeholder={t('dialogues.searchPlaceholder')}
                                 className="pl-10"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -99,7 +101,7 @@ export default function DialoguesPage() {
             {/* Dialogues List */}
             <Card>
                 <CardHeader>
-                    <CardTitle>All Dialogues</CardTitle>
+                    <CardTitle>{t('dialogues.list')}</CardTitle>
                     <CardDescription>
                         {dialoguesData?.data.length || 0} dialogue(s) found
                     </CardDescription>
@@ -107,11 +109,11 @@ export default function DialoguesPage() {
                 <CardContent>
                     {isLoading ? (
                         <div className="text-center py-8">
-                            <p>Loading dialogues...</p>
+                            <p>{t('common.loading')}</p>
                         </div>
                     ) : dialoguesData?.data.length === 0 ? (
                         <div className="text-center py-8">
-                            <p className="text-muted-foreground">No dialogues found</p>
+                            <p className="text-muted-foreground">{t('common.noResults')}</p>
                             <Link href="/dialogues/new">
                                 <Button className="mt-4">
                                     <Plus className="mr-2 h-4 w-4" />
@@ -127,7 +129,7 @@ export default function DialoguesPage() {
                                     <TableHead>Slug</TableHead>
                                     <TableHead>Version</TableHead>
                                     <TableHead>Start Node</TableHead>
-                                    <TableHead>Actions</TableHead>
+                                    <TableHead>{t('common.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -157,7 +159,7 @@ export default function DialoguesPage() {
                                                 </Link>
                                                 <Link href={`/dialogues/${dialogue.id}/graph`}>
                                                     <Button variant="outline" size="sm">
-                                                        Graph
+                                                        {t('dialogues.graph')}
                                                     </Button>
                                                 </Link>
                                                 <Button
@@ -186,14 +188,14 @@ export default function DialoguesPage() {
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={page === 1}
                     >
-                        Previous
+                        {t('common.previous')}
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => setPage(p => p + 1)}
                         disabled={dialoguesData.data.length < 10}
                     >
-                        Next
+                        {t('common.next')}
                     </Button>
                 </div>
             )}

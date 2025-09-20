@@ -1,54 +1,57 @@
 import Link from 'next/link'
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function HomePage() {
+    const t = useTranslations();
+
     return (
         <main className="container mx-auto px-4 py-8">
             <div className="max-w-4xl mx-auto">
                 <header className="text-center mb-12">
                     <h1 className="text-4xl font-bold tracking-tight mb-4">
-                        ContentSmith
+                        {t('home.title')}
                     </h1>
                     <p className="text-xl text-muted-foreground">
-                        Professional MMORPG Content Management System
+                        {t('home.subtitle')}
                     </p>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Dialogues</CardTitle>
+                            <CardTitle>{t('home.dialogues.title')}</CardTitle>
                             <CardDescription>
-                                Manage NPC dialogues with visual graph editor
+                                {t('home.dialogues.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Link href="/dialogues">
-                                <Button className="w-full">Open Dialogue Editor</Button>
+                                <Button className="w-full">{t('home.dialogues.openEditor')}</Button>
                             </Link>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Quests</CardTitle>
+                            <CardTitle>{t('home.quests.title')}</CardTitle>
                             <CardDescription>
-                                Create and manage quest chains and objectives
+                                {t('home.quests.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Link href="/quests">
-                                <Button className="w-full">Open Quest Editor</Button>
+                                <Button className="w-full">{t('home.quests.openEditor')}</Button>
                             </Link>
                         </CardContent>
                     </Card>
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Localization</CardTitle>
+                            <CardTitle>{t('home.localization.title')}</CardTitle>
                             <CardDescription>
-                                Manage translations and text content for UE5
+                                {t('home.localization.description')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent>

@@ -1,12 +1,17 @@
+'use client';
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { useTranslations } from 'next-intl'
 
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const t = useTranslations();
     return (
         <div className="min-h-screen bg-background">
             {/* Navigation Header */}
@@ -22,30 +27,31 @@ export default function DashboardLayout({
                             href="/dialogues"
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
-                            Dialogues
+                            {t('navigation.dialogues')}
                         </Link>
                         <Link
                             href="/quests"
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
-                            Quests
+                            {t('navigation.quests')}
                         </Link>
                         <Link
                             href="/localization"
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
-                            Localization
+                            {t('navigation.localization')}
                         </Link>
                         <Link
                             href="/analytics"
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
-                            Analytics
+                            {t('navigation.analytics')}
                         </Link>
                     </nav>
                     <div className="ml-auto flex items-center space-x-4">
+                        <LanguageSwitcher />
                         <Button variant="outline" size="sm">
-                            Settings
+                            {t('navigation.settings')}
                         </Button>
                     </div>
                 </div>

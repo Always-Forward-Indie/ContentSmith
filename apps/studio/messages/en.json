@@ -1,0 +1,93 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "create": "Create",
+        "new": "New",
+        "name": "Name",
+        "title": "Title",
+        "description": "Description",
+        "actions": "Actions",
+        "search": "Search",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "noResults": "No results found",
+        "confirmDelete": "Are you sure you want to delete this item?",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "close": "Close"
+    },
+    "navigation": {
+        "home": "Home",
+        "dialogues": "Dialogues",
+        "quests": "Quests",
+        "localization": "Localization",
+        "analytics": "Analytics",
+        "settings": "Settings"
+    },
+    "home": {
+        "title": "ContentSmith",
+        "subtitle": "Game Content Management Studio",
+        "dialogues": {
+            "title": "Dialogues",
+            "description": "Create and manage interactive dialogue trees",
+            "openEditor": "Open Dialogue Editor"
+        },
+        "quests": {
+            "title": "Quests",
+            "description": "Create and manage quest chains and objectives",
+            "openEditor": "Open Quest Editor"
+        },
+        "localization": {
+            "title": "Localization",
+            "description": "Manage translations and localized content"
+        }
+    },
+    "quests": {
+        "title": "Quests",
+        "description": "Manage and organize your game quests",
+        "createNew": "Create Quest",
+        "list": "Quest List",
+        "listDescription": "View and manage all your quests",
+        "newQuest": "New Quest",
+        "editQuest": "Edit Quest",
+        "questName": "Quest Name",
+        "questDescription": "Quest Description",
+        "questNamePlaceholder": "Enter quest name",
+        "questDescriptionPlaceholder": "Enter quest description",
+        "searchPlaceholder": "Search quests...",
+        "id": "ID",
+        "createdAt": "Created",
+        "updatedAt": "Updated",
+        "priority": "Priority",
+        "status": "Status",
+        "giver": "Quest Giver",
+        "selectGiver": "Select Quest Giver",
+        "noGiver": "No quest giver selected",
+        "steps": "Steps",
+        "validationErrors": {
+            "nameRequired": "Quest name is required",
+            "nameMinLength": "Quest name must be at least 1 character",
+            "nameMaxLength": "Quest name must be less than 255 characters",
+            "descriptionMaxLength": "Description must be less than 1000 characters"
+        }
+    },
+    "dialogues": {
+        "title": "Dialogues",
+        "description": "Create and manage dialogue conversations",
+        "createNew": "Create Dialogue",
+        "list": "Dialogue List",
+        "listDescription": "View and manage all your dialogues",
+        "newDialogue": "New Dialogue",
+        "editDialogue": "Edit Dialogue",
+        "dialogueName": "Dialogue Name",
+        "dialogueDescription": "Dialogue Description",
+        "searchPlaceholder": "Search dialogues...",
+        "graph": "Graph",
+        "viewGraph": "View Graph"
+    }
+}
