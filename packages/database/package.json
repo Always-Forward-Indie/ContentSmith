@@ -1,0 +1,24 @@
+{
+    "name": "@contentsmith/database",
+    "version": "1.0.0",
+    "description": "Database schema and migrations for ContentSmith",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "generate": "drizzle-kit generate:pg",
+        "migrate": "tsx src/migrate.ts",
+        "studio": "drizzle-kit studio",
+        "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "drizzle-orm": "^0.29.0",
+        "postgres": "^3.4.3"
+    },
+    "devDependencies": {
+        "drizzle-kit": "^0.20.6",
+        "tsx": "^4.6.2",
+        "typescript": "^5.2.2"
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "name": "contentsmith",
+    "version": "1.0.0",
+    "description": "MMORPG Content Management System",
+    "private": true,
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "turbo run dev",
+        "build": "turbo run build",
+        "lint": "turbo run lint",
+        "type-check": "turbo run type-check",
+        "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+        "docker:dev-full": "docker-compose -f docker-compose.full.yml up --build",
+        "docker:prod": "docker-compose -f docker-compose.yml up --build",
+        "db:migrate": "npm run db:migrate --workspace=@contentsmith/database",
+        "db:studio": "npm run studio --workspace=@contentsmith/database"
+    },
+    "devDependencies": {
+        "turbo": "^1.10.12",
+        "@types/node": "^20.0.0",
+        "typescript": "^5.2.2"
+    }
+}

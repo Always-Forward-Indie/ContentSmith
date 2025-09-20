@@ -1,0 +1,19 @@
+services:
+  # Только приложение Next.js - подключается к локальной БД
+  studio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-development_secret_key_please_change_in_production}
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/studio/.next
+    network_mode: "host"  # Используем сеть хоста для доступа к локальной БД
