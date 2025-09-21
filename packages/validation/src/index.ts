@@ -3,6 +3,8 @@ export * from './actions';
 export * from './dialogue';
 export * from './quest';
 export * from './localization';
+export * from './npc';
+export * from './skills';
 
 // Common validation utilities
 export { z } from 'zod';

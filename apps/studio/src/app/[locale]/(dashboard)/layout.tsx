@@ -37,6 +37,18 @@ export default function DashboardLayout({
                             {t('navigation.quests')}
                         </Link>
                         <Link
+                            href={`/${locale}/npcs`}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t('navigation.npcs')}
+                        </Link>
+                        <Link
+                            href={`/${locale}/skills`}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t('navigation.skills')}
+                        </Link>
+                        <Link
                             href={`/${locale}/localization`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >

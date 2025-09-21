@@ -26,6 +26,8 @@ const quests = loadJson('quests.json');
 const editors = loadJson('editors.json');
 const errors = loadJson('errors.json');
 const home = loadJson('home.json');
+const npcs = loadJson('npcs.json');
+const skills = loadJson('skills.json');
 
 export default {
   common,
@@ -35,4 +37,6 @@ export default {
   editors,
   errors,
   home,
+  npcs,
+  skills,
 };

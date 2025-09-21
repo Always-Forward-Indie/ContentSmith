@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  serial,
   text,
   integer,
   boolean,
@@ -129,4 +130,148 @@ export const playerFlag = pgTable('player_flag', {
   pk: primaryKey({ columns: [table.playerId, table.flagKey] }),
   boolIdx: index('ix_player_flag_bool').on(table.playerId, table.flagKey, table.boolValue),
   intIdx: index('ix_player_flag_int').on(table.playerId, table.flagKey, table.intValue),
+}));
+
+// ===== NPC RELATED TABLES =====
+export const race = pgTable('race', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_race_slug').on(table.slug),
+}));
+
+export const npcType = pgTable('npc_type', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_npc_type_slug').on(table.slug),
+}));
+
+export const npcPosition = pgTable('npc_position', {
+  id: bigint('id', { mode: 'number' }),
+  npcId: bigint('npc_id', { mode: 'number' }).notNull().references(() => npc.id, { onDelete: 'cascade' }),
+  x: integer('x'),
+  y: integer('y'),
+  z: integer('z'),
+  rotZ: integer('rot_z').notNull().default(0),
+}, (table) => ({
+  npcIdx: index('ix_npc_position_npc').on(table.npcId),
+}));
+
+export const entityAttributes = pgTable('entity_attributes', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_entity_attributes_slug').on(table.slug),
+}));
+
+export const npcAttributes = pgTable('npc_attributes', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  npcId: bigint('npc_id', { mode: 'number' }).notNull().references(() => npc.id, { onDelete: 'cascade' }),
+  attributeId: integer('attribute_id').notNull().references(() => entityAttributes.id),
+  value: integer('value').notNull(),
+}, (table) => ({
+  npcAttrIdx: index('ix_npc_attributes_npc').on(table.npcId),
+  uniqueNpcAttr: unique().on(table.npcId, table.attributeId),
+}));
+
+export const skillSchool = pgTable('skill_school', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_skill_school_slug').on(table.slug),
+}));
+
+export const skillScaleType = pgTable('skill_scale_type', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_skill_scale_type_slug').on(table.slug),
+}));
+
+export const skills = pgTable('skills', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+  scaleStatId: integer('scale_stat_id').notNull().default(1).references(() => skillScaleType.id),
+  schoolId: integer('school_id').notNull().default(1).references(() => skillSchool.id),
+}, (table) => ({
+  slugIdx: index('ix_skills_slug').on(table.slug),
+}));
+
+export const npcSkills = pgTable('npc_skills', {
+  id: serial('id').primaryKey(),
+  npcId: bigint('npc_id', { mode: 'number' }).notNull().references(() => npc.id, { onDelete: 'cascade' }),
+  skillId: integer('skill_id').notNull().references(() => skills.id),
+  currentLevel: integer('current_level').notNull().default(1),
+}, (table) => ({
+  npcSkillIdx: index('ix_npc_skills_npc').on(table.npcId),
+  uniqueNpcSkill: unique().on(table.npcId, table.skillId),
+}));
+
+export const skillProperties = pgTable('skill_properties', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_skill_properties_slug').on(table.slug),
+}));
+
+export const skillPropertiesMapping = pgTable('skill_properties_mapping', {
+  id: serial('id').primaryKey(),
+  skillId: integer('skill_id').notNull().references(() => skills.id),
+  skillLevel: integer('skill_level').notNull(),
+  propertyId: integer('property_id').notNull().references(() => skillProperties.id),
+  propertyValue: integer('property_value').notNull(),
+}, (table) => ({
+  skillPropIdx: index('ix_skill_props_mapping').on(table.skillId, table.skillLevel),
+  uniqueSkillProp: unique().on(table.skillId, table.skillLevel, table.propertyId),
+}));
+
+export const targetType = pgTable('target_type', {
+  id: serial('id').primaryKey(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_target_type_slug').on(table.slug),
+}));
+
+export const skillEffectsType = pgTable('skill_effects_type', {
+  id: serial('id').primaryKey(),
+  slug: text('slug').notNull(),
+}, (table) => ({
+  slugIdx: index('ix_skill_effects_type_slug').on(table.slug),
+}));
+
+export const skillEffects = pgTable('skill_effects', {
+  id: serial('id').primaryKey(),
+  slug: text('slug').notNull(),
+  effectTypeId: integer('effect_type_id').notNull().default(1).references(() => skillEffectsType.id),
+}, (table) => ({
+  slugIdx: index('ix_skill_effects_slug').on(table.slug),
+}));
+
+export const skillEffectInstances = pgTable('skill_effect_instances', {
+  id: serial('id').primaryKey(),
+  skillId: integer('skill_id').notNull().references(() => skills.id),
+  orderIdx: integer('order_idx').notNull().default(1),
+  targetTypeId: integer('target_type_id').notNull().references(() => targetType.id),
+}, (table) => ({
+  skillEffectIdx: index('ix_skill_effect_instances_skill').on(table.skillId),
+  uniqueSkillOrder: unique().on(table.skillId, table.orderIdx),
+}));
+
+export const skillEffectsMapping = pgTable('skill_effects_mapping', {
+  id: serial('id').primaryKey(),
+  effectInstanceId: integer('effect_instance_id').notNull().references(() => skillEffectInstances.id),
+  effectId: integer('effect_id').notNull().references(() => skillEffects.id),
+  value: integer('value').notNull(),
+  level: integer('level').notNull().default(1),
+}, (table) => ({
+  effectMappingIdx: index('ix_skill_effects_mapping').on(table.effectInstanceId, table.level),
+  uniqueEffectMapping: unique().on(table.effectInstanceId, table.level, table.effectId),
 }));
