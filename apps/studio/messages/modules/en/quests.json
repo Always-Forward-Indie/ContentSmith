@@ -103,6 +103,8 @@
         "questGiver": "Quest Giver",
         "questReceiver": "Quest Receiver",
         "clientKey": "Client Key",
+        "level": "Level",
+        "npcNotFound": "NPC not found",
         "none": "None"
     },
     "stepPages": {

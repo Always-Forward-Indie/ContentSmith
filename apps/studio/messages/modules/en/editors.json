@@ -48,7 +48,7 @@
             "layoutAppliedDescription": "Nodes have been automatically arranged",
             "positionsReset": "Positions reset",
             "positionsResetDescription": "All node positions have been reset",
-            "savedSuccessfully": "Saved successfully", 
+            "savedSuccessfully": "Saved successfully",
             "savedSuccessfullyDescription": "All changes have been saved to the database",
             "saveFailed": "Save failed"
         },
@@ -56,7 +56,7 @@
             "title": "Instructions",
             "sections": {
                 "nodeTypes": "Node Types",
-                "controls": "Controls", 
+                "controls": "Controls",
                 "layout": "Layout"
             },
             "nodeTypeDescriptions": {

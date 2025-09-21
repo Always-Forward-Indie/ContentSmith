@@ -103,6 +103,8 @@
         "questGiver": "Квестодатель",
         "questReceiver": "Принимающий квест",
         "clientKey": "Ключ клиента",
+        "level": "Уровень",
+        "npcNotFound": "NPC не найден",
         "none": "Нет"
     },
     "stepPages": {

@@ -83,7 +83,7 @@ export default function QuestDetailPage() {
         )
     }
 
-    const { quest, steps } = questData!
+    const { quest, steps, giverNpc, turninNpc } = questData!
 
     const getStepTypeLabel = (type: string) => {
         const typeKey = `quests.detail.stepTypes.${type}` as any
@@ -92,6 +92,12 @@ export default function QuestDetailPage() {
 
     const formatStepParams = (params: Record<string, any>) => {
         return JSON.stringify(params, null, 2)
+    }
+
+    const formatNpcInfo = (npcData: any, npcId: number | null) => {
+        if (!npcId) return '—'
+        if (!npcData) return `ID: ${npcId} (${t('quests.detail.npcNotFound')})`
+        return `${npcData.name} (ID: ${npcData.id}, ${t('quests.detail.level')}: ${npcData.level})`
     }
 
     return (
@@ -150,11 +156,11 @@ export default function QuestDetailPage() {
                             )}
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.questGiver')}</p>
-                                <p className="text-lg">{quest.giverNpcId || '—'}</p>
+                                <p className="text-lg">{formatNpcInfo(giverNpc, quest.giverNpcId)}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.questReceiver')}</p>
-                                <p className="text-lg">{quest.turninNpcId || '—'}</p>
+                                <p className="text-lg">{formatNpcInfo(turninNpc, quest.turninNpcId)}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.clientKey')}</p>

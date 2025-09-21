@@ -7,7 +7,7 @@ import {
   UpdateQuestSchema,
   QuestStepSchema
 } from '@contentsmith/validation';
-import { quest, questStep } from '@contentsmith/database';
+import { quest, questStep, npc } from '@contentsmith/database';
 import { eq, desc, like, or, inArray } from '@contentsmith/database';
 
 // В режиме разработки используем dev процедуры
@@ -85,6 +85,8 @@ export const questRouter = createTRPCRouter({
         });
       }
 
+      const questData = questResult[0];
+
       // Get all steps for this quest
       const steps = await ctx.db
         .select()
@@ -92,9 +94,33 @@ export const questRouter = createTRPCRouter({
         .where(eq(questStep.questId, input.id))
         .orderBy(questStep.stepIndex);
 
+      // Get NPC information for giver and turnin NPCs
+      let giverNpc = null;
+      let turninNpc = null;
+
+      if (questData.giverNpcId) {
+        const giverResult = await ctx.db
+          .select()
+          .from(npc)
+          .where(eq(npc.id, questData.giverNpcId))
+          .limit(1);
+        giverNpc = giverResult[0] || null;
+      }
+
+      if (questData.turninNpcId) {
+        const turninResult = await ctx.db
+          .select()
+          .from(npc)
+          .where(eq(npc.id, questData.turninNpcId))
+          .limit(1);
+        turninNpc = turninResult[0] || null;
+      }
+
       return {
-        quest: questResult[0],
+        quest: questData,
         steps,
+        giverNpc,
+        turninNpc,
       };
     }),
 
