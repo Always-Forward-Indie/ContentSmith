@@ -1,0 +1,207 @@
+{
+    "title": "Quests",
+    "description": "Manage and organize your game quests",
+    "createNew": "Create Quest",
+    "list": "Quest List",
+    "listDescription": "View and manage all your quests",
+    "newQuest": "New Quest",
+    "editQuest": "Edit Quest",
+    "questName": "Quest Name",
+    "questDescription": "Quest Description",
+    "questNamePlaceholder": "Enter quest name",
+    "questDescriptionPlaceholder": "Enter quest description",
+    "searchPlaceholder": "Search quests...",
+    "id": "ID",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "priority": "Priority",
+    "status": "Status",
+    "giver": "Quest Giver",
+    "selectGiver": "Select Quest Giver",
+    "noGiver": "No quest giver selected",
+    "steps": "Steps",
+    "validationErrors": {
+        "nameRequired": "Quest name is required",
+        "nameMinLength": "Quest name must be at least 1 character",
+        "nameMaxLength": "Quest name must be less than 255 characters",
+        "descriptionMaxLength": "Description must be less than 1000 characters"
+    },
+    "noQuests": "No quests",
+    "questsNotFound": "Quests not found",
+    "errorLoading": "Loading error",
+    "page": "Page",
+    "showingResults": "Showing {current} items • Page {page}",
+    "deleteQuest": "Delete Quest",
+    "deleteConfirm": "Are you sure you want to delete quest \"{slug}\"? This action cannot be undone.",
+    "deleting": "Deleting...",
+    "creating": "Creating...",
+    "createError": "Quest creation error",
+    "form": {
+        "basicInfo": "Basic Information",
+        "basicInfoDescription": "Configure basic quest parameters",
+        "fillBasicInfo": "Fill in basic quest information",
+        "slug": "Quest Slug *",
+        "minLevel": "Minimum Level *",
+        "repeatable": "Repeatable Quest",
+        "repeatableDescription": "Can this quest be taken again after completion",
+        "cooldown": "Cooldown (seconds)",
+        "cooldownDescription": "Wait time before retaking the quest",
+        "questGiver": "Quest Giver NPC",
+        "questGiverDescription": "NPC who gives this quest to players",
+        "questReceiver": "Quest Receiver NPC",
+        "questReceiverDescription": "NPC to whom player submits completed quest",
+        "clientKey": "Client UI Key",
+        "clientKeyDescription": "Key for quest name/description in client interface"
+    },
+    "edit": {
+        "title": "Edit Quest",
+        "description": "Modify quest parameters for \"{slug}\"",
+        "basicInfo": "Basic Information",
+        "basicInfoDescription": "Update quest parameters",
+        "errorLoading": "Loading Error",
+        "back": "Back",
+        "cancel": "Cancel",
+        "saveChanges": "Save Changes",
+        "saving": "Saving...",
+        "updateError": "Quest update error: {error}"
+    },
+    "table": {
+        "minLevel": "Min. Level",
+        "repeatable": "Repeatable",
+        "cooldown": "Cooldown (sec)",
+        "clientKey": "Client Key"
+    },
+    "detail": {
+        "title": "Quest Details and Steps",
+        "questInfo": "Quest Information",
+        "questInfoDescription": "Basic quest parameters and settings",
+        "minLevel": "Minimum Level",
+        "repeatable": "Repeatable",
+        "cooldown": "Cooldown (sec)",
+        "steps": "Quest Steps",
+        "stepsDescription": "Sequence of tasks that need to be completed",
+        "addStep": "Add Step",
+        "noSteps": "No steps found",
+        "noStepsDescription": "This quest doesn't have any steps yet.",
+        "stepType": "Type",
+        "stepDescription": "Description",
+        "stepParams": "Parameters",
+        "stepIndex": "Index",
+        "stepTypes": {
+            "collect": "Collect",
+            "kill": "Kill",
+            "talk": "Talk",
+            "reach": "Reach",
+            "custom": "Custom"
+        },
+        "editStep": "Edit Step",
+        "deleteStep": "Delete Step",
+        "deleteStepConfirm": "Are you sure you want to delete this quest step?",
+        "deleteStepTitle": "Delete Quest Step",
+        "deleteStepDescription": "Are you sure you want to delete step #{stepIndex}? This action cannot be undone.",
+        "errorLoading": "Loading Error",
+        "questGiver": "Quest Giver",
+        "questReceiver": "Quest Receiver",
+        "clientKey": "Client Key",
+        "none": "None"
+    },
+    "stepPages": {
+        "new": {
+            "title": "Add Quest Step",
+            "description": "Creating new step for quest #{questId}",
+            "back": "Back",
+            "errorCreating": "Step creation error: {error}"
+        },
+        "edit": {
+            "title": "Edit Quest Step",
+            "description": "Editing step #{stepIndex} for quest #{questId}",
+            "back": "Back",
+            "errorLoading": "Loading Error",
+            "stepNotFound": "Quest step not found",
+            "errorUpdating": "Step update error: {error}"
+        }
+    },
+    "stepEditor": {
+        "title": "Quest Step Editor",
+        "editingStep": "Editing Step",
+        "addingStep": "Adding New Step",
+        "fields": {
+            "stepIndex": "Step Index",
+            "stepIndexDescription": "Order of this step in the quest",
+            "stepType": "Step Type",
+            "stepTypeOptions": {
+                "collect": "Collect Items",
+                "kill": "Kill Creatures",
+                "talk": "Talk to NPC",
+                "reach": "Reach Location",
+                "custom": "Custom"
+            },
+            "clientStepKey": "Step Key",
+            "clientStepKeyPlaceholder": "e.g., collect_wood, talk_to_guard",
+            "clientStepKeyDescription": "Unique key for this step (optional)",
+            "parameters": "Parameters (JSON)",
+            "parametersDescription": "JSON configuration for this step type"
+        },
+        "parameterTemplates": {
+            "collect": {
+                "title": "Collect Items Template",
+                "description": "Template for collecting items quest step"
+            },
+            "kill": {
+                "title": "Kill Creatures Template",
+                "description": "Template for killing creatures quest step"
+            },
+            "talk": {
+                "title": "Talk to NPC Template",
+                "description": "Template for talking to NPC quest step"
+            },
+            "reach": {
+                "title": "Reach Location Template",
+                "description": "Template for reaching location quest step"
+            },
+            "custom": {
+                "title": "Custom Step Template",
+                "description": "Template for custom quest step"
+            }
+        },
+        "buttons": {
+            "cancel": "Cancel",
+            "save": "Save Step"
+        },
+        "validation": {
+            "invalidJson": "Invalid JSON format"
+        },
+        "visualEditors": {
+            "collect": {
+                "title": "Collect Items Parameters",
+                "itemId": "Item ID",
+                "itemIdPlaceholder": "wood",
+                "count": "Count",
+                "countPlaceholder": "5"
+            },
+            "kill": {
+                "title": "Kill Creatures Parameters",
+                "npcId": "Mob/NPC ID",
+                "npcIdPlaceholder": "wolf_mob",
+                "count": "Count",
+                "countPlaceholder": "3"
+            },
+            "talk": {
+                "title": "Talk to NPC Parameters",
+                "npcLabel": "Target NPC"
+            },
+            "reach": {
+                "title": "Reach Location Parameters",
+                "x": "X Coordinate",
+                "y": "Y Coordinate",
+                "z": "Z Coordinate",
+                "radius": "Radius",
+                "radiusPlaceholder": "5.0"
+            },
+            "custom": {
+                "title": "Custom Step Parameters",
+                "description": "Configure custom parameters in the JSON field below"
+            }
+        }
+    }
+}

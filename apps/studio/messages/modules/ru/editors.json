@@ -1,0 +1,225 @@
+{
+    "npcSelect": {
+        "defaultLabel": "NPC говорящий",
+        "selectNpc": "Выбрать NPC...",
+        "searchPlaceholder": "Поиск NPC по имени или слагу...",
+        "loading": "Загрузка...",
+        "noNpcsFound": "NPC не найдены",
+        "noNpcsAvailable": "NPC недоступны",
+        "level": "Ур"
+    },
+    "dialogueGraphEditor": {
+        "title": "Редактор графа диалогов",
+        "controls": {
+            "addNode": "Добавить узел",
+            "save": "Сохранить изменения",
+            "export": "Экспорт",
+            "import": "Импорт",
+            "resetLayout": "Сбросить макет",
+            "autoLayout": "Авто макет"
+        },
+        "nodeTypes": {
+            "line": "Строка",
+            "choice": "Выбор",
+            "action": "Действие",
+            "jump": "Переход",
+            "end": "Конец"
+        },
+        "panels": {
+            "addNodes": "Добавить узлы",
+            "actions": "Действия"
+        },
+        "minimap": {
+            "title": "Мини карта"
+        },
+        "status": {
+            "saving": "Сохранение...",
+            "saved": "Сохранено",
+            "error": "Ошибка",
+            "noChanges": "Нет изменений для сохранения"
+        },
+        "messages": {
+            "saveSuccess": "Диалог успешно сохранен",
+            "saveError": "Не удалось сохранить диалог",
+            "exportSuccess": "Диалог экспортирован",
+            "importSuccess": "Диалог импортирован",
+            "layoutReset": "Макет сброшен к позициям по умолчанию",
+            "layoutApplied": "Макет применен",
+            "layoutAppliedDescription": "Узлы были автоматически расположены",
+            "positionsReset": "Позиции сброшены",
+            "positionsResetDescription": "Все позиции узлов были сброшены",
+            "savedSuccessfully": "Успешно сохранено",
+            "savedSuccessfullyDescription": "Все изменения сохранены в базу данных",
+            "saveFailed": "Ошибка сохранения"
+        },
+        "help": {
+            "title": "Инструкции",
+            "sections": {
+                "nodeTypes": "Типы узлов",
+                "controls": "Управление",
+                "layout": "Макет"
+            },
+            "nodeTypeDescriptions": {
+                "line": "Одна строка диалога с говорящим",
+                "choice": "Центр выбора игрока с несколькими опциями",
+                "action": "Выполнить игровые действия",
+                "jump": "Перейти к другому узлу",
+                "end": "Завершить диалог"
+            },
+            "controlDescriptions": {
+                "doubleClickNode": "Двойной клик по узлу: Редактировать свойства узла",
+                "doubleClickEdge": "Двойной клик по связи: Редактировать свойства соединения",
+                "edgeLabels": "Метки связей: Показать текст выбора и информацию",
+                "dragFromNode": "Перетащить из узла: Создать новое соединение",
+                "dragNode": "Перетащить узел: Переместить и сохранить позицию",
+                "selectDelete": "Выбрать и удалить: Удалить узлы/связи",
+                "saveButton": "Кнопка сохранения: Сохранить изменения в базу данных"
+            },
+            "layoutDescriptions": {
+                "autoLayout": "Авто макет: Расположить узлы автоматически",
+                "resetLayout": "Сбросить макет: Очистить сохраненные позиции",
+                "positions": "Позиции: Сохранены локально в вашем браузере",
+                "persistent": "Постоянные: Макет переживает перезагрузки страницы"
+            }
+        },
+        "confirmations": {
+            "resetPositions": "Это сбросит все позиции узлов к значениям по умолчанию. Продолжить?"
+        }
+    },
+    "dialogs": {
+        "edgeEdit": {
+            "title": "Редактировать связь (ребро)",
+            "fields": {
+                "choiceKey": {
+                    "label": "Ключ/Текст выбора",
+                    "placeholder": "например, dialogue.choice.yes или 'Да, согласен'",
+                    "description": "Этот ключ будет использоваться клиентом для отображения текста выбора"
+                },
+                "orderIndex": {
+                    "label": "Индекс порядка",
+                    "description": "Порядок этого выбора в списке (меньшие числа появляются первыми)"
+                },
+                "hideIfLocked": {
+                    "label": "Скрыть если заблокировано",
+                    "description": "Скрыть этот выбор если условия не выполнены"
+                },
+                "conditions": {
+                    "label": "Условия (JSON)",
+                    "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"can_access\", \"value\": true}, {\"type\": \"item\", \"item\": \"key\", \"count\": 1}]}"
+                },
+                "actions": {
+                    "label": "Действия (JSON)",
+                    "placeholder": "Действия для выполнения когда этот выбор выбран"
+                }
+            },
+            "buttons": {
+                "delete": "Удалить связь",
+                "cancel": "Отмена",
+                "save": "Сохранить изменения"
+            }
+        },
+        "nodeEdit": {
+            "title": "Редактировать узел {nodeType}",
+            "confirmDelete": "Вы уверены, что хотите удалить этот узел?",
+            "fields": {
+                "nodeId": {
+                    "label": "ID узла"
+                },
+                "nodeType": {
+                    "label": "Тип узла"
+                },
+                "nodeKey": {
+                    "label": "Ключ узла",
+                    "placeholder": "например, greeting.welcome, choice.help, action.give_item"
+                },
+                "conditions": {
+                    "label": "Условия (JSON)",
+                    "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"quest.completed\", \"value\": true}, {\"type\": \"level\", \"min\": 5}]}"
+                },
+                "actions": {
+                    "label": "Действия (JSON)",
+                    "placeholder": "Конфигурация действий"
+                }
+            },
+            "nodeTypes": {
+                "line": {
+                    "title": "Строка"
+                },
+                "choice_hub": {
+                    "title": "Узел выбора",
+                    "conditionsLabel": "Условия выбора (JSON)",
+                    "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"has_key\", \"value\": true}, {\"type\": \"level\", \"min\": 10}]}"
+                },
+                "action": {
+                    "title": "Действие"
+                },
+                "jump": {
+                    "title": "Переход",
+                    "targetLabel": "ID целевого узла перехода",
+                    "targetPlaceholder": "ID целевого узла"
+                },
+                "end": {
+                    "title": "Конец",
+                    "description": "Конечные узлы не имеют дополнительной конфигурации."
+                }
+            },
+            "buttons": {
+                "delete": "Удалить узел",
+                "cancel": "Отмена",
+                "save": "Сохранить изменения"
+            }
+        }
+    },
+    "edges": {
+        "dialogueEdge": {
+            "tooltip": {
+                "edgeId": "ID связи",
+                "choice": "Выбор",
+                "order": "Порядок",
+                "hiddenIfLocked": "Скрыто если заблокировано",
+                "hasConditions": "Есть условия",
+                "hasActions": "Есть действия",
+                "hasConditionsOrActions": "Есть условия/действия"
+            },
+            "labels": {
+                "noChoiceText": "Нет текста выбора"
+            }
+        }
+    },
+    "nodes": {
+        "common": {
+            "key": "Ключ",
+            "type": "Тип",
+            "notSet": "Не установлен",
+            "speaker": "Говорящий"
+        },
+        "line": {
+            "title": "Узел строки",
+            "untitled": "Безымянная строка"
+        },
+        "choice": {
+            "title": "Узел выбора",
+            "untitled": "Безымянный выбор",
+            "choices": "Варианты"
+        },
+        "action": {
+            "title": "Узел действия",
+            "untitled": "Безымянное действие",
+            "parameters": "Параметры"
+        },
+        "jump": {
+            "title": "Узел перехода",
+            "untitled": "Безымянный переход",
+            "targetId": "ID цели"
+        },
+        "end": {
+            "title": "Узел завершения",
+            "untitled": "Безымянное завершение",
+            "types": {
+                "normal": "Обычное",
+                "questComplete": "Завершение квеста",
+                "dialogueExit": "Выход из диалога"
+            }
+        }
+    }
+}

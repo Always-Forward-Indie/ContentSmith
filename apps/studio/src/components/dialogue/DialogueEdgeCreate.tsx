@@ -94,7 +94,7 @@ export default function DialogueEdgeCreate({
                             ))}
                         </select>
                         <p className="text-xs text-muted-foreground">
-                            The node where this connection starts
+                            {t('fields.fromNodeDescription')}
                         </p>
                     </div>
 
@@ -119,7 +119,7 @@ export default function DialogueEdgeCreate({
                             }
                         </select>
                         <p className="text-xs text-muted-foreground">
-                            The node where this connection leads to
+                            {t('fields.toNodeDescription')}
                         </p>
                     </div>
 
@@ -163,7 +163,7 @@ export default function DialogueEdgeCreate({
                         />
                         <Label htmlFor="hideIfLocked">{t('fields.hideIfLocked')}</Label>
                         <p className="text-xs text-muted-foreground">
-                            Hide this choice if conditions are not met
+                            {t('fields.hideIfLockedDescription')}
                         </p>
                     </div>
 

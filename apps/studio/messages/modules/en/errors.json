@@ -1,0 +1,25 @@
+{
+    "common": {
+        "required": "This field is required",
+        "invalid": "Invalid value",
+        "tooShort": "Too short",
+        "tooLong": "Too long",
+        "notFound": "Not found",
+        "serverError": "Server error",
+        "unknownError": "Unknown error occurred"
+    },
+    "validation": {
+        "keyRequired": "Key is required",
+        "keyInvalid": "Key must be alphanumeric with underscores and hyphens",
+        "titleRequired": "Title is required",
+        "descriptionTooLong": "Description is too long",
+        "slugInvalid": "Slug must be lowercase alphanumeric with hyphens",
+        "invalidUrl": "Invalid URL format"
+    },
+    "database": {
+        "connectionError": "Database connection error",
+        "saveError": "Error saving to database",
+        "deleteError": "Error deleting from database",
+        "notFound": "Record not found"
+    }
+}

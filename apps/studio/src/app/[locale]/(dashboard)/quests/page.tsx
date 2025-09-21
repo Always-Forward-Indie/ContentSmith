@@ -29,7 +29,8 @@ import {
 import { trpc } from '@/lib/trpc'
 
 export default function QuestsPage() {
-    const t = useTranslations();
+    const t = useTranslations('quests')
+    const commonT = useTranslations('common')
     const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState(1)
 
@@ -48,7 +49,7 @@ export default function QuestsPage() {
     })
 
     const handleDeleteQuest = (id: number) => {
-        if (confirm(t('common.confirmDelete'))) {
+        if (confirm(commonT('confirmDelete'))) {
             deleteQuest.mutate({ id })
         }
     }
@@ -64,30 +65,30 @@ export default function QuestsPage() {
         <div className="container mx-auto py-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold">{t('quests.title')}</h1>
+                    <h1 className="text-3xl font-bold">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        {t('quests.description')}
+                        {t('description')}
                     </p>
                 </div>
                 <Link href="/quests/new">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
-                        {t('quests.createNew')}
+                        {t('createNew')}
                     </Button>
                 </Link>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('quests.list')}</CardTitle>
+                    <CardTitle>{t('list')}</CardTitle>
                     <CardDescription>
-                        {t('quests.listDescription')}
+                        {t('listDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSearch} className="flex gap-2 mb-4">
                         <Input
-                            placeholder={t('quests.searchPlaceholder')}
+                            placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-1"
@@ -99,13 +100,13 @@ export default function QuestsPage() {
 
                     {isLoading && (
                         <div className="text-center py-8">
-                            {t('common.loading')}
+                            {commonT('loading')}
                         </div>
                     )}
 
                     {error && (
                         <div className="text-center py-8 text-red-600">
-                            {t('quests.errorLoading')}: {error.message}
+                            {t('errorLoading')}: {error.message}
                         </div>
                     )}
 
@@ -115,18 +116,18 @@ export default function QuestsPage() {
                                 <TableRow>
                                     <TableHead>ID</TableHead>
                                     <TableHead>Slug</TableHead>
-                                    <TableHead>{t('quests.table.minLevel')}</TableHead>
-                                    <TableHead>{t('quests.table.repeatable')}</TableHead>
-                                    <TableHead>{t('quests.table.cooldown')}</TableHead>
-                                    <TableHead>{t('quests.table.clientKey')}</TableHead>
-                                    <TableHead className="text-right">{t('common.actions')}</TableHead>
+                                    <TableHead>{t('table.minLevel')}</TableHead>
+                                    <TableHead>{t('table.repeatable')}</TableHead>
+                                    <TableHead>{t('table.cooldown')}</TableHead>
+                                    <TableHead>{t('table.clientKey')}</TableHead>
+                                    <TableHead className="text-right">{commonT('actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {quests.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} className="text-center py-8">
-                                            {searchTerm ? t('quests.questsNotFound') : t('quests.noQuests')}
+                                            {searchTerm ? t('questsNotFound') : t('noQuests')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -138,7 +139,7 @@ export default function QuestsPage() {
                                             <TableCell>{quest.slug}</TableCell>
                                             <TableCell>{quest.minLevel}</TableCell>
                                             <TableCell>
-                                                {quest.repeatable ? t('common.yes') : t('common.no')}
+                                                {quest.repeatable ? commonT('yes') : commonT('no')}
                                             </TableCell>
                                             <TableCell>{quest.cooldownSec}</TableCell>
                                             <TableCell>
@@ -164,15 +165,15 @@ export default function QuestsPage() {
                                                         </DialogTrigger>
                                                         <DialogContent>
                                                             <DialogHeader>
-                                                                <DialogTitle>{t('quests.deleteQuest')}</DialogTitle>
+                                                                <DialogTitle>{t('deleteQuest')}</DialogTitle>
                                                                 <DialogDescription>
-                                                                    {t('quests.deleteConfirm', { slug: quest.slug })}
+                                                                    {t('deleteConfirm', { slug: quest.slug })}
                                                                 </DialogDescription>
                                                             </DialogHeader>
                                                             <div className="flex justify-end gap-2">
                                                                 <DialogClose asChild>
                                                                     <Button variant="outline">
-                                                                        {t('common.cancel')}
+                                                                        {commonT('cancel')}
                                                                     </Button>
                                                                 </DialogClose>
                                                                 <Button
@@ -180,7 +181,7 @@ export default function QuestsPage() {
                                                                     onClick={() => handleDeleteQuest(quest.id)}
                                                                     disabled={deleteQuest.isPending}
                                                                 >
-                                                                    {deleteQuest.isPending ? t('quests.deleting') : t('common.delete')}
+                                                                    {deleteQuest.isPending ? t('deleting') : commonT('delete')}
                                                                 </Button>
                                                             </div>
                                                         </DialogContent>
@@ -197,7 +198,7 @@ export default function QuestsPage() {
                     {questsData && questsData.data.length > 0 && (
                         <div className="flex items-center justify-between mt-4">
                             <div className="text-sm text-muted-foreground">
-                                {t('quests.showingResults', {
+                                {t('showingResults', {
                                     current: questsData.data.length,
                                     page: page
                                 })}
@@ -209,7 +210,7 @@ export default function QuestsPage() {
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
                                 >
-                                    {t('common.previous')}
+                                    {commonT('previous')}
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -217,7 +218,7 @@ export default function QuestsPage() {
                                     onClick={() => setPage(p => p + 1)}
                                     disabled={questsData.data.length < 10}
                                 >
-                                    {t('common.next')}
+                                    {commonT('next')}
                                 </Button>
                             </div>
                         </div>

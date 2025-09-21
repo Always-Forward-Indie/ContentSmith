@@ -1,0 +1,207 @@
+{
+    "title": "Квесты",
+    "description": "Управляйте и организуйте игровые квесты",
+    "createNew": "Создать квест",
+    "list": "Список квестов",
+    "listDescription": "Просматривайте и управляйте всеми квестами",
+    "newQuest": "Новый квест",
+    "editQuest": "Редактировать квест",
+    "questName": "Название квеста",
+    "questDescription": "Описание квеста",
+    "questNamePlaceholder": "Введите название квеста",
+    "questDescriptionPlaceholder": "Введите описание квеста",
+    "searchPlaceholder": "Поиск квестов...",
+    "id": "ID",
+    "createdAt": "Создан",
+    "updatedAt": "Обновлен",
+    "priority": "Приоритет",
+    "status": "Статус",
+    "giver": "Квестодатель",
+    "selectGiver": "Выберите квестодателя",
+    "noGiver": "Квестодатель не выбран",
+    "steps": "Шаги",
+    "validationErrors": {
+        "nameRequired": "Название квеста обязательно",
+        "nameMinLength": "Название квеста должно содержать минимум 1 символ",
+        "nameMaxLength": "Название квеста должно быть менее 255 символов",
+        "descriptionMaxLength": "Описание должно быть менее 1000 символов"
+    },
+    "noQuests": "Нет квестов",
+    "questsNotFound": "Квесты не найдены",
+    "errorLoading": "Ошибка загрузки",
+    "page": "Страница",
+    "showingResults": "Показано {current} элементов • Страница {page}",
+    "deleteQuest": "Удалить квест",
+    "deleteConfirm": "Вы уверены, что хотите удалить квест \"{slug}\"? Это действие нельзя отменить.",
+    "deleting": "Удаление...",
+    "creating": "Создание...",
+    "createError": "Ошибка создания квеста",
+    "form": {
+        "basicInfo": "Основная информация",
+        "basicInfoDescription": "Настройте базовые параметры квеста",
+        "fillBasicInfo": "Заполните основную информацию о квесте",
+        "slug": "Slug квеста *",
+        "minLevel": "Минимальный уровень *",
+        "repeatable": "Повторяемый квест",
+        "repeatableDescription": "Можно ли брать этот квест повторно после завершения",
+        "cooldown": "Кулдаун (секунды)",
+        "cooldownDescription": "Время ожидания перед повторным взятием квеста",
+        "questGiver": "NPC выдающий квест",
+        "questGiverDescription": "NPC, который выдает этот квест игрокам",
+        "questReceiver": "NPC принимающий квест",
+        "questReceiverDescription": "NPC, которому игрок сдает завершенный квест",
+        "clientKey": "Ключ клиентского UI",
+        "clientKeyDescription": "Ключ для названия/описания квеста в клиентском интерфейсе"
+    },
+    "edit": {
+        "title": "Редактировать квест",
+        "description": "Изменение параметров квеста \"{slug}\"",
+        "basicInfo": "Основная информация",
+        "basicInfoDescription": "Обновите параметры квеста",
+        "errorLoading": "Ошибка загрузки",
+        "back": "Назад",
+        "cancel": "Отмена",
+        "saveChanges": "Сохранить изменения",
+        "saving": "Сохранение...",
+        "updateError": "Ошибка обновления квеста: {error}"
+    },
+    "table": {
+        "minLevel": "Мин. уровень",
+        "repeatable": "Повторяемый",
+        "cooldown": "Кулдаун (сек)",
+        "clientKey": "Ключ клиента"
+    },
+    "detail": {
+        "title": "Детали квеста и его шаги",
+        "questInfo": "Информация о квесте",
+        "questInfoDescription": "Основные параметры и настройки квеста",
+        "minLevel": "Минимальный уровень",
+        "repeatable": "Повторяемый",
+        "cooldown": "Кулдаун (сек)",
+        "steps": "Шаги квеста",
+        "stepsDescription": "Последовательность задач, которые нужно выполнить",
+        "addStep": "Добавить шаг",
+        "noSteps": "Шаги не найдены",
+        "noStepsDescription": "У этого квеста пока нет шагов.",
+        "stepType": "Тип",
+        "stepDescription": "Описание",
+        "stepParams": "Параметры",
+        "stepIndex": "Индекс",
+        "stepTypes": {
+            "collect": "Собрать",
+            "kill": "Убить",
+            "talk": "Поговорить",
+            "reach": "Достичь",
+            "custom": "Пользовательский"
+        },
+        "editStep": "Редактировать шаг",
+        "deleteStep": "Удалить шаг",
+        "deleteStepConfirm": "Вы уверены, что хотите удалить этот шаг квеста?",
+        "deleteStepTitle": "Удалить шаг квеста",
+        "deleteStepDescription": "Вы уверены, что хотите удалить шаг #{stepIndex}? Это действие нельзя отменить.",
+        "errorLoading": "Ошибка загрузки",
+        "questGiver": "Квестодатель",
+        "questReceiver": "Принимающий квест",
+        "clientKey": "Ключ клиента",
+        "none": "Нет"
+    },
+    "stepPages": {
+        "new": {
+            "title": "Добавить шаг квеста",
+            "description": "Создание нового шага для квеста #{questId}",
+            "back": "Назад",
+            "errorCreating": "Ошибка создания шага: {error}"
+        },
+        "edit": {
+            "title": "Редактировать шаг квеста",
+            "description": "Изменение шага #{stepIndex} для квеста #{questId}",
+            "back": "Назад",
+            "errorLoading": "Ошибка загрузки",
+            "stepNotFound": "Шаг квеста не найден",
+            "errorUpdating": "Ошибка обновления шага: {error}"
+        }
+    },
+    "stepEditor": {
+        "title": "Редактор шагов квеста",
+        "editingStep": "Редактирование шага",
+        "addingStep": "Добавление нового шага",
+        "fields": {
+            "stepIndex": "Индекс шага",
+            "stepIndexDescription": "Порядок этого шага в квесте",
+            "stepType": "Тип шага",
+            "stepTypeOptions": {
+                "collect": "Собрать предметы",
+                "kill": "Убить существ",
+                "talk": "Поговорить с NPC",
+                "reach": "Достичь местоположения",
+                "custom": "Пользовательский"
+            },
+            "clientStepKey": "Ключ шага",
+            "clientStepKeyPlaceholder": "например, collect_wood, talk_to_guard",
+            "clientStepKeyDescription": "Уникальный ключ для этого шага (необязательно)",
+            "parameters": "Параметры (JSON)",
+            "parametersDescription": "JSON конфигурация для этого типа шага"
+        },
+        "parameterTemplates": {
+            "collect": {
+                "title": "Шаблон сбора предметов",
+                "description": "Шаблон для шага квеста сбора предметов"
+            },
+            "kill": {
+                "title": "Шаблон убийства существ",
+                "description": "Шаблон для шага квеста убийства существ"
+            },
+            "talk": {
+                "title": "Шаблон разговора с NPC",
+                "description": "Шаблон для шага квеста разговора с NPC"
+            },
+            "reach": {
+                "title": "Шаблон достижения места",
+                "description": "Шаблон для шага квеста достижения местоположения"
+            },
+            "custom": {
+                "title": "Пользовательский шаблон",
+                "description": "Шаблон для пользовательского шага квеста"
+            }
+        },
+        "buttons": {
+            "cancel": "Отменить",
+            "save": "Сохранить шаг"
+        },
+        "validation": {
+            "invalidJson": "Неверный формат JSON"
+        },
+        "visualEditors": {
+            "collect": {
+                "title": "Параметры сбора предметов",
+                "itemId": "ID предмета",
+                "itemIdPlaceholder": "wood",
+                "count": "Количество",
+                "countPlaceholder": "5"
+            },
+            "kill": {
+                "title": "Параметры убийства существ",
+                "npcId": "ID моба/NPC",
+                "npcIdPlaceholder": "wolf_mob",
+                "count": "Количество",
+                "countPlaceholder": "3"
+            },
+            "talk": {
+                "title": "Параметры разговора с NPC",
+                "npcLabel": "Целевой NPC"
+            },
+            "reach": {
+                "title": "Параметры достижения местоположения",
+                "x": "Координата X",
+                "y": "Координата Y",
+                "z": "Координата Z",
+                "radius": "Радиус",
+                "radiusPlaceholder": "5.0"
+            },
+            "custom": {
+                "title": "Параметры пользовательского шага",
+                "description": "Настройте пользовательские параметры в поле JSON ниже"
+            }
+        }
+    }
+}

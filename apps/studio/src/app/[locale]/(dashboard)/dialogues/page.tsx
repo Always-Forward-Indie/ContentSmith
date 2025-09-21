@@ -16,13 +16,25 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
 
 import { trpc } from '@/lib/trpc'
+import type { Dialogue } from '@contentsmith/validation'
 
 export default function DialoguesPage() {
-    const t = useTranslations()
+    const t = useTranslations('dialogues')
+    const commonT = useTranslations('common')
     const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState(1)
+    const [dialogueToDelete, setDialogueToDelete] = useState<Dialogue | null>(null)
 
     // Fetch dialogues with tRPC
     const { data: dialoguesData, isLoading, error } = trpc.dialogue.list.useQuery({
@@ -35,13 +47,17 @@ export default function DialoguesPage() {
         onSuccess: () => {
             // Refresh the list
             window.location.reload()
+            setDialogueToDelete(null)
         },
     })
 
-    const handleDelete = async (id: number) => {
-        if (confirm(t('common.confirmDelete'))) {
-            await deleteDialogue.mutateAsync({ id })
+    const handleDelete = async () => {
+        if (!dialogueToDelete?.id) {
+            console.error('Cannot delete dialogue without ID')
+            return
         }
+
+        await deleteDialogue.mutateAsync({ id: dialogueToDelete.id })
     }
 
     const handleSearch = (e: React.FormEvent) => {
@@ -54,7 +70,7 @@ export default function DialoguesPage() {
     if (error) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">{t('common.error')}: {error.message}</p>
+                <p className="text-destructive">{commonT('error')}: {error.message}</p>
             </div>
         )
     }
@@ -63,30 +79,30 @@ export default function DialoguesPage() {
         <div className="container mx-auto py-6">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold">{t('dialogues.title')}</h1>
+                    <h1 className="text-3xl font-bold">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        {t('dialogues.description')}
+                        {t('description')}
                     </p>
                 </div>
                 <Link href="/dialogues/new">
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
-                        {t('dialogues.createNew')}
+                        {t('createNew')}
                     </Button>
                 </Link>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('dialogues.list')}</CardTitle>
+                    <CardTitle>{t('list')}</CardTitle>
                     <CardDescription>
-                        {t('dialogues.listDescription')}
+                        {t('listDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSearch} className="flex gap-2 mb-4">
                         <Input
-                            placeholder={t('dialogues.searchPlaceholder')}
+                            placeholder={t('searchPlaceholder')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-1"
@@ -98,13 +114,13 @@ export default function DialoguesPage() {
 
                     {isLoading && (
                         <div className="text-center py-8">
-                            {t('common.loading')}
+                            {commonT('loading')}
                         </div>
                     )}
 
                     {error && (
                         <div className="text-center py-8 text-red-600">
-                            {t('common.error')}: {String(error)}
+                            {commonT('error')}: {String(error)}
                         </div>
                     )}
 
@@ -115,16 +131,16 @@ export default function DialoguesPage() {
                                     <TableRow>
                                         <TableHead>ID</TableHead>
                                         <TableHead>Slug</TableHead>
-                                        <TableHead>{t('dialogues.table.version')}</TableHead>
-                                        <TableHead>{t('dialogues.table.startNode')}</TableHead>
-                                        <TableHead className="text-right">{t('common.actions')}</TableHead>
+                                        <TableHead>{t('table.version')}</TableHead>
+                                        <TableHead>{t('table.startNode')}</TableHead>
+                                        <TableHead className="text-right">{commonT('actions')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {dialogues.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={5} className="text-center py-8">
-                                                {searchTerm ? t('dialogues.dialoguesNotFound') : t('dialogues.noDialogues')}
+                                                {searchTerm ? t('dialoguesNotFound') : t('noDialogues')}
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -156,13 +172,13 @@ export default function DialoguesPage() {
                                                         </Link>
                                                         <Link href={`/dialogues/${dialogue.id}/graph`}>
                                                             <Button variant="outline" size="sm">
-                                                                {t('dialogues.graph.title')}
+                                                                {t('graph.title')}
                                                             </Button>
                                                         </Link>
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
-                                                            onClick={() => handleDelete(dialogue.id!)}
+                                                            onClick={() => setDialogueToDelete(dialogue)}
                                                             disabled={deleteDialogue.isLoading}
                                                         >
                                                             <Trash2 className="h-4 w-4" />
@@ -178,7 +194,7 @@ export default function DialoguesPage() {
                             {dialogues.length > 0 && (
                                 <div className="flex items-center justify-between mt-4">
                                     <div className="text-sm text-muted-foreground">
-                                        {t('dialogues.showingResults', {
+                                        {t('showingResults', {
                                             current: dialogues.length,
                                             page: page
                                         })}
@@ -190,7 +206,7 @@ export default function DialoguesPage() {
                                             onClick={() => setPage(p => Math.max(1, p - 1))}
                                             disabled={page === 1}
                                         >
-                                            {t('common.previous')}
+                                            {commonT('previous')}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -198,7 +214,7 @@ export default function DialoguesPage() {
                                             onClick={() => setPage(p => p + 1)}
                                             disabled={dialogues.length < 10}
                                         >
-                                            {t('common.next')}
+                                            {commonT('next')}
                                         </Button>
                                     </div>
                                 </div>
@@ -207,6 +223,34 @@ export default function DialoguesPage() {
                     )}
                 </CardContent>
             </Card>
+
+            {/* Delete confirmation dialog */}
+            <Dialog open={!!dialogueToDelete} onOpenChange={(open) => !open && setDialogueToDelete(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('deleteConfirmTitle')}</DialogTitle>
+                        <DialogDescription>
+                            {t('deleteConfirmDescription', { slug: dialogueToDelete?.slug || '' })}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setDialogueToDelete(null)}
+                            disabled={deleteDialogue.isLoading}
+                        >
+                            {commonT('cancel')}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
+                            disabled={deleteDialogue.isLoading}
+                        >
+                            {deleteDialogue.isLoading ? commonT('loading') : commonT('delete')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

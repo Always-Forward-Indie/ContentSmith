@@ -1,0 +1,23 @@
+{
+    "title": "ContentSmith - MMORPG Content Editor",
+    "subtitle": "Professional content management system for creating dialogues, quests, and game narratives",
+    "dialogues": {
+        "title": "Dialogue System",
+        "description": "Create and manage interactive dialogues with branching conversations and NPC interactions",
+        "openEditor": "Open Dialogue Editor"
+    },
+    "quests": {
+        "title": "Quest Management",
+        "description": "Design complex quest chains with objectives, rewards, and player progression",
+        "openEditor": "Open Quest Editor"
+    },
+    "localization": {
+        "title": "Localization Tools",
+        "description": "Manage translations and localized content for multiple languages"
+    },
+    "welcome": {
+        "title": "Welcome to ContentSmith",
+        "subtitle": "Create and manage your game content",
+        "description": "ContentSmith is a powerful tool for creating and managing dialogues, quests, and game narrative content."
+    }
+}

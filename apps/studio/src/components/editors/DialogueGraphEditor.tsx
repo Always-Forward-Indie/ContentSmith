@@ -278,19 +278,19 @@ export default function DialogueGraphEditor({
         // Save to localStorage
         positionManager.savePositions(newPositions)
 
-        toast.success('Layout applied', 'Nodes have been automatically arranged')
+        toast.success(t('messages.layoutApplied'), t('messages.layoutAppliedDescription'))
     }, [graphData?.nodes, setNodes, positionManager])
 
     // Reset positions (clear localStorage)
     const handleResetPositions = useCallback(() => {
-        if (confirm('This will reset all node positions to their defaults. Continue?')) {
+        if (confirm(t('confirmations.resetPositions'))) {
             positionManager.clearStoredPositions()
 
             // Reload nodes with default positions
             if (graphData?.nodes) {
                 const resetNodes = convertDataToNodes(graphData.nodes)
                 setNodes(resetNodes)
-                toast.success('Positions reset', 'All node positions have been reset')
+                toast.success(t('messages.positionsReset'), t('messages.positionsResetDescription'))
             }
         }
     }, [positionManager, graphData?.nodes, convertDataToNodes, setNodes])
@@ -416,12 +416,12 @@ export default function DialogueGraphEditor({
                     }
                 }
 
-                toast.success('Saved successfully', 'All changes have been saved to the database')
+                toast.success(t('messages.savedSuccessfully'), t('messages.savedSuccessfullyDescription'))
                 // Reload the page to get fresh data with new IDs
                 window.location.reload()
             } catch (error) {
                 console.error('Save failed:', error)
-                toast.error('Save failed', (error as Error).message)
+                toast.error(t('messages.saveFailed'), (error as Error).message)
             }
         }
     }, [nodes, edges, onSave, dialogueId, saveNodeMutation, saveEdgeMutation, positionManager])
@@ -560,7 +560,7 @@ export default function DialogueGraphEditor({
                                         onClick={handleResetPositions}
                                         className="w-full text-xs text-destructive hover:text-destructive"
                                     >
-                                        Reset Layout
+                                        {t('controls.resetLayout')}
                                     </Button>
                                 </div>
                             </div>
@@ -588,39 +588,39 @@ export default function DialogueGraphEditor({
             {/* Help/Instructions */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Instructions</CardTitle>
+                    <CardTitle>{t('help.title')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
-                            <h4 className="font-medium mb-2">Node Types</h4>
+                            <h4 className="font-medium mb-2">{t('help.sections.nodeTypes')}</h4>
                             <ul className="space-y-1 text-muted-foreground">
-                                <li><strong>Line:</strong> Single dialogue line with speaker</li>
-                                <li><strong>Choice:</strong> Player choice hub with multiple options</li>
-                                <li><strong>Action:</strong> Execute game actions</li>
-                                <li><strong>Jump:</strong> Jump to another node</li>
-                                <li><strong>End:</strong> End the dialogue</li>
+                                <li><strong>{t('nodeTypes.line')}:</strong> {t('help.nodeTypeDescriptions.line')}</li>
+                                <li><strong>{t('nodeTypes.choice')}:</strong> {t('help.nodeTypeDescriptions.choice')}</li>
+                                <li><strong>{t('nodeTypes.action')}:</strong> {t('help.nodeTypeDescriptions.action')}</li>
+                                <li><strong>{t('nodeTypes.jump')}:</strong> {t('help.nodeTypeDescriptions.jump')}</li>
+                                <li><strong>{t('nodeTypes.end')}:</strong> {t('help.nodeTypeDescriptions.end')}</li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-medium mb-2">Controls</h4>
+                            <h4 className="font-medium mb-2">{t('help.sections.controls')}</h4>
                             <ul className="space-y-1 text-muted-foreground">
-                                <li><strong>Double-click node:</strong> Edit node properties</li>
-                                <li><strong>Double-click edge:</strong> Edit connection properties</li>
-                                <li><strong>Edge labels:</strong> Show choice text and info</li>
-                                <li><strong>Drag from node:</strong> Create new connection</li>
-                                <li><strong>Drag node:</strong> Move and save position</li>
-                                <li><strong>Select & Delete:</strong> Remove nodes/edges</li>
-                                <li><strong>Save button:</strong> Save changes to database</li>
+                                <li>{t('help.controlDescriptions.doubleClickNode')}</li>
+                                <li>{t('help.controlDescriptions.doubleClickEdge')}</li>
+                                <li>{t('help.controlDescriptions.edgeLabels')}</li>
+                                <li>{t('help.controlDescriptions.dragFromNode')}</li>
+                                <li>{t('help.controlDescriptions.dragNode')}</li>
+                                <li>{t('help.controlDescriptions.selectDelete')}</li>
+                                <li>{t('help.controlDescriptions.saveButton')}</li>
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-medium mb-2">Layout</h4>
+                            <h4 className="font-medium mb-2">{t('help.sections.layout')}</h4>
                             <ul className="space-y-1 text-muted-foreground">
-                                <li><strong>Auto Layout:</strong> Arrange nodes automatically</li>
-                                <li><strong>Reset Layout:</strong> Clear saved positions</li>
-                                <li><strong>Positions:</strong> Saved locally in your browser</li>
-                                <li><strong>Persistent:</strong> Layout survives page reloads</li>
+                                <li>{t('help.layoutDescriptions.autoLayout')}</li>
+                                <li>{t('help.layoutDescriptions.resetLayout')}</li>
+                                <li>{t('help.layoutDescriptions.positions')}</li>
+                                <li>{t('help.layoutDescriptions.persistent')}</li>
                             </ul>
                         </div>
                     </div>

@@ -153,7 +153,7 @@ export default function DialogueEdgeEdit({
                         />
                         <Label htmlFor="hideIfLocked">{t('fields.hideIfLocked')}</Label>
                         <p className="text-xs text-muted-foreground">
-                            Hide this choice if conditions are not met
+                            {t('fields.hideIfLockedDescription')}
                         </p>
                     </div>
 
