@@ -1,0 +1,22 @@
+{
+    "title": "Skill Effects",
+    "skillEffects": "Skill Effects",
+    "skillEffect": "Skill Effect",
+    "skillEffectsList": "Skill Effects List",
+    "addSkillEffect": "Add Skill Effect",
+    "createSkillEffect": "Create Skill Effect",
+    "editSkillEffect": "Edit Skill Effect",
+    "skillEffectSlug": "Slug",
+    "effectType": "Effect Type",
+    "noSkillEffects": "No skill effects found",
+    "skillEffectCreated": "Skill effect created successfully",
+    "skillEffectUpdated": "Skill effect updated successfully",
+    "skillEffectDeleted": "Skill effect deleted successfully",
+    "deleteSkillEffect": "Delete Skill Effect",
+    "deleteSkillEffectConfirm": "Are you sure you want to delete this skill effect?",
+    "skillEffectNotFound": "Skill effect not found",
+    "slugRequired": "Slug is required",
+    "effectTypeRequired": "Effect type is required",
+    "search": "Search skill effects...",
+    "actions": "Actions"
+}

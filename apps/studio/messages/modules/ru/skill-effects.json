@@ -1,0 +1,22 @@
+{
+    "title": "Эффекты навыков",
+    "skillEffects": "Эффекты навыков",
+    "skillEffect": "Эффект навыка",
+    "skillEffectsList": "Список эффектов навыков",
+    "addSkillEffect": "Добавить эффект навыка",
+    "createSkillEffect": "Создать эффект навыка",
+    "editSkillEffect": "Редактировать эффект навыка",
+    "skillEffectSlug": "Слаг",
+    "effectType": "Тип эффекта",
+    "noSkillEffects": "Эффекты навыков не найдены",
+    "skillEffectCreated": "Эффект навыка успешно создан",
+    "skillEffectUpdated": "Эффект навыка успешно обновлён",
+    "skillEffectDeleted": "Эффект навыка успешно удалён",
+    "deleteSkillEffect": "Удалить эффект навыка",
+    "deleteSkillEffectConfirm": "Вы уверены, что хотите удалить этот эффект навыка?",
+    "skillEffectNotFound": "Эффект навыка не найден",
+    "slugRequired": "Слаг обязателен",
+    "effectTypeRequired": "Тип эффекта обязателен",
+    "search": "Поиск эффектов навыков...",
+    "actions": "Действия"
+}

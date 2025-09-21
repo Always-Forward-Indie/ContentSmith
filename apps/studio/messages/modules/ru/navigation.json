@@ -3,7 +3,12 @@
     "dialogues": "Диалоги",
     "quests": "Квесты",
     "npcs": "НПС",
-    "skills": "Скилы",
+    "skills": "Навыки",
+    "skillSchools": "Школы навыков",
+    "skillScaleTypes": "Типы масштабирования навыков",
+    "skillProperties": "Свойства навыков",
+    "skillEffectsType": "Типы эффектов навыков",
+    "skillEffects": "Эффекты навыков",
     "localization": "Локализация",
     "analytics": "Аналитика",
     "settings": "Настройки"

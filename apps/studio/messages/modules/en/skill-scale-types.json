@@ -1,0 +1,18 @@
+{
+    "title": "Skill Scale Types",
+    "skillScaleTypesManagement": "Skill Scale Types Management",
+    "createSkillScaleType": "Create Skill Scale Type",
+    "editSkillScaleType": "Edit Skill Scale Type",
+    "skillScaleTypeName": "Scale Type Name",
+    "skillScaleTypeSlug": "Scale Type Slug",
+    "deleteSkillScaleTypeTitle": "Delete Skill Scale Type",
+    "deleteSkillScaleTypeDescription": "Are you sure you want to delete the skill scale type \"{name}\"? This action cannot be undone and may affect skills using this scale type.",
+    "skillScaleTypeCreated": "Skill scale type created successfully",
+    "skillScaleTypeUpdated": "Skill scale type updated successfully",
+    "skillScaleTypeDeleted": "Skill scale type deleted successfully",
+    "skillScaleTypeNotFound": "Skill scale type not found",
+    "searchSkillScaleTypes": "Search skill scale types...",
+    "noSkillScaleTypesFound": "No skill scale types found",
+    "nameRequired": "Name is required",
+    "slugRequired": "Slug is required"
+}

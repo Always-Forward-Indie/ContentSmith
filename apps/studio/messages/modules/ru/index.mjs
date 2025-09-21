@@ -28,6 +28,11 @@ const errors = loadJson('errors.json');
 const home = loadJson('home.json');
 const npcs = loadJson('npcs.json');
 const skills = loadJson('skills.json');
+const skillSchools = loadJson('skill-schools.json');
+const skillScaleTypes = loadJson('skill-scale-types.json');
+const skillProperties = loadJson('skill-properties.json');
+const skillEffectsType = loadJson('skill-effects-type.json');
+const skillEffects = loadJson('skill-effects.json');
 
 export default {
   common,
@@ -39,4 +44,9 @@ export default {
   home,
   npcs,
   skills,
+  skillSchools,
+  skillScaleTypes,
+  skillProperties,
+  skillEffectsType,
+  skillEffects,
 };

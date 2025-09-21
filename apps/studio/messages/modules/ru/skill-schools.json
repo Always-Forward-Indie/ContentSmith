@@ -1,0 +1,18 @@
+{
+    "title": "Школы скилов",
+    "skillSchoolsManagement": "Управление школами скилов",
+    "createSkillSchool": "Создать школу скилов",
+    "editSkillSchool": "Редактировать школу скилов",
+    "skillSchoolName": "Название школы",
+    "skillSchoolSlug": "Слаг школы",
+    "deleteSkillSchoolTitle": "Удаление школы скилов",
+    "deleteSkillSchoolDescription": "Вы уверены, что хотите удалить школу скилов \"{name}\"? Это действие нельзя отменить и может повлиять на скилы, использующие эту школу.",
+    "skillSchoolCreated": "Школа скилов успешно создана",
+    "skillSchoolUpdated": "Школа скилов успешно обновлена",
+    "skillSchoolDeleted": "Школа скилов успешно удалена",
+    "skillSchoolNotFound": "Школа скилов не найдена",
+    "searchSkillSchools": "Поиск школ скилов...",
+    "noSkillSchoolsFound": "Школы скилов не найдены",
+    "nameRequired": "Название обязательно",
+    "slugRequired": "Слаг обязателен"
+}

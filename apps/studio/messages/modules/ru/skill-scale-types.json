@@ -1,0 +1,18 @@
+{
+    "title": "Типы масштабирования навыков",
+    "skillScaleTypesManagement": "Управление типами масштабирования навыков",
+    "createSkillScaleType": "Создать тип масштабирования",
+    "editSkillScaleType": "Редактировать тип масштабирования",
+    "skillScaleTypeName": "Название типа",
+    "skillScaleTypeSlug": "Слаг типа",
+    "deleteSkillScaleTypeTitle": "Удалить тип масштабирования",
+    "deleteSkillScaleTypeDescription": "Вы уверены, что хотите удалить тип масштабирования \"{name}\"? Это действие нельзя отменить, и оно может повлиять на навыки, использующие этот тип.",
+    "skillScaleTypeCreated": "Тип масштабирования успешно создан",
+    "skillScaleTypeUpdated": "Тип масштабирования успешно обновлен",
+    "skillScaleTypeDeleted": "Тип масштабирования успешно удален",
+    "skillScaleTypeNotFound": "Тип масштабирования не найден",
+    "searchSkillScaleTypes": "Поиск типов масштабирования...",
+    "noSkillScaleTypesFound": "Типы масштабирования не найдены",
+    "nameRequired": "Название обязательно",
+    "slugRequired": "Слаг обязателен"
+}

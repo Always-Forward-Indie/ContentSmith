@@ -4,6 +4,11 @@
     "quests": "Quests",
     "npcs": "NPCs",
     "skills": "Skills",
+    "skillSchools": "Skill Schools",
+    "skillScaleTypes": "Skill Scale Types",
+    "skillProperties": "Skill Properties",
+    "skillEffectsType": "Skill Effects Types",
+    "skillEffects": "Skill Effects",
     "localization": "Localization",
     "analytics": "Analytics",
     "settings": "Settings"

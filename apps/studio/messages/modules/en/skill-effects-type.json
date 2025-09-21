@@ -1,0 +1,16 @@
+{
+    "title": "Skill Effects Types",
+    "skillEffectsTypesManagement": "Skill Effects Types Management",
+    "createSkillEffectsType": "Create Skill Effects Type",
+    "editSkillEffectsType": "Edit Skill Effects Type",
+    "skillEffectsTypeSlug": "Effect Type Slug",
+    "deleteSkillEffectsTypeTitle": "Delete Skill Effects Type",
+    "deleteSkillEffectsTypeDescription": "Are you sure you want to delete the skill effects type \"{slug}\"? This action cannot be undone and may affect skills using this effect type.",
+    "skillEffectsTypeCreated": "Skill effects type created successfully",
+    "skillEffectsTypeUpdated": "Skill effects type updated successfully",
+    "skillEffectsTypeDeleted": "Skill effects type deleted successfully",
+    "skillEffectsTypeNotFound": "Skill effects type not found",
+    "searchSkillEffectsTypes": "Search skill effects types...",
+    "noSkillEffectsTypesFound": "No skill effects types found",
+    "slugRequired": "Slug is required"
+}

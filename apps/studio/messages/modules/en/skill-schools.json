@@ -1,0 +1,18 @@
+{
+    "title": "Skill Schools",
+    "skillSchoolsManagement": "Skill Schools Management",
+    "createSkillSchool": "Create Skill School",
+    "editSkillSchool": "Edit Skill School",
+    "skillSchoolName": "School Name",
+    "skillSchoolSlug": "School Slug",
+    "deleteSkillSchoolTitle": "Delete Skill School",
+    "deleteSkillSchoolDescription": "Are you sure you want to delete the skill school \"{name}\"? This action cannot be undone and may affect skills using this school.",
+    "skillSchoolCreated": "Skill school created successfully",
+    "skillSchoolUpdated": "Skill school updated successfully",
+    "skillSchoolDeleted": "Skill school deleted successfully",
+    "skillSchoolNotFound": "Skill school not found",
+    "searchSkillSchools": "Search skill schools...",
+    "noSkillSchoolsFound": "No skill schools found",
+    "nameRequired": "Name is required",
+    "slugRequired": "Slug is required"
+}

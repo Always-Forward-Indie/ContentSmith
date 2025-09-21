@@ -1,0 +1,18 @@
+{
+    "title": "Skill Properties",
+    "skillPropertiesManagement": "Skill Properties Management",
+    "createSkillProperty": "Create Skill Property",
+    "editSkillProperty": "Edit Skill Property",
+    "skillPropertyName": "Property Name",
+    "skillPropertySlug": "Property Slug",
+    "deleteSkillPropertyTitle": "Delete Skill Property",
+    "deleteSkillPropertyDescription": "Are you sure you want to delete the skill property \"{name}\"? This action cannot be undone and may affect skills using this property.",
+    "skillPropertyCreated": "Skill property created successfully",
+    "skillPropertyUpdated": "Skill property updated successfully",
+    "skillPropertyDeleted": "Skill property deleted successfully",
+    "skillPropertyNotFound": "Skill property not found",
+    "searchSkillProperties": "Search skill properties...",
+    "noSkillPropertiesFound": "No skill properties found",
+    "nameRequired": "Name is required",
+    "slugRequired": "Slug is required"
+}

@@ -1,0 +1,16 @@
+{
+    "title": "Типы эффектов навыков",
+    "skillEffectsTypesManagement": "Управление типами эффектов навыков",
+    "createSkillEffectsType": "Создать тип эффекта навыка",
+    "editSkillEffectsType": "Редактировать тип эффекта навыка",
+    "skillEffectsTypeSlug": "Слаг типа эффекта",
+    "deleteSkillEffectsTypeTitle": "Удалить тип эффекта навыка",
+    "deleteSkillEffectsTypeDescription": "Вы уверены, что хотите удалить тип эффекта навыка \"{slug}\"? Это действие нельзя отменить, и оно может повлиять на навыки, использующие этот тип эффекта.",
+    "skillEffectsTypeCreated": "Тип эффекта навыка успешно создан",
+    "skillEffectsTypeUpdated": "Тип эффекта навыка успешно обновлен",
+    "skillEffectsTypeDeleted": "Тип эффекта навыка успешно удален",
+    "skillEffectsTypeNotFound": "Тип эффекта навыка не найден",
+    "searchSkillEffectsTypes": "Поиск типов эффектов навыков...",
+    "noSkillEffectsTypesFound": "Типы эффектов навыков не найдены",
+    "slugRequired": "Слаг обязателен"
+}

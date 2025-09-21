@@ -1,0 +1,18 @@
+{
+    "title": "Свойства навыков",
+    "skillPropertiesManagement": "Управление свойствами навыков",
+    "createSkillProperty": "Создать свойство навыка",
+    "editSkillProperty": "Редактировать свойство навыка",
+    "skillPropertyName": "Название свойства",
+    "skillPropertySlug": "Слаг свойства",
+    "deleteSkillPropertyTitle": "Удалить свойство навыка",
+    "deleteSkillPropertyDescription": "Вы уверены, что хотите удалить свойство навыка \"{name}\"? Это действие нельзя отменить, и оно может повлиять на навыки, использующие это свойство.",
+    "skillPropertyCreated": "Свойство навыка успешно создано",
+    "skillPropertyUpdated": "Свойство навыка успешно обновлено",
+    "skillPropertyDeleted": "Свойство навыка успешно удалено",
+    "skillPropertyNotFound": "Свойство навыка не найдено",
+    "searchSkillProperties": "Поиск свойств навыков...",
+    "noSkillPropertiesFound": "Свойства навыков не найдены",
+    "nameRequired": "Название обязательно",
+    "slugRequired": "Слаг обязателен"
+}
