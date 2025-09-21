@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Save } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,6 +15,9 @@ import { trpc } from '@/lib/trpc'
 import { toast } from '@/hooks/use-toast'
 
 export default function DialogueEditPage() {
+    const t = useTranslations('dialogues')
+    const tCommon = useTranslations('common')
+    const locale = useLocale()
     const params = useParams()
     const router = useRouter()
     const dialogueId = parseInt(params.id as string)
@@ -48,11 +52,11 @@ export default function DialogueEditPage() {
 
     const updateDialogue = trpc.dialogue.update.useMutation({
         onSuccess: () => {
-            toast.success('Dialogue updated', 'The dialogue properties were successfully updated')
+            toast.success(t('detail.nodeUpdated'), t('detail.nodeUpdatedDescription'))
             refetch()
         },
         onError: (error) => {
-            toast.error('Failed to update dialogue', error.message)
+            toast.error(t('detail.nodeUpdateError'), error.message)
         },
     })
 
@@ -77,9 +81,9 @@ export default function DialogueEditPage() {
     if (isNaN(dialogueId)) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">Invalid dialogue ID</p>
-                <Link href="/dialogues">
-                    <Button className="mt-4">Back to Dialogues</Button>
+                <p className="text-destructive">{t('invalidId')}</p>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button className="mt-4">{t('backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -89,10 +93,10 @@ export default function DialogueEditPage() {
         return (
             <div className="text-center py-12">
                 <p className="text-destructive mb-4">
-                    Error loading dialogue: {error.message}
+                    {t('errorLoading')}: {error.message}
                 </p>
-                <Link href="/dialogues">
-                    <Button>Back to Dialogues</Button>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button>{t('backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -105,7 +109,7 @@ export default function DialogueEditPage() {
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {tCommon('back')}
                         </Button>
                     </Link>
                     <div>
@@ -130,25 +134,25 @@ export default function DialogueEditPage() {
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {tCommon('back')}
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold">Edit Dialogue</h1>
+                        <h1 className="text-2xl font-bold">{t('form.editTitle')}</h1>
                         <p className="text-muted-foreground">
-                            Dialogue ID: {dialogue?.id}
+                            ID: {dialogue?.id}
                         </p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <Link href={`/dialogues/${dialogueId}/graph`}>
                         <Button variant="outline">
-                            Edit Graph
+                            {t('graph.editorTitle')}
                         </Button>
                     </Link>
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline">
-                            View Details
+                            {t('graph.viewDetails')}
                         </Button>
                     </Link>
                 </div>
@@ -157,9 +161,9 @@ export default function DialogueEditPage() {
             {/* Dialogue Form */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Dialogue Settings</CardTitle>
+                    <CardTitle>{t('form.basicInfo')}</CardTitle>
                     <CardDescription>
-                        Edit the basic properties of this dialogue.
+                        {t('form.basicInfoDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -167,22 +171,22 @@ export default function DialogueEditPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Slug */}
                             <div className="space-y-2">
-                                <Label htmlFor="slug">Slug</Label>
+                                <Label htmlFor="slug">{t('form.slug')}</Label>
                                 <Input
                                     id="slug"
                                     value={formData.slug}
                                     onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                                    placeholder="Enter dialogue slug"
+                                    placeholder={t('form.slugPlaceholder')}
                                     required
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Unique identifier for this dialogue
+                                    {t('form.slugDescription')}
                                 </p>
                             </div>
 
                             {/* Version */}
                             <div className="space-y-2">
-                                <Label htmlFor="version">Version</Label>
+                                <Label htmlFor="version">{t('form.version')}</Label>
                                 <Input
                                     id="version"
                                     type="number"
@@ -192,14 +196,14 @@ export default function DialogueEditPage() {
                                     required
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Version number for this dialogue
+                                    {t('form.versionDescription')}
                                 </p>
                             </div>
                         </div>
 
                         {/* Start Node ID */}
                         <div className="space-y-2">
-                            <Label htmlFor="startNodeId">Start Node</Label>
+                            <Label htmlFor="startNodeId">{t('form.startNode')}</Label>
                             <select
                                 id="startNodeId"
                                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -209,15 +213,15 @@ export default function DialogueEditPage() {
                                     startNodeId: e.target.value ? parseInt(e.target.value) : null
                                 }))}
                             >
-                                <option value="">No start node</option>
+                                <option value="">{t('form.noStartNode')}</option>
                                 {availableNodes.map((node) => (
                                     <option key={node.id} value={node.id}>
-                                        Node {node.id} ({node.type}) - {node.clientNodeKey || 'Untitled'}
+                                        Node {node.id} ({node.type}) - {node.clientNodeKey || t('form.untitled')}
                                     </option>
                                 ))}
                             </select>
                             <p className="text-sm text-muted-foreground">
-                                The first node to execute when this dialogue starts
+                                {t('form.startNodeEditDescription')}
                             </p>
                         </div>
 
@@ -229,11 +233,11 @@ export default function DialogueEditPage() {
                                 className="min-w-[120px]"
                             >
                                 {updateDialogue.isLoading ? (
-                                    'Saving...'
+                                    t('form.saving')
                                 ) : (
                                     <>
                                         <Save className="w-4 h-4 mr-2" />
-                                        Save Changes
+                                        {t('form.saveChanges')}
                                     </>
                                 )}
                             </Button>
@@ -245,22 +249,22 @@ export default function DialogueEditPage() {
             {/* Info Card */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Dialogue Structure</CardTitle>
+                    <CardTitle>{t('form.dialogueStructure')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
-                            <p className="font-medium">Total Nodes</p>
+                            <p className="font-medium">{t('form.totalNodes')}</p>
                             <p className="text-2xl font-bold text-primary">{availableNodes.length}</p>
                         </div>
                         <div>
-                            <p className="font-medium">Total Edges</p>
+                            <p className="font-medium">{t('form.totalEdges')}</p>
                             <p className="text-2xl font-bold text-primary">{graphData?.edges?.length || 0}</p>
                         </div>
                         <div>
-                            <p className="font-medium">Start Node</p>
+                            <p className="font-medium">{t('form.startNode')}</p>
                             <p className="text-lg text-muted-foreground">
-                                {formData.startNodeId ? `Node ${formData.startNodeId}` : 'Not set'}
+                                {formData.startNodeId ? `Node ${formData.startNodeId}` : t('form.notSet')}
                             </p>
                         </div>
                     </div>

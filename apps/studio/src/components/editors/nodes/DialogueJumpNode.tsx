@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { Handle, Position, NodeProps } from 'reactflow'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { ArrowRight } from 'lucide-react'
@@ -11,26 +12,28 @@ interface DialogueJumpNodeData {
 }
 
 export default function DialogueJumpNode({ data, selected }: NodeProps<DialogueJumpNodeData>) {
+    const t = useTranslations('editors.nodes')
+
     return (
         <Card className={`min-w-[180px] ${selected ? 'ring-2 ring-primary' : ''}`}>
             <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                     <ArrowRight className="w-4 h-4 text-purple-500" />
-                    <span className="text-sm font-medium">Jump Node</span>
+                    <span className="text-sm font-medium">{t('jump.title')}</span>
                 </div>
             </CardHeader>
             <CardContent className="pt-0">
                 <div className="space-y-2">
                     <div className="text-xs">
-                        <strong>Key:</strong> {data.clientNodeKey || 'Not set'}
+                        <strong>{t('common.key')}:</strong> {data.clientNodeKey || t('common.notSet')}
                     </div>
                     {data.jumpTargetNodeId && (
                         <div className="text-xs">
-                            <strong>Target ID:</strong> {data.jumpTargetNodeId}
+                            <strong>{t('jump.targetId')}:</strong> {data.jumpTargetNodeId}
                         </div>
                     )}
                     <div className="text-xs text-muted-foreground">
-                        {data.clientNodeKey || 'Untitled Jump'}
+                        {data.clientNodeKey || t('jump.untitled')}
                     </div>
                 </div>
             </CardContent>

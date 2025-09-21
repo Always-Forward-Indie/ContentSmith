@@ -1,13 +1,22 @@
+'use client'
+
 import Link from 'next/link'
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 
 export default function HomePage() {
     const t = useTranslations();
+    const locale = useLocale();
 
     return (
         <main className="container mx-auto px-4 py-8">
+            {/* Language switcher at the top */}
+            <div className="flex justify-end mb-6">
+                <LanguageSwitcher />
+            </div>
+
             <div className="max-w-4xl mx-auto">
                 <header className="text-center mb-12">
                     <h1 className="text-4xl font-bold tracking-tight mb-4">
@@ -27,7 +36,7 @@ export default function HomePage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Link href="/dialogues">
+                            <Link href={`/${locale}/dialogues`}>
                                 <Button className="w-full">{t('home.dialogues.openEditor')}</Button>
                             </Link>
                         </CardContent>
@@ -41,7 +50,7 @@ export default function HomePage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Link href="/quests">
+                            <Link href={`/${locale}/quests`}>
                                 <Button className="w-full">{t('home.quests.openEditor')}</Button>
                             </Link>
                         </CardContent>

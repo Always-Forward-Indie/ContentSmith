@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +30,7 @@ export default function DialogueEdgeCreate({
     nodes,
     onSave,
 }: DialogueEdgeCreateProps) {
+    const t = useTranslations('dialogues.components.edgeCreate')
     const [formData, setFormData] = useState({
         dialogueId: dialogueId,
         fromNodeId: 0,
@@ -44,7 +46,7 @@ export default function DialogueEdgeCreate({
         e.preventDefault()
 
         if (formData.fromNodeId === 0 || formData.toNodeId === 0) {
-            alert('Please select both source and target nodes')
+            alert(t('validation.selectBothNodes'))
             return
         }
 
@@ -67,16 +69,16 @@ export default function DialogueEdgeCreate({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Create New Connection (Edge)</DialogTitle>
+                    <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>
-                        Add a new connection between dialogue nodes.
+                        {t('description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* From Node */}
                     <div className="space-y-2">
-                        <Label htmlFor="fromNodeId">From Node</Label>
+                        <Label htmlFor="fromNodeId">{t('fields.fromNode')}</Label>
                         <select
                             id="fromNodeId"
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -84,7 +86,7 @@ export default function DialogueEdgeCreate({
                             onChange={(e) => setFormData(prev => ({ ...prev, fromNodeId: parseInt(e.target.value) }))}
                             required
                         >
-                            <option value="0">Select source node</option>
+                            <option value="0">{t('fields.selectSourceNode')}</option>
                             {nodes.map(node => (
                                 <option key={node.id} value={node.id}>
                                     #{node.id} ({node.type}) - {node.clientNodeKey || 'Untitled'}
@@ -98,7 +100,7 @@ export default function DialogueEdgeCreate({
 
                     {/* To Node */}
                     <div className="space-y-2">
-                        <Label htmlFor="toNodeId">To Node</Label>
+                        <Label htmlFor="toNodeId">{t('fields.toNode')}</Label>
                         <select
                             id="toNodeId"
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -106,7 +108,7 @@ export default function DialogueEdgeCreate({
                             onChange={(e) => setFormData(prev => ({ ...prev, toNodeId: parseInt(e.target.value) }))}
                             required
                         >
-                            <option value="0">Select target node</option>
+                            <option value="0">{t('fields.selectTargetNode')}</option>
                             {nodes
                                 .filter(node => node.id !== formData.fromNodeId) // Don't allow self-loops
                                 .map(node => (
@@ -123,21 +125,21 @@ export default function DialogueEdgeCreate({
 
                     {/* Choice Key */}
                     <div className="space-y-2">
-                        <Label htmlFor="clientChoiceKey">Choice Text</Label>
+                        <Label htmlFor="clientChoiceKey">{t('fields.choiceText')}</Label>
                         <Input
                             id="clientChoiceKey"
                             value={formData.clientChoiceKey}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientChoiceKey: e.target.value }))}
-                            placeholder="e.g., choice.yes, choice.help, action.continue"
+                            placeholder={t('fields.choiceTextPlaceholder')}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Text displayed for this choice option
+                            {t('fields.choiceTextDescription')}
                         </p>
                     </div>
 
                     {/* Order Index */}
                     <div className="space-y-2">
-                        <Label htmlFor="orderIndex">Order Index</Label>
+                        <Label htmlFor="orderIndex">{t('fields.orderIndex')}</Label>
                         <Input
                             id="orderIndex"
                             type="number"
@@ -146,7 +148,7 @@ export default function DialogueEdgeCreate({
                             onChange={(e) => setFormData(prev => ({ ...prev, orderIndex: parseInt(e.target.value) || 0 }))}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Display order for this choice (0 = first)
+                            {t('fields.orderIndexDescription')}
                         </p>
                     </div>
 
@@ -159,7 +161,7 @@ export default function DialogueEdgeCreate({
                             onChange={(e) => setFormData(prev => ({ ...prev, hideIfLocked: e.target.checked }))}
                             className="h-4 w-4 rounded border border-input bg-background"
                         />
-                        <Label htmlFor="hideIfLocked">Hide if locked</Label>
+                        <Label htmlFor="hideIfLocked">{t('fields.hideIfLocked')}</Label>
                         <p className="text-xs text-muted-foreground">
                             Hide this choice if conditions are not met
                         </p>
@@ -167,7 +169,7 @@ export default function DialogueEdgeCreate({
 
                     {/* Condition Group */}
                     <div className="space-y-2">
-                        <Label htmlFor="conditionGroup">Conditions (JSON)</Label>
+                        <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
                         <Textarea
                             id="conditionGroup"
                             value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
@@ -179,17 +181,17 @@ export default function DialogueEdgeCreate({
                                     // Invalid JSON, keep the string for editing
                                 }
                             }}
-                            placeholder='{"type": "and", "conditions": [{"type": "flag", "flag": "choice.available", "value": true}, {"type": "item", "item": "gold", "count": 10}]}'
+                            placeholder={t('fields.conditionsPlaceholder')}
                             rows={3}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Conditions that must be met for this choice to be available
+                            {t('fields.conditionsDescription')}
                         </p>
                     </div>
 
                     {/* Action Group */}
                     <div className="space-y-2">
-                        <Label htmlFor="actionGroup">Actions (JSON)</Label>
+                        <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
                         <Textarea
                             id="actionGroup"
                             value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
@@ -201,20 +203,20 @@ export default function DialogueEdgeCreate({
                                     // Invalid JSON, keep the string for editing
                                 }
                             }}
-                            placeholder='{"type": "set_flag", "flag": "example", "value": true}'
+                            placeholder={t('fields.actionsPlaceholder')}
                             rows={3}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Actions to execute when this choice is selected
+                            {t('fields.actionsDescription')}
                         </p>
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancel
+                            {t('buttons.cancel')}
                         </Button>
                         <Button type="submit">
-                            Create Connection
+                            {t('buttons.create')}
                         </Button>
                     </DialogFooter>
                 </form>

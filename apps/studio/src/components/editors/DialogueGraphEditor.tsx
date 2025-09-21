@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useMemo, useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import {
     ReactFlow,
     Node,
@@ -66,6 +67,8 @@ export default function DialogueGraphEditor({
     onSave,
     readOnly = false,
 }: DialogueGraphEditorProps) {
+    const t = useTranslations('editors.dialogueGraphEditor')
+
     // Position manager for localStorage
     const positionManager = useMemo(() => new DialoguePositionManager(dialogueId), [dialogueId])
 
@@ -478,7 +481,7 @@ export default function DialogueGraphEditor({
                         <Panel position="top-left" className="space-y-2">
                             <Card className="p-3">
                                 <div className="space-y-2">
-                                    <h3 className="font-medium text-sm">Add Nodes</h3>
+                                    <h3 className="font-medium text-sm">{t('panels.addNodes')}</h3>
                                     <div className="grid grid-cols-2 gap-1">
                                         <Button
                                             size="sm"
@@ -487,7 +490,7 @@ export default function DialogueGraphEditor({
                                             className="text-xs h-8"
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            Line
+                                            {t('nodeTypes.line')}
                                         </Button>
                                         <Button
                                             size="sm"
@@ -496,7 +499,7 @@ export default function DialogueGraphEditor({
                                             className="text-xs h-8"
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            Choice
+                                            {t('nodeTypes.choice')}
                                         </Button>
                                         <Button
                                             size="sm"
@@ -505,7 +508,7 @@ export default function DialogueGraphEditor({
                                             className="text-xs h-8"
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            Action
+                                            {t('nodeTypes.action')}
                                         </Button>
                                         <Button
                                             size="sm"
@@ -514,7 +517,7 @@ export default function DialogueGraphEditor({
                                             className="text-xs h-8"
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            Jump
+                                            {t('nodeTypes.jump')}
                                         </Button>
                                         <Button
                                             size="sm"
@@ -523,7 +526,7 @@ export default function DialogueGraphEditor({
                                             className="text-xs h-8 col-span-2"
                                         >
                                             <Plus className="w-3 h-3 mr-1" />
-                                            End
+                                            {t('nodeTypes.end')}
                                         </Button>
                                     </div>
                                 </div>
@@ -534,12 +537,12 @@ export default function DialogueGraphEditor({
                     <Panel position="top-right" className="space-y-2">
                         <Card className="p-3">
                             <div className="space-y-2">
-                                <h3 className="font-medium text-sm">Actions</h3>
+                                <h3 className="font-medium text-sm">{t('panels.actions')}</h3>
                                 <div className="space-y-1">
                                     {!readOnly && (
                                         <Button size="sm" onClick={handleSave} className="w-full text-xs">
                                             <Save className="w-3 h-3 mr-1" />
-                                            Save
+                                            {t('controls.save')}
                                         </Button>
                                     )}
                                     <Button
@@ -549,7 +552,7 @@ export default function DialogueGraphEditor({
                                         className="w-full text-xs"
                                     >
                                         <RotateCcw className="w-3 h-3 mr-1" />
-                                        Auto Layout
+                                        {t('controls.autoLayout')}
                                     </Button>
                                     <Button
                                         size="sm"

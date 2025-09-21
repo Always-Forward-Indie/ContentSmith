@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,7 +23,8 @@ interface NPCSelectProps {
     label?: string
 }
 
-export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NPCSelectProps) {
+export default function NPCSelect({ value, onChange, label }: NPCSelectProps) {
+    const t = useTranslations('editors.npcSelect')
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [selectedNpc, setSelectedNpc] = useState<any>(null)
@@ -63,7 +65,7 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
 
     return (
         <div className="space-y-2">
-            <Label>{label}</Label>
+            <Label>{label || t('defaultLabel')}</Label>
 
             {/* Выбранный NPC или кнопка выбора */}
             {selectedNpc ? (
@@ -77,6 +79,7 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
                     </div>
                     <div className="text-xs text-muted-foreground">ID: {selectedNpc.id}</div>
                     <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={handleClear}
@@ -87,12 +90,13 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
                 </div>
             ) : (
                 <Button
+                    type="button"
                     variant="outline"
                     onClick={() => setIsOpen(true)}
                     className="w-full justify-start text-muted-foreground"
                 >
                     <Search className="w-4 h-4 mr-2" />
-                    Select NPC...
+                    {t('selectNpc')}
                 </Button>
             )}
 
@@ -104,13 +108,14 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
                             <div className="flex items-center gap-2">
                                 <Search className="w-4 h-4 text-muted-foreground" />
                                 <Input
-                                    placeholder="Search NPCs by name or slug..."
+                                    placeholder={t('searchPlaceholder')}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="border-0 focus-visible:ring-0 p-0"
                                     autoFocus
                                 />
                                 <Button
+                                    type="button"
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => setIsOpen(false)}
@@ -123,15 +128,16 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
                             <div className="max-h-48 overflow-y-auto space-y-1">
                                 {isLoading ? (
                                     <div className="text-center py-4 text-muted-foreground">
-                                        Loading...
+                                        {t('loading')}
                                     </div>
                                 ) : npcs.length === 0 ? (
                                     <div className="text-center py-4 text-muted-foreground">
-                                        {search ? 'No NPCs found' : 'No NPCs available'}
+                                        {search ? t('noNpcsFound') : t('noNpcsAvailable')}
                                     </div>
                                 ) : (
                                     npcs.map((npc) => (
                                         <button
+                                            type="button"
                                             key={npc.id}
                                             onClick={() => handleSelect(npc)}
                                             className="w-full text-left p-2 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -145,7 +151,7 @@ export default function NPCSelect({ value, onChange, label = "Speaker NPC" }: NP
                                                     )}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    ID: {npc.id} | Lvl: {npc.level}
+                                                    ID: {npc.id} | {t('level')}: {npc.level}
                                                 </div>
                                             </div>
                                         </button>

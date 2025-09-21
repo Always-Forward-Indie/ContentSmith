@@ -1,7 +1,7 @@
 {
     "common": {
         "save": "Сохранить",
-        "cancel": "Отмена",
+        "cancel": "Отменить",
         "edit": "Редактировать",
         "delete": "Удалить",
         "create": "Создать",
@@ -14,12 +14,14 @@
         "loading": "Загрузка...",
         "error": "Ошибка",
         "success": "Успешно",
-        "noResults": "Результаты не найдены",
+        "noResults": "Результатов не найдено",
         "confirmDelete": "Вы уверены, что хотите удалить этот элемент?",
         "back": "Назад",
         "next": "Далее",
         "previous": "Предыдущий",
-        "close": "Закрыть"
+        "close": "Закрыть",
+        "yes": "Да",
+        "no": "Нет"
     },
     "navigation": {
         "home": "Главная",
@@ -74,6 +76,184 @@
             "nameMinLength": "Название квеста должно содержать минимум 1 символ",
             "nameMaxLength": "Название квеста должно быть менее 255 символов",
             "descriptionMaxLength": "Описание должно быть менее 1000 символов"
+        },
+        "noQuests": "Нет квестов",
+        "questsNotFound": "Квесты не найдены",
+        "errorLoading": "Ошибка загрузки",
+        "page": "Страница",
+        "showingResults": "Показано {current} элементов • Страница {page}",
+        "deleteQuest": "Удалить квест",
+        "deleteConfirm": "Вы уверены, что хотите удалить квест \"{slug}\"? Это действие нельзя отменить.",
+        "deleting": "Удаление...",
+        "creating": "Создание...",
+        "createError": "Ошибка создания квеста",
+        "form": {
+            "basicInfo": "Основная информация",
+            "basicInfoDescription": "Настройте базовые параметры квеста",
+            "fillBasicInfo": "Заполните основную информацию о квесте",
+            "slug": "Slug квеста *",
+            "minLevel": "Минимальный уровень *",
+            "repeatable": "Повторяемый квест",
+            "repeatableDescription": "Можно ли брать этот квест повторно после завершения",
+            "cooldown": "Кулдаун (секунды)",
+            "cooldownDescription": "Время ожидания перед повторным взятием квеста",
+            "questGiver": "NPC выдающий квест",
+            "questGiverDescription": "NPC, который выдает этот квест игрокам",
+            "questReceiver": "NPC принимающий квест",
+            "questReceiverDescription": "NPC, которому игрок сдает завершенный квест",
+            "clientKey": "Ключ клиентского UI",
+            "clientKeyDescription": "Ключ для названия/описания квеста в клиентском интерфейсе"
+        },
+        "edit": {
+            "title": "Редактировать квест",
+            "description": "Изменение параметров квеста \"{slug}\"",
+            "basicInfo": "Основная информация",
+            "basicInfoDescription": "Обновите параметры квеста",
+            "errorLoading": "Ошибка загрузки",
+            "back": "Назад",
+            "cancel": "Отмена",
+            "saveChanges": "Сохранить изменения",
+            "saving": "Сохранение...",
+            "updateError": "Ошибка обновления квеста: {error}"
+        },
+        "table": {
+            "minLevel": "Мин. уровень",
+            "repeatable": "Повторяемый",
+            "cooldown": "Кулдаун (сек)",
+            "clientKey": "Ключ клиента"
+        },
+        "detail": {
+            "title": "Детали квеста и его шаги",
+            "questInfo": "Информация о квесте",
+            "questInfoDescription": "Основные параметры и настройки квеста",
+            "minLevel": "Минимальный уровень",
+            "repeatable": "Повторяемый",
+            "cooldown": "Кулдаун (сек)",
+            "steps": "Шаги квеста",
+            "stepsDescription": "Последовательность задач, которые нужно выполнить",
+            "addStep": "Добавить шаг",
+            "noSteps": "Шаги не найдены",
+            "noStepsDescription": "У этого квеста пока нет шагов.",
+            "stepType": "Тип",
+            "stepDescription": "Описание",
+            "stepParams": "Параметры",
+            "stepIndex": "Индекс",
+            "stepTypes": {
+                "collect": "Собрать",
+                "kill": "Убить",
+                "talk": "Поговорить",
+                "reach": "Достичь",
+                "custom": "Пользовательский"
+            },
+            "editStep": "Редактировать шаг",
+            "deleteStep": "Удалить шаг",
+            "deleteStepConfirm": "Вы уверены, что хотите удалить этот шаг квеста?",
+            "deleteStepTitle": "Удалить шаг квеста",
+            "deleteStepDescription": "Вы уверены, что хотите удалить шаг #{stepIndex}? Это действие нельзя отменить.",
+            "errorLoading": "Ошибка загрузки",
+            "questGiver": "Квестодатель",
+            "questReceiver": "Принимающий квест",
+            "clientKey": "Ключ клиента",
+            "none": "Нет"
+        },
+        "stepPages": {
+            "new": {
+                "title": "Добавить шаг квеста",
+                "description": "Создание нового шага для квеста #{questId}",
+                "back": "Назад",
+                "errorCreating": "Ошибка создания шага: {error}"
+            },
+            "edit": {
+                "title": "Редактировать шаг квеста",
+                "description": "Изменение шага #{stepIndex} для квеста #{questId}",
+                "back": "Назад",
+                "errorLoading": "Ошибка загрузки",
+                "stepNotFound": "Шаг квеста не найден",
+                "errorUpdating": "Ошибка обновления шага: {error}"
+            }
+        },
+        "stepEditor": {
+            "title": "Редактор шагов квеста",
+            "editingStep": "Редактирование шага",
+            "addingStep": "Добавление нового шага",
+            "fields": {
+                "stepIndex": "Индекс шага",
+                "stepIndexDescription": "Порядок этого шага в квесте",
+                "stepType": "Тип шага",
+                "stepTypeOptions": {
+                    "collect": "Собрать предметы",
+                    "kill": "Убить существ",
+                    "talk": "Поговорить с NPC",
+                    "reach": "Достичь местоположения",
+                    "custom": "Пользовательский"
+                },
+                "clientStepKey": "Ключ шага",
+                "clientStepKeyPlaceholder": "например, collect_wood, talk_to_guard",
+                "clientStepKeyDescription": "Уникальный ключ для этого шага (необязательно)",
+                "parameters": "Параметры (JSON)",
+                "parametersDescription": "JSON конфигурация для этого типа шага"
+            },
+            "parameterTemplates": {
+                "collect": {
+                    "title": "Шаблон сбора предметов",
+                    "description": "Шаблон для шага квеста сбора предметов"
+                },
+                "kill": {
+                    "title": "Шаблон убийства существ",
+                    "description": "Шаблон для шага квеста убийства существ"
+                },
+                "talk": {
+                    "title": "Шаблон разговора с NPC",
+                    "description": "Шаблон для шага квеста разговора с NPC"
+                },
+                "reach": {
+                    "title": "Шаблон достижения места",
+                    "description": "Шаблон для шага квеста достижения местоположения"
+                },
+                "custom": {
+                    "title": "Пользовательский шаблон",
+                    "description": "Шаблон для пользовательского шага квеста"
+                }
+            },
+            "buttons": {
+                "cancel": "Отменить",
+                "save": "Сохранить шаг"
+            },
+            "validation": {
+                "invalidJson": "Неверный формат JSON"
+            },
+            "visualEditors": {
+                "collect": {
+                    "title": "Параметры сбора предметов",
+                    "itemId": "ID предмета",
+                    "itemIdPlaceholder": "wood",
+                    "count": "Количество",
+                    "countPlaceholder": "5"
+                },
+                "kill": {
+                    "title": "Параметры убийства существ",
+                    "npcId": "ID моба/NPC",
+                    "npcIdPlaceholder": "wolf_mob",
+                    "count": "Количество",
+                    "countPlaceholder": "3"
+                },
+                "talk": {
+                    "title": "Параметры разговора с NPC",
+                    "npcLabel": "Целевой NPC"
+                },
+                "reach": {
+                    "title": "Параметры достижения местоположения",
+                    "x": "Координата X",
+                    "y": "Координата Y",
+                    "z": "Координата Z",
+                    "radius": "Радиус",
+                    "radiusPlaceholder": "5.0"
+                },
+                "custom": {
+                    "title": "Параметры пользовательского шага",
+                    "description": "Настройте пользовательские параметры в поле JSON ниже"
+                }
+            }
         }
     },
     "dialogues": {
@@ -81,13 +261,453 @@
         "description": "Создавайте и управляйте диалоговыми беседами",
         "createNew": "Создать диалог",
         "list": "Список диалогов",
-        "listDescription": "Просматривайте и управляйте всеми диалогами",
+        "listDescription": "Управляйте диалоговыми беседами",
+        "noDialogues": "Диалоги не найдены",
+        "dialoguesNotFound": "Нет диалогов, соответствующих вашему поиску",
+        "table": {
+            "version": "Версия",
+            "startNode": "Начальный узел"
+        },
+        "showingResults": "Показано {current} элементов • Страница {page}",
         "newDialogue": "Новый диалог",
         "editDialogue": "Редактировать диалог",
         "dialogueName": "Название диалога",
         "dialogueDescription": "Описание диалога",
         "searchPlaceholder": "Поиск диалогов...",
-        "graph": "Граф",
-        "viewGraph": "Посмотреть граф"
+        "viewGraph": "Посмотреть граф",
+        "backToDialogues": "Назад к диалогам",
+        "invalidId": "Неверный ID диалога",
+        "errorLoading": "Ошибка загрузки диалога",
+        "deleteDialogue": "Удалить диалог",
+        "deleteSuccess": "Диалог удален",
+        "deleteError": "Не удалось удалить диалог",
+        "creating": "Создание...",
+        "saving": "Сохранение...",
+        "form": {
+            "newDialogueTitle": "Создать новый диалог",
+            "newDialogueDescription": "Создайте новое дерево диалога для NPC",
+            "dialogueDetails": "Детали диалога",
+            "dialogueDetailsDescription": "Введите базовую информацию для нового диалога",
+            "slug": "Slug *",
+            "slugPlaceholder": "например, guard_greeting, merchant_intro",
+            "slugDescription": "Уникальный идентификатор для этого диалога. Используйте строчные буквы с подчеркиваниями.",
+            "version": "Версия",
+            "versionDescription": "Номер версии для управления контентом",
+            "nextSteps": "Следующие шаги",
+            "nextStepsDescription": "После создания диалога вы можете:",
+            "nextStepsItems": [
+                "Добавить узлы диалога (реплики, выборы, действия)",
+                "Соединить узлы ребрами",
+                "Установить условия и действия",
+                "Использовать визуальный редактор графа",
+                "Предварительно просмотреть поток диалога"
+            ],
+            "startNode": "Начальный узел",
+            "startNodeDescription": "Первый узел, который увидят игроки",
+            "editTitle": "Редактировать диалог",
+            "editDescription": "Изменить настройки диалога",
+            "basicInfo": "Основная информация",
+            "basicInfoDescription": "Обновить метаданные диалога",
+            "noStartNode": "Нет начального узла",
+            "startNodeEditDescription": "Первый узел для выполнения при запуске этого диалога",
+            "nodeLabel": "Узел {id} ({type}) - {title}",
+            "untitled": "Без названия",
+            "saveChanges": "Сохранить изменения",
+            "saving": "Сохранение...",
+            "dialogueStructure": "Структура диалога",
+            "totalNodes": "Всего узлов",
+            "totalEdges": "Всего ребер",
+            "notSet": "Не задан"
+        },
+        "validation": {
+            "slugRequired": "Slug обязателен",
+            "slugTooLong": "Slug слишком длинный",
+            "slugExists": "Этот slug уже существует",
+            "versionMin": "Версия должна быть минимум 1"
+        },
+        "graph": {
+            "title": "Граф диалога",
+            "description": "Визуальный редактор для потока диалога",
+            "loadingGraph": "Загрузка графа...",
+            "noNodes": "Узлы не найдены",
+            "addNode": "Добавить узел",
+            "editNode": "Редактировать узел",
+            "deleteNode": "Удалить узел",
+            "addConnection": "Добавить соединение",
+            "editConnection": "Редактировать соединение",
+            "deleteConnection": "Удалить соединение",
+            "editorTitle": "Редактор графа диалога",
+            "editorDescription": "Создавайте и редактируйте узлы диалога и соединения. Дважды щелкните по узлам и ребрам для их редактирования.",
+            "viewDetails": "Просмотр деталей"
+        },
+        "detail": {
+            "back": "Назад",
+            "edit": "Редактировать",
+            "cancel": "Отмена",
+            "delete": "Удалить",
+            "addNode": "Добавить узел",
+            "viewGraph": "Посмотреть граф",
+            "nodes": "Узлы",
+            "connections": "Соединения",
+            "noNodes": "Узлы не найдены",
+            "noConnections": "Соединения не найдены",
+            "createdAt": "Создан",
+            "updatedAt": "Обновлен",
+            "basicInformation": "Основная информация",
+            "slug": "Slug",
+            "version": "Версия",
+            "startNode": "Начальный узел",
+            "notSet": "Не задан",
+            "graphStatistics": "Статистика графа",
+            "totalNodes": "Всего узлов",
+            "totalEdges": "Всего ребер",
+            "nodeTypes": "Типы узлов",
+            "quickActions": "Быстрые действия",
+            "addConnection": "Добавить соединение",
+            "exportDialogue": "Экспортировать диалог",
+            "testDialogue": "Тестировать диалог",
+            "dialogueNodes": "Узлы диалога",
+            "allNodesDescription": "Все узлы в этом диалоге",
+            "dialogueConnections": "Соединения диалога (ребра)",
+            "allConnectionsDescription": "Все соединения (ребра) между узлами в этом диалоге",
+            "noKeySet": "Ключ не задан",
+            "order": "Порядок",
+            "hiddenIfLocked": "Скрыт если заблокирован",
+            "unknown": "Неизвестно",
+            "emptyStateDescription": "В этом диалоге пока нет узлов",
+            "addFirstNode": "Добавить первый узел",
+            "nodeDeleted": "Узел удален",
+            "nodeDeletedDescription": "Узел был успешно удален",
+            "nodeDeleteError": "Не удалось удалить узел",
+            "nodeUpdated": "Узел обновлен",
+            "nodeUpdatedDescription": "Узел был успешно обновлен",
+            "nodeUpdateError": "Не удалось обновить узел",
+            "nodeCreated": "Узел создан",
+            "nodeCreatedDescription": "Новый узел был успешно создан",
+            "nodeCreateError": "Не удалось создать узел",
+            "connectionDeleted": "Соединение удалено",
+            "connectionDeletedDescription": "Соединение было успешно удалено",
+            "connectionDeleteError": "Не удалось удалить соединение",
+            "connectionUpdated": "Соединение обновлено",
+            "connectionUpdatedDescription": "Соединение было успешно обновлено",
+            "connectionUpdateError": "Не удалось обновить соединение",
+            "connectionCreated": "Соединение создано",
+            "connectionCreatedDescription": "Новое соединение было успешно создано",
+            "connectionCreateError": "Не удалось создать соединение",
+            "deleteDialogueConfirm": "Вы уверены, что хотите удалить этот диалог? Это действие нельзя отменить.",
+            "deleteNodeConfirm": "Вы уверены, что хотите удалить этот узел? Это также удалит все связанные ребра и не может быть отменено.",
+            "deleteConnectionConfirm": "Вы уверены, что хотите удалить это соединение?",
+            "deleteConnectionTitle": "Удалить соединение",
+            "deleteNodeTitle": "Удалить узел",
+            "deleteDialogueTitle": "Удалить диалог"
+        },
+        "components": {
+            "edgeCreate": {
+                "title": "Создать новое соединение (ребро)",
+                "description": "Добавить новое соединение между узлами диалога.",
+                "fields": {
+                    "fromNode": "Исходный узел",
+                    "selectSourceNode": "Выберите исходный узел",
+                    "toNode": "Целевой узел",
+                    "selectTargetNode": "Выберите целевой узел",
+                    "choiceText": "Текст выбора",
+                    "choiceTextPlaceholder": "player_choice_help",
+                    "choiceTextDescription": "Ключ локализации для текста выбора",
+                    "orderIndex": "Порядковый индекс",
+                    "orderIndexDescription": "Порядок отображения для этого выбора (0 = первый)",
+                    "hideIfLocked": "Скрыть если заблокировано",
+                    "conditions": "Условия (JSON)",
+                    "conditionsPlaceholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"choice.available\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": 10}]}",
+                    "conditionsDescription": "JSON условия, которые должны быть выполнены для доступности этого ребра",
+                    "actions": "Действия (JSON)",
+                    "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
+                    "actionsDescription": "JSON действия для выполнения при выборе этого ребра"
+                },
+                "validation": {
+                    "selectBothNodes": "Пожалуйста, выберите исходный и целевой узлы"
+                },
+                "buttons": {
+                    "cancel": "Отменить",
+                    "create": "Создать соединение"
+                }
+            },
+            "edgeEdit": {
+                "title": "Редактировать соединение (ребро)",
+                "description": "Изменить существующее соединение между узлами диалога.",
+                "fields": {
+                    "fromNode": "Исходный узел",
+                    "selectSourceNode": "Выберите исходный узел",
+                    "toNode": "Целевой узел",
+                    "selectTargetNode": "Выберите целевой узел",
+                    "choiceText": "Текст выбора",
+                    "choiceTextPlaceholder": "player_choice_help",
+                    "choiceTextDescription": "Ключ локализации для текста выбора",
+                    "orderIndex": "Порядковый индекс",
+                    "orderIndexDescription": "Порядок отображения для этого выбора (0 = первый)",
+                    "hideIfLocked": "Скрыть если заблокировано",
+                    "conditions": "Условия (JSON)",
+                    "conditionsPlaceholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"choice.available\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": 10}]}",
+                    "conditionsDescription": "JSON условия, которые должны быть выполнены для доступности этого ребра",
+                    "actions": "Действия (JSON)",
+                    "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
+                    "actionsDescription": "JSON действия для выполнения при выборе этого ребра"
+                },
+                "validation": {
+                    "selectBothNodes": "Пожалуйста, выберите исходный и целевой узлы"
+                },
+                "buttons": {
+                    "cancel": "Отменить",
+                    "save": "Сохранить изменения"
+                }
+            },
+            "nodeCreate": {
+                "title": "Создать новый узел",
+                "description": "Добавить новый узел диалога в этот диалог.",
+                "fields": {
+                    "nodeType": "Тип узла",
+                    "nodeTypeOptions": {
+                        "line": "Строка (Диалог)",
+                        "choice": "Выбор",
+                        "action": "Действие",
+                        "jump": "Переход",
+                        "end": "Конец"
+                    },
+                    "nodeKey": "Ключ узла",
+                    "nodeKeyPlaceholder": "например, greeting.welcome, choice.help, action.give_item",
+                    "nodeKeyDescription": "Уникальный идентификатор для этого узла (обязательно)",
+                    "speakerNpc": "NPC говорящий",
+                    "speakerNpcDescription": "Выберите NPC, который говорит эту строку",
+                    "jumpTargetNodeId": "ID целевого узла перехода",
+                    "jumpTargetPlaceholder": "Введите ID целевого узла",
+                    "jumpTargetDescription": "ID узла, к которому нужно перейти",
+                    "conditions": "Условия (JSON)",
+                    "conditionsPlaceholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"quest.completed\", \"value\": true}, {\"type\": \"level\", \"min\": 5}]}",
+                    "conditionsDescription": "Дополнительные условия для этого узла",
+                    "actions": "Действия (JSON)",
+                    "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
+                    "actionsDescription": "Дополнительные действия для выполнения при достижении этого узла"
+                },
+                "buttons": {
+                    "cancel": "Отменить",
+                    "create": "Создать узел"
+                }
+            },
+            "nodeEdit": {
+                "title": "Редактировать узел",
+                "description": "Изменить свойства этого узла диалога.",
+                "fields": {
+                    "nodeType": "Тип",
+                    "nodeTypeOptions": {
+                        "line": "Строка",
+                        "choice_hub": "Центр выбора",
+                        "action": "Действие",
+                        "jump": "Переход",
+                        "end": "Конец"
+                    },
+                    "nodeKey": "Ключ узла",
+                    "nodeKeyPlaceholder": "например, greeting.welcome, choice.help, action.give_item",
+                    "nodeKeyDescription": "Уникальный идентификатор для этого узла в игре",
+                    "speakerNpc": "NPC говорящий",
+                    "speakerNpcDescription": "Выберите NPC, который говорит эту строку (для узлов строк)",
+                    "jumpTargetNodeId": "ID целевого узла перехода",
+                    "jumpTargetPlaceholder": "Введите ID целевого узла",
+                    "conditions": "Условия (JSON)",
+                    "conditionsPlaceholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"quest.completed\", \"value\": true}, {\"type\": \"level\", \"min\": 5}]}",
+                    "conditionsDescription": "Условия, которые должны быть выполнены для доступности этого узла",
+                    "actions": "Действия (JSON)",
+                    "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
+                    "actionsDescription": "Действия для выполнения при обработке этого узла"
+                },
+                "buttons": {
+                    "cancel": "Отменить",
+                    "save": "Сохранить изменения"
+                }
+            }
+        }
+    },
+    "editors": {
+        "npcSelect": {
+            "defaultLabel": "NPC говорящий",
+            "selectNpc": "Выбрать NPC...",
+            "searchPlaceholder": "Поиск NPC по имени или слагу...",
+            "loading": "Загрузка...",
+            "noNpcsFound": "NPC не найдены",
+            "noNpcsAvailable": "NPC недоступны",
+            "level": "Ур"
+        },
+        "dialogueGraphEditor": {
+            "title": "Редактор графа диалогов",
+            "controls": {
+                "addNode": "Добавить узел",
+                "save": "Сохранить изменения",
+                "export": "Экспорт",
+                "import": "Импорт",
+                "resetLayout": "Сбросить макет",
+                "autoLayout": "Авто макет"
+            },
+            "nodeTypes": {
+                "line": "Строка",
+                "choice": "Выбор",
+                "action": "Действие",
+                "jump": "Переход",
+                "end": "Конец"
+            },
+            "panels": {
+                "addNodes": "Добавить узлы",
+                "actions": "Действия"
+            },
+            "minimap": {
+                "title": "Мини карта"
+            },
+            "status": {
+                "saving": "Сохранение...",
+                "saved": "Сохранено",
+                "error": "Ошибка",
+                "noChanges": "Нет изменений для сохранения"
+            },
+            "messages": {
+                "saveSuccess": "Диалог успешно сохранен",
+                "saveError": "Не удалось сохранить диалог",
+                "exportSuccess": "Диалог экспортирован",
+                "importSuccess": "Диалог импортирован",
+                "layoutReset": "Макет сброшен к позициям по умолчанию"
+            }
+        },
+        "dialogs": {
+            "edgeEdit": {
+                "title": "Редактировать связь (ребро)",
+                "fields": {
+                    "choiceKey": {
+                        "label": "Ключ/Текст выбора",
+                        "placeholder": "например, dialogue.choice.yes или 'Да, согласен'",
+                        "description": "Этот ключ будет использоваться клиентом для отображения текста выбора"
+                    },
+                    "orderIndex": {
+                        "label": "Индекс порядка",
+                        "description": "Порядок этого выбора в списке (меньшие числа появляются первыми)"
+                    },
+                    "hideIfLocked": {
+                        "label": "Скрыть если заблокировано",
+                        "description": "Скрыть этот выбор если условия не выполнены"
+                    },
+                    "conditions": {
+                        "label": "Условия (JSON)",
+                        "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"can_access\", \"value\": true}, {\"type\": \"item\", \"item\": \"key\", \"count\": 1}]}"
+                    },
+                    "actions": {
+                        "label": "Действия (JSON)",
+                        "placeholder": "Действия для выполнения когда этот выбор выбран"
+                    }
+                },
+                "buttons": {
+                    "delete": "Удалить связь",
+                    "cancel": "Отмена",
+                    "save": "Сохранить изменения"
+                }
+            },
+            "nodeEdit": {
+                "title": "Редактировать узел {nodeType}",
+                "confirmDelete": "Вы уверены, что хотите удалить этот узел?",
+                "fields": {
+                    "nodeId": {
+                        "label": "ID узла"
+                    },
+                    "nodeType": {
+                        "label": "Тип узла"
+                    },
+                    "nodeKey": {
+                        "label": "Ключ узла",
+                        "placeholder": "например, greeting.welcome, choice.help, action.give_item"
+                    },
+                    "conditions": {
+                        "label": "Условия (JSON)",
+                        "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"quest.completed\", \"value\": true}, {\"type\": \"level\", \"min\": 5}]}"
+                    },
+                    "actions": {
+                        "label": "Действия (JSON)",
+                        "placeholder": "Конфигурация действий"
+                    }
+                },
+                "nodeTypes": {
+                    "line": {
+                        "title": "Строка"
+                    },
+                    "choice_hub": {
+                        "title": "Узел выбора",
+                        "conditionsLabel": "Условия выбора (JSON)",
+                        "placeholder": "{\"type\": \"and\", \"conditions\": [{\"type\": \"flag\", \"flag\": \"has_key\", \"value\": true}, {\"type\": \"level\", \"min\": 10}]}"
+                    },
+                    "action": {
+                        "title": "Действие"
+                    },
+                    "jump": {
+                        "title": "Переход",
+                        "targetLabel": "ID целевого узла перехода",
+                        "targetPlaceholder": "ID целевого узла"
+                    },
+                    "end": {
+                        "title": "Конец",
+                        "description": "Конечные узлы не имеют дополнительной конфигурации."
+                    }
+                },
+                "buttons": {
+                    "delete": "Удалить узел",
+                    "cancel": "Отмена",
+                    "save": "Сохранить изменения"
+                }
+            }
+        },
+        "edges": {
+            "dialogueEdge": {
+                "tooltip": {
+                    "edgeId": "ID связи",
+                    "choice": "Выбор",
+                    "order": "Порядок",
+                    "hiddenIfLocked": "Скрыто если заблокировано",
+                    "hasConditions": "Есть условия",
+                    "hasActions": "Есть действия",
+                    "hasConditionsOrActions": "Есть условия/действия"
+                },
+                "labels": {
+                    "noChoiceText": "Нет текста выбора"
+                }
+            }
+        },
+        "nodes": {
+            "common": {
+                "key": "Ключ",
+                "type": "Тип",
+                "notSet": "Не установлен",
+                "speaker": "Говорящий"
+            },
+            "line": {
+                "title": "Узел строки",
+                "untitled": "Безымянная строка"
+            },
+            "choice": {
+                "title": "Узел выбора",
+                "untitled": "Безымянный выбор",
+                "choices": "Варианты"
+            },
+            "action": {
+                "title": "Узел действия",
+                "untitled": "Безымянное действие",
+                "parameters": "Параметры"
+            },
+            "jump": {
+                "title": "Узел перехода",
+                "untitled": "Безымянный переход",
+                "targetId": "ID цели"
+            },
+            "end": {
+                "title": "Узел завершения",
+                "untitled": "Безымянное завершение",
+                "types": {
+                    "normal": "Обычное",
+                    "questComplete": "Завершение квеста",
+                    "dialogueExit": "Выход из диалога"
+                }
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function DashboardLayout({
     children,
@@ -12,37 +12,38 @@ export default function DashboardLayout({
     children: React.ReactNode
 }) {
     const t = useTranslations();
+    const locale = useLocale();
     return (
         <div className="min-h-screen bg-background">
             {/* Navigation Header */}
             <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container flex h-14 items-center">
-                    <Link href="/" className="mr-6 flex items-center space-x-2">
+                    <Link href={`/${locale}`} className="mr-6 flex items-center space-x-2">
                         <span className="hidden font-bold sm:inline-block">
                             ContentSmith
                         </span>
                     </Link>
                     <nav className="flex items-center space-x-6 text-sm font-medium">
                         <Link
-                            href="/dialogues"
+                            href={`/${locale}/dialogues`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
                             {t('navigation.dialogues')}
                         </Link>
                         <Link
-                            href="/quests"
+                            href={`/${locale}/quests`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
                             {t('navigation.quests')}
                         </Link>
                         <Link
-                            href="/localization"
+                            href={`/${locale}/localization`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
                             {t('navigation.localization')}
                         </Link>
                         <Link
-                            href="/analytics"
+                            href={`/${locale}/analytics`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >
                             {t('navigation.analytics')}

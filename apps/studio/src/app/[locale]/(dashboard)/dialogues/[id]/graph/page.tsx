@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +11,9 @@ import { trpc } from '@/lib/trpc'
 import DialogueGraphEditor from '@/components/editors/DialogueGraphEditor'
 
 export default function DialogueGraphPage() {
+    const t = useTranslations('dialogues')
+    const tCommon = useTranslations('common')
+    const locale = useLocale()
     const params = useParams()
     const router = useRouter()
     const dialogueId = parseInt(params.id as string)
@@ -27,9 +31,9 @@ export default function DialogueGraphPage() {
     if (isNaN(dialogueId)) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">Invalid dialogue ID</p>
-                <Link href="/dialogues">
-                    <Button className="mt-4">Back to Dialogues</Button>
+                <p className="text-destructive">{t('invalidId')}</p>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button className="mt-4">{t('backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -39,10 +43,10 @@ export default function DialogueGraphPage() {
         return (
             <div className="text-center py-12">
                 <p className="text-destructive mb-4">
-                    Error loading dialogue: {dialogueError?.message || graphError?.message}
+                    {t('errorLoading')}: {dialogueError?.message || graphError?.message}
                 </p>
-                <Link href="/dialogues">
-                    <Button>Back to Dialogues</Button>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button>{t('backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -55,7 +59,7 @@ export default function DialogueGraphPage() {
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {tCommon('back')}
                         </Button>
                     </Link>
                     <div>
@@ -80,11 +84,11 @@ export default function DialogueGraphPage() {
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline" size="sm">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back
+                            {tCommon('back')}
                         </Button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold">Dialogue Graph Editor</h1>
+                        <h1 className="text-2xl font-bold">{t('title')}</h1>
                         <p className="text-muted-foreground">
                             {dialogue?.slug} (ID: {dialogue?.id})
                         </p>
@@ -93,12 +97,12 @@ export default function DialogueGraphPage() {
                 <div className="flex items-center gap-2">
                     <Link href={`/dialogues/${dialogueId}/edit`}>
                         <Button variant="outline">
-                            Edit Dialogue
+                            {t('editDialogue')}
                         </Button>
                     </Link>
                     <Link href={`/dialogues/${dialogueId}`}>
                         <Button variant="outline">
-                            View Details
+                            {t('graph.viewDetails')}
                         </Button>
                     </Link>
                 </div>
@@ -107,9 +111,9 @@ export default function DialogueGraphPage() {
             {/* Graph Editor */}
             <Card>
                 <CardHeader>
-                    <CardTitle>Dialogue Graph Editor</CardTitle>
+                    <CardTitle>{t('graph.editorTitle')}</CardTitle>
                     <CardDescription>
-                        Create and edit dialogue nodes and connections. Double-click nodes and edges to edit them.
+                        {t('graph.editorDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ type CreateQuestForm = z.infer<typeof CreateQuestSchema>
 
 export default function NewQuestPage() {
     const t = useTranslations();
+    const locale = useLocale()
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -42,7 +43,7 @@ export default function NewQuestPage() {
 
     const createQuest = trpc.quest.create.useMutation({
         onSuccess: (data) => {
-            router.push(`/quests/${data.id}`)
+            router.push(`/${locale}/quests/${data.id}`)
         },
         onError: (error) => {
             console.error('Failed to create quest:', error)
@@ -65,21 +66,21 @@ export default function NewQuestPage() {
             <div className="mb-6">
                 <h1 className="text-3xl font-bold">{t('quests.newQuest')}</h1>
                 <p className="text-muted-foreground">
-                    Заполните основную информацию о квесте
+                    {t('quests.form.fillBasicInfo')}
                 </p>
             </div>
 
             <Card className="max-w-2xl">
                 <CardHeader>
-                    <CardTitle>Основная информация</CardTitle>
+                    <CardTitle>{t('quests.form.basicInfo')}</CardTitle>
                     <CardDescription>
-                        Настройте базовые параметры квеста
+                        {t('quests.form.basicInfoDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="slug">Slug квеста *</Label>
+                            <Label htmlFor="slug">{t('quests.form.slug')}</Label>
                             <Input
                                 id="slug"
                                 {...register('slug')}
@@ -92,7 +93,7 @@ export default function NewQuestPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="minLevel">Минимальный уровень *</Label>
+                            <Label htmlFor="minLevel">{t('quests.form.minLevel')}</Label>
                             <Input
                                 id="minLevel"
                                 type="number"
@@ -114,16 +115,16 @@ export default function NewQuestPage() {
                                     {...register('repeatable')}
                                     disabled={isSubmitting}
                                 />
-                                Повторяемый квест
+                                {t('quests.form.repeatable')}
                             </Label>
                             <p className="text-sm text-muted-foreground">
-                                Можно ли брать этот квест повторно после завершения
+                                {t('quests.form.repeatableDescription')}
                             </p>
                         </div>
 
                         {repeatable && (
                             <div className="space-y-2">
-                                <Label htmlFor="cooldownSec">Кулдаун (секунды)</Label>
+                                <Label htmlFor="cooldownSec">{t('quests.form.cooldown')}</Label>
                                 <Input
                                     id="cooldownSec"
                                     type="number"
@@ -132,7 +133,7 @@ export default function NewQuestPage() {
                                     disabled={isSubmitting}
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Время ожидания перед повторным взятием квеста
+                                    {t('quests.form.cooldownDescription')}
                                 </p>
                                 {errors.cooldownSec && (
                                     <p className="text-sm text-red-600">{errors.cooldownSec.message}</p>
@@ -142,12 +143,12 @@ export default function NewQuestPage() {
 
                         <div className="space-y-2">
                             <NPCSelect
-                                label="NPC выдающий квест"
+                                label={t('quests.form.questGiver')}
                                 value={watch('giverNpcId') ?? null}
                                 onChange={(npcId) => setValue('giverNpcId', npcId)}
                             />
                             <p className="text-sm text-muted-foreground">
-                                NPC, который выдает этот квест игрокам
+                                {t('quests.form.questGiverDescription')}
                             </p>
                             {errors.giverNpcId && (
                                 <p className="text-sm text-red-600">{errors.giverNpcId.message}</p>
@@ -156,12 +157,12 @@ export default function NewQuestPage() {
 
                         <div className="space-y-2">
                             <NPCSelect
-                                label="NPC принимающий квест"
+                                label={t('quests.form.questReceiver')}
                                 value={watch('turninNpcId') ?? null}
                                 onChange={(npcId) => setValue('turninNpcId', npcId)}
                             />
                             <p className="text-sm text-muted-foreground">
-                                NPC, которому игрок сдает завершенный квест
+                                {t('quests.form.questReceiverDescription')}
                             </p>
                             {errors.turninNpcId && (
                                 <p className="text-sm text-red-600">{errors.turninNpcId.message}</p>
@@ -169,7 +170,7 @@ export default function NewQuestPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="clientQuestKey">Ключ клиентского UI</Label>
+                            <Label htmlFor="clientQuestKey">{t('quests.form.clientKey')}</Label>
                             <Input
                                 id="clientQuestKey"
                                 {...register('clientQuestKey', {
@@ -179,7 +180,7 @@ export default function NewQuestPage() {
                                 disabled={isSubmitting}
                             />
                             <p className="text-sm text-muted-foreground">
-                                Ключ для названия/описания квеста в клиентском интерфейсе
+                                {t('quests.form.clientKeyDescription')}
                             </p>
                             {errors.clientQuestKey && (
                                 <p className="text-sm text-red-600">{errors.clientQuestKey.message}</p>
@@ -190,22 +191,22 @@ export default function NewQuestPage() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => router.back()}
+                                onClick={() => router.push(`/${locale}/quests`)}
                                 disabled={isSubmitting}
                             >
-                                Отмена
+                                {t('common.cancel')}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || createQuest.isPending}
                             >
-                                {isSubmitting || createQuest.isPending ? 'Создание...' : 'Создать квест'}
+                                {isSubmitting || createQuest.isPending ? t('quests.creating') : t('quests.createNew')}
                             </Button>
                         </div>
 
                         {createQuest.error && (
                             <div className="text-sm text-red-600 mt-2">
-                                Ошибка создания квеста: {createQuest.error.message}
+                                {t('quests.createError')}: {createQuest.error.message}
                             </div>
                         )}
                     </form>

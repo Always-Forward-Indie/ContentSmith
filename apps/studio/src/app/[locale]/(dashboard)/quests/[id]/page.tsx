@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Edit, Plus, Trash2, ArrowLeft } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,12 +23,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogClose,
 } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 
 import { trpc } from '@/lib/trpc'
 
 export default function QuestDetailPage() {
+    const t = useTranslations()
+    const locale = useLocale()
     const params = useParams()
     const router = useRouter()
     const questId = parseInt(params.id as string, 10)
@@ -44,7 +48,7 @@ export default function QuestDetailPage() {
     })
 
     const handleDeleteStep = (stepId: number) => {
-        if (confirm('Вы уверены, что хотите удалить этот шаг квеста?')) {
+        if (confirm(t('quests.detail.deleteStepConfirm'))) {
             deleteStep.mutate({ id: stepId })
         }
     }
@@ -68,11 +72,11 @@ export default function QuestDetailPage() {
         return (
             <div className="container mx-auto py-6">
                 <div className="text-center py-8">
-                    <h1 className="text-2xl font-bold mb-2">Ошибка загрузки</h1>
+                    <h1 className="text-2xl font-bold mb-2">{t('quests.detail.errorLoading')}</h1>
                     <p className="text-red-600 mb-4">{error.message}</p>
-                    <Button onClick={() => router.back()}>
+                    <Button onClick={() => router.push(`/${locale}/quests`)}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Назад
+                        {t('common.back')}
                     </Button>
                 </div>
             </div>
@@ -82,14 +86,8 @@ export default function QuestDetailPage() {
     const { quest, steps } = questData!
 
     const getStepTypeLabel = (type: string) => {
-        const types: Record<string, string> = {
-            collect: 'Собрать',
-            kill: 'Убить',
-            talk: 'Поговорить',
-            reach: 'Достичь',
-            custom: 'Пользовательский',
-        }
-        return types[type] || type
+        const typeKey = `quests.detail.stepTypes.${type}` as any
+        return t(typeKey) || type
     }
 
     const formatStepParams = (params: Record<string, any>) => {
@@ -99,20 +97,20 @@ export default function QuestDetailPage() {
     return (
         <div className="container mx-auto py-6">
             <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" onClick={() => router.back()}>
+                <Button variant="outline" onClick={() => router.push(`/${locale}/quests`)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Назад
+                    {t('common.back')}
                 </Button>
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold">{quest.slug}</h1>
                     <p className="text-muted-foreground">
-                        Детали квеста и его шаги
+                        {t('quests.detail.title')}
                     </p>
                 </div>
                 <Link href={`/quests/${quest.id}/edit`}>
                     <Button>
                         <Edit className="mr-2 h-4 w-4" />
-                        Редактировать
+                        {t('common.edit')}
                     </Button>
                 </Link>
             </div>
@@ -121,9 +119,9 @@ export default function QuestDetailPage() {
                 {/* Quest Info */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Информация о квесте</CardTitle>
+                        <CardTitle>{t('quests.detail.questInfo')}</CardTitle>
                         <CardDescription>
-                            Основные параметры и настройки квеста
+                            {t('quests.detail.questInfoDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -137,29 +135,29 @@ export default function QuestDetailPage() {
                                 <p className="text-lg">{quest.slug}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Минимальный уровень</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.minLevel')}</p>
                                 <p className="text-lg">{quest.minLevel}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Повторяемый</p>
-                                <p className="text-lg">{quest.repeatable ? 'Да' : 'Нет'}</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.repeatable')}</p>
+                                <p className="text-lg">{quest.repeatable ? t('common.yes') : t('common.no')}</p>
                             </div>
                             {quest.repeatable && (
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Кулдаун (сек)</p>
+                                    <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.cooldown')}</p>
                                     <p className="text-lg">{quest.cooldownSec}</p>
                                 </div>
                             )}
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">NPC выдающий квест</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.questGiver')}</p>
                                 <p className="text-lg">{quest.giverNpcId || '—'}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">NPC принимающий квест</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.questReceiver')}</p>
                                 <p className="text-lg">{quest.turninNpcId || '—'}</p>
                             </div>
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Ключ клиента</p>
+                                <p className="text-sm font-medium text-muted-foreground">{t('quests.detail.clientKey')}</p>
                                 <p className="text-lg">{quest.clientQuestKey || '—'}</p>
                             </div>
                         </div>
@@ -171,15 +169,15 @@ export default function QuestDetailPage() {
                     <CardHeader>
                         <div className="flex justify-between items-center">
                             <div>
-                                <CardTitle>Шаги квеста</CardTitle>
+                                <CardTitle>{t('quests.detail.steps')}</CardTitle>
                                 <CardDescription>
-                                    Список задач, которые нужно выполнить для завершения квеста
+                                    {t('quests.detail.stepsDescription')}
                                 </CardDescription>
                             </div>
                             <Link href={`/quests/${quest.id}/steps/new`}>
                                 <Button>
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Добавить шаг
+                                    {t('quests.detail.addStep')}
                                 </Button>
                             </Link>
                         </div>
@@ -188,12 +186,12 @@ export default function QuestDetailPage() {
                         {steps.length === 0 ? (
                             <div className="text-center py-8">
                                 <p className="text-muted-foreground mb-4">
-                                    У этого квеста пока нет шагов
+                                    {t('quests.detail.noStepsDescription')}
                                 </p>
                                 <Link href={`/quests/${quest.id}/steps/new`}>
                                     <Button>
                                         <Plus className="mr-2 h-4 w-4" />
-                                        Добавить первый шаг
+                                        {t('quests.detail.addStep')}
                                     </Button>
                                 </Link>
                             </div>
@@ -201,11 +199,11 @@ export default function QuestDetailPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Индекс</TableHead>
-                                        <TableHead>Тип</TableHead>
-                                        <TableHead>Параметры</TableHead>
-                                        <TableHead>Ключ клиента</TableHead>
-                                        <TableHead className="text-right">Действия</TableHead>
+                                        <TableHead>{t('quests.detail.stepIndex')}</TableHead>
+                                        <TableHead>{t('quests.detail.stepType')}</TableHead>
+                                        <TableHead>{t('quests.detail.stepParams')}</TableHead>
+                                        <TableHead>{t('quests.detail.clientKey')}</TableHead>
+                                        <TableHead className="text-right">{t('common.actions')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -242,22 +240,23 @@ export default function QuestDetailPage() {
                                                         </DialogTrigger>
                                                         <DialogContent>
                                                             <DialogHeader>
-                                                                <DialogTitle>Удалить шаг квеста</DialogTitle>
+                                                                <DialogTitle>{t('quests.detail.deleteStepTitle')}</DialogTitle>
                                                                 <DialogDescription>
-                                                                    Вы уверены, что хотите удалить шаг #{step.stepIndex}?
-                                                                    Это действие нельзя отменить.
+                                                                    {t('quests.detail.deleteStepDescription', { stepIndex: step.stepIndex })}
                                                                 </DialogDescription>
                                                             </DialogHeader>
                                                             <div className="flex justify-end gap-2">
-                                                                <Button variant="outline">
-                                                                    Отмена
-                                                                </Button>
+                                                                <DialogClose asChild>
+                                                                    <Button variant="outline">
+                                                                        {t('common.cancel')}
+                                                                    </Button>
+                                                                </DialogClose>
                                                                 <Button
                                                                     variant="destructive"
                                                                     onClick={() => handleDeleteStep(step.id)}
                                                                     disabled={deleteStep.isPending}
                                                                 >
-                                                                    {deleteStep.isPending ? 'Удаление...' : 'Удалить'}
+                                                                    {deleteStep.isPending ? t('common.delete') + '...' : t('common.delete')}
                                                                 </Button>
                                                             </div>
                                                         </DialogContent>

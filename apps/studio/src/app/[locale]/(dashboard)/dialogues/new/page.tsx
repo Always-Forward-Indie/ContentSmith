@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +20,8 @@ const createDialogueSchema = z.object({
 type CreateDialogueForm = z.infer<typeof createDialogueSchema>
 
 export default function NewDialoguePage() {
+    const t = useTranslations()
+    const locale = useLocale()
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -36,11 +39,11 @@ export default function NewDialoguePage() {
 
     const createDialogue = trpc.dialogue.create.useMutation({
         onSuccess: (dialogue) => {
-            router.push(`/dialogues/${dialogue.id}`)
+            router.push(`/${locale}/dialogues/${dialogue.id}`)
         },
         onError: (error) => {
             if (error.message.includes('slug')) {
-                setError('slug', { message: 'This slug already exists' })
+                setError('slug', { message: t('dialogues.validation.slugExists') })
             }
         },
     })
@@ -57,28 +60,28 @@ export default function NewDialoguePage() {
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Create New Dialogue</h1>
+                <h1 className="text-3xl font-bold tracking-tight">{t('dialogues.form.newDialogueTitle')}</h1>
                 <p className="text-muted-foreground">
-                    Create a new dialogue tree for NPCs
+                    {t('dialogues.form.newDialogueDescription')}
                 </p>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Dialogue Details</CardTitle>
+                    <CardTitle>{t('dialogues.form.dialogueDetails')}</CardTitle>
                     <CardDescription>
-                        Enter the basic information for your new dialogue
+                        {t('dialogues.form.dialogueDetailsDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <div className="space-y-2">
                             <label htmlFor="slug" className="text-sm font-medium">
-                                Slug *
+                                {t('dialogues.form.slug')}
                             </label>
                             <Input
                                 id="slug"
-                                placeholder="e.g., guard_greeting, merchant_intro"
+                                placeholder={t('dialogues.form.slugPlaceholder')}
                                 {...register('slug')}
                                 aria-invalid={errors.slug ? 'true' : 'false'}
                             />
@@ -86,13 +89,13 @@ export default function NewDialoguePage() {
                                 <p className="text-sm text-destructive">{errors.slug.message}</p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                                Unique identifier for this dialogue. Use lowercase with underscores.
+                                {t('dialogues.form.slugDescription')}
                             </p>
                         </div>
 
                         <div className="space-y-2">
                             <label htmlFor="version" className="text-sm font-medium">
-                                Version
+                                {t('dialogues.form.version')}
                             </label>
                             <Input
                                 id="version"
@@ -105,7 +108,7 @@ export default function NewDialoguePage() {
                                 <p className="text-sm text-destructive">{errors.version.message}</p>
                             )}
                             <p className="text-xs text-muted-foreground">
-                                Version number for content management
+                                {t('dialogues.form.versionDescription')}
                             </p>
                         </div>
 
@@ -114,14 +117,14 @@ export default function NewDialoguePage() {
                                 type="submit"
                                 disabled={isSubmitting || createDialogue.isLoading}
                             >
-                                {isSubmitting ? 'Creating...' : 'Create Dialogue'}
+                                {isSubmitting ? t('dialogues.creating') : t('dialogues.createNew')}
                             </Button>
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => router.push('/dialogues')}
+                                onClick={() => router.push(`/${locale}/dialogues`)}
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </Button>
                         </div>
                     </form>
@@ -130,17 +133,17 @@ export default function NewDialoguePage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Next Steps</CardTitle>
+                    <CardTitle>{t('dialogues.form.nextSteps')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>After creating the dialogue, you can:</p>
+                        <p>{t('dialogues.form.nextStepsDescription')}</p>
                         <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>Add dialogue nodes (lines, choices, actions)</li>
-                            <li>Connect nodes with edges</li>
-                            <li>Set conditions and actions</li>
-                            <li>Use the visual graph editor</li>
-                            <li>Preview the dialogue flow</li>
+                            <li>{t('dialogues.form.nextStepsItems.0')}</li>
+                            <li>{t('dialogues.form.nextStepsItems.1')}</li>
+                            <li>{t('dialogues.form.nextStepsItems.2')}</li>
+                            <li>{t('dialogues.form.nextStepsItems.3')}</li>
+                            <li>{t('dialogues.form.nextStepsItems.4')}</li>
                         </ul>
                     </div>
                 </CardContent>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -35,14 +36,6 @@ interface QuestStepEditorProps {
     isSubmitting?: boolean
 }
 
-const stepTypeOptions = [
-    { value: 'collect', label: 'Собрать предметы' },
-    { value: 'kill', label: 'Убить существ' },
-    { value: 'talk', label: 'Поговорить с NPC' },
-    { value: 'reach', label: 'Достичь местоположения' },
-    { value: 'custom', label: 'Пользовательский' },
-]
-
 export function QuestStepEditor({
     questId,
     step,
@@ -50,6 +43,16 @@ export function QuestStepEditor({
     onCancel,
     isSubmitting = false
 }: QuestStepEditorProps) {
+    const t = useTranslations('quests.stepEditor')
+
+    const stepTypeOptions = [
+        { value: 'collect', label: t('fields.stepTypeOptions.collect') },
+        { value: 'kill', label: t('fields.stepTypeOptions.kill') },
+        { value: 'talk', label: t('fields.stepTypeOptions.talk') },
+        { value: 'reach', label: t('fields.stepTypeOptions.reach') },
+        { value: 'custom', label: t('fields.stepTypeOptions.custom') },
+    ]
+
     const stepParams = (step?.params as Record<string, any>) || {}
     const [paramsJson, setParamsJson] = useState(
         step ? JSON.stringify(stepParams, null, 2) : '{}'
@@ -133,25 +136,25 @@ export function QuestStepEditor({
             case 'collect':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">Параметры сбора предметов</h4>
+                        <h4 className="font-medium">{t('visualEditors.collect.title')}</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="itemId">ID предмета</Label>
+                                <Label htmlFor="itemId">{t('visualEditors.collect.itemId')}</Label>
                                 <Input
                                     id="itemId"
-                                    placeholder="wolf_pelt"
+                                    placeholder={t('visualEditors.collect.itemIdPlaceholder')}
                                     defaultValue={stepParams?.itemId || ''}
                                     onChange={(e) => updateParams({ itemId: e.target.value })}
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="count">Количество</Label>
+                                <Label htmlFor="count">{t('visualEditors.collect.count')}</Label>
                                 <Input
                                     id="count"
                                     type="number"
                                     min="1"
-                                    placeholder="5"
+                                    placeholder={t('visualEditors.collect.countPlaceholder')}
                                     defaultValue={stepParams?.count || 1}
                                     onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
                                     disabled={isSubmitting}
@@ -164,25 +167,25 @@ export function QuestStepEditor({
             case 'kill':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">Параметры убийства мобов</h4>
+                        <h4 className="font-medium">{t('visualEditors.kill.title')}</h4>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="npcId">ID моба/NPC</Label>
+                                <Label htmlFor="npcId">{t('visualEditors.kill.npcId')}</Label>
                                 <Input
                                     id="npcId"
-                                    placeholder="wolf_mob"
+                                    placeholder={t('visualEditors.kill.npcIdPlaceholder')}
                                     defaultValue={stepParams?.npcId || ''}
                                     onChange={(e) => updateParams({ npcId: e.target.value })}
                                     disabled={isSubmitting}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="count">Количество</Label>
+                                <Label htmlFor="count">{t('visualEditors.kill.count')}</Label>
                                 <Input
                                     id="count"
                                     type="number"
                                     min="1"
-                                    placeholder="3"
+                                    placeholder={t('visualEditors.kill.countPlaceholder')}
                                     defaultValue={stepParams?.count || 1}
                                     onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
                                     disabled={isSubmitting}
@@ -195,10 +198,10 @@ export function QuestStepEditor({
             case 'talk':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">Параметры разговора с NPC</h4>
+                        <h4 className="font-medium">{t('visualEditors.talk.title')}</h4>
                         <div className="space-y-4">
                             <NPCSelect
-                                label="Выберите NPC для разговора"
+                                label={t('visualEditors.talk.npcLabel')}
                                 value={stepParams?.npcId ? parseInt(stepParams.npcId) : null}
                                 onChange={(npcId) => updateParams({ npcId: npcId?.toString() })}
                             />
@@ -315,16 +318,16 @@ export function QuestStepEditor({
         <Card>
             <CardHeader>
                 <CardTitle>
-                    {step ? 'Редактировать шаг квеста' : 'Создать шаг квеста'}
+                    {step ? t('editingStep') : t('addingStep')}
                 </CardTitle>
                 <CardDescription>
-                    Настройте параметры шага квеста
+                    {t('title')}
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="stepIndex">Индекс шага</Label>
+                        <Label htmlFor="stepIndex">{t('fields.stepIndex')}</Label>
                         <Input
                             id="stepIndex"
                             type="number"
@@ -333,7 +336,7 @@ export function QuestStepEditor({
                             disabled={isSubmitting}
                         />
                         <p className="text-sm text-muted-foreground">
-                            Порядковый номер шага в квесте (начиная с 0)
+                            {t('fields.stepIndexDescription')}
                         </p>
                         {errors.stepIndex && (
                             <p className="text-sm text-red-600">{errors.stepIndex.message}</p>
@@ -341,7 +344,7 @@ export function QuestStepEditor({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="stepType">Тип шага</Label>
+                        <Label htmlFor="stepType">{t('fields.stepType')}</Label>
                         <select
                             id="stepType"
                             {...register('stepType')}
@@ -363,17 +366,17 @@ export function QuestStepEditor({
                     {renderVisualEditor()}
 
                     <div className="space-y-2">
-                        <Label htmlFor="clientStepKey">Ключ клиентского UI</Label>
+                        <Label htmlFor="clientStepKey">{t('fields.clientStepKey')}</Label>
                         <Input
                             id="clientStepKey"
                             {...register('clientStepKey', {
                                 setValueAs: (value) => value === '' ? null : value
                             })}
-                            placeholder="quest_step_collect_pelts"
+                            placeholder={t('fields.clientStepKeyPlaceholder')}
                             disabled={isSubmitting}
                         />
                         <p className="text-sm text-muted-foreground">
-                            Ключ для описания шага в клиентском интерфейсе
+                            {t('fields.clientStepKeyDescription')}
                         </p>
                         {errors.clientStepKey && (
                             <p className="text-sm text-red-600">{errors.clientStepKey.message}</p>
@@ -381,7 +384,7 @@ export function QuestStepEditor({
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Параметры (JSON) - Расширенные настройки</Label>
+                        <Label>{t('fields.parameters')}</Label>
                         <Textarea
                             value={paramsJson}
                             onChange={(e) => {
@@ -396,11 +399,10 @@ export function QuestStepEditor({
                             className="font-mono text-sm"
                             rows={6}
                             disabled={isSubmitting}
-                            placeholder={`Параметры будут автоматически заполнены на основе визуальных полей выше.
-Вы можете редактировать JSON напрямую для дополнительных настроек.`}
+                            placeholder={t('fields.parametersDescription')}
                         />
                         <p className="text-sm text-muted-foreground">
-                            Параметры шага в формате JSON. Изменения в визуальных полях выше автоматически обновят этот JSON.
+                            {t('fields.parametersDescription')}
                         </p>
                     </div>
 
@@ -411,13 +413,13 @@ export function QuestStepEditor({
                             onClick={onCancel}
                             disabled={isSubmitting}
                         >
-                            Отмена
+                            {t('buttons.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? 'Сохранение...' : step ? 'Сохранить изменения' : 'Создать шаг'}
+                            {t('buttons.save')}
                         </Button>
                     </div>
                 </form>

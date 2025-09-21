@@ -4,9 +4,19 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Edit, Trash2, Plus, GitBranch, Link as LinkIcon } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogClose,
+} from '@/components/ui/dialog'
 import { trpc } from '@/lib/trpc'
 import { toast } from '@/hooks/use-toast'
 import DialogueNodeEdit from '@/components/dialogue/DialogueNodeEdit'
@@ -15,6 +25,8 @@ import DialogueNodeCreate from '@/components/dialogue/DialogueNodeCreate'
 import DialogueEdgeCreate from '@/components/dialogue/DialogueEdgeCreate'
 
 export default function DialogueDetailPage() {
+    const t = useTranslations('dialogues.detail')
+    const locale = useLocale()
     const params = useParams()
     const router = useRouter()
     const dialogueId = parseInt(params.id as string)
@@ -39,101 +51,95 @@ export default function DialogueDetailPage() {
 
     const deleteDialogue = trpc.dialogue.delete.useMutation({
         onSuccess: () => {
-            toast.success('Dialogue deleted', 'The dialogue was successfully deleted')
-            router.push('/dialogues')
+            toast.success(t('../../deleteSuccess'), t('../../deleteSuccess'))
+            router.push(`/${locale}/dialogues`)
         },
         onError: (error) => {
-            toast.error('Failed to delete dialogue', error.message)
+            toast.error(t('../../deleteError'), error.message)
         },
     })
 
     const deleteNode = trpc.dialogue.deleteNode.useMutation({
         onSuccess: () => {
-            toast.success('Node deleted', 'The node was successfully deleted')
+            toast.success(t('nodeDeleted'), t('nodeDeletedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to delete node', error.message)
+            toast.error(t('nodeDeleteError'), error.message)
         },
     })
 
     const deleteEdge = trpc.dialogue.deleteEdge.useMutation({
         onSuccess: () => {
-            toast.success('Connection deleted', 'The connection was successfully deleted')
+            toast.success(t('connectionDeleted'), t('connectionDeletedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to delete connection', error.message)
+            toast.error(t('connectionDeleteError'), error.message)
         },
     })
 
     const updateNode = trpc.dialogue.saveNode.useMutation({
         onSuccess: () => {
-            toast.success('Node updated', 'The node was successfully updated')
+            toast.success(t('nodeUpdated'), t('nodeUpdatedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to update node', error.message)
+            toast.error(t('nodeUpdateError'), error.message)
         },
     })
 
     const updateEdge = trpc.dialogue.saveEdge.useMutation({
         onSuccess: () => {
-            toast.success('Connection updated', 'The connection was successfully updated')
+            toast.success(t('connectionUpdated'), t('connectionUpdatedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to update connection', error.message)
+            toast.error(t('connectionUpdateError'), error.message)
         },
     })
 
     const createNode = trpc.dialogue.saveNode.useMutation({
         onSuccess: () => {
-            toast.success('Node created', 'The new node was successfully created')
+            toast.success(t('nodeCreated'), t('nodeCreatedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to create node', error.message)
+            toast.error(t('nodeCreateError'), error.message)
         },
     })
 
     const createEdge = trpc.dialogue.saveEdge.useMutation({
         onSuccess: () => {
-            toast.success('Connection created', 'The new connection was successfully created')
+            toast.success(t('connectionCreated'), t('connectionCreatedDescription'))
             refetchGraph()
         },
         onError: (error) => {
-            toast.error('Failed to create connection', error.message)
+            toast.error(t('connectionCreateError'), error.message)
         },
     })
 
     const handleDelete = async () => {
-        if (confirm('Are you sure you want to delete this dialogue? This action cannot be undone.')) {
-            try {
-                await deleteDialogue.mutateAsync({ id: dialogueId })
-            } catch (error) {
-                console.error('Failed to delete dialogue:', error)
-            }
+        try {
+            await deleteDialogue.mutateAsync({ id: dialogueId })
+        } catch (error) {
+            console.error('Failed to delete dialogue:', error)
         }
     }
 
     const handleDeleteNode = async (nodeId: number) => {
-        if (confirm('Are you sure you want to delete this node? This will also delete all connected edges and cannot be undone.')) {
-            try {
-                await deleteNode.mutateAsync({ id: nodeId })
-            } catch (error) {
-                console.error('Failed to delete node:', error)
-            }
+        try {
+            await deleteNode.mutateAsync({ id: nodeId })
+        } catch (error) {
+            console.error('Failed to delete node:', error)
         }
     }
 
     const handleDeleteEdge = async (edgeId: number) => {
-        if (confirm('Are you sure you want to delete this connection?')) {
-            try {
-                await deleteEdge.mutateAsync({ id: edgeId })
-            } catch (error) {
-                console.error('Failed to delete edge:', error)
-            }
+        try {
+            await deleteEdge.mutateAsync({ id: edgeId })
+        } catch (error) {
+            console.error('Failed to delete edge:', error)
         }
     }
 
@@ -188,9 +194,9 @@ export default function DialogueDetailPage() {
     if (isNaN(dialogueId)) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">Invalid dialogue ID</p>
-                <Link href="/dialogues">
-                    <Button className="mt-4">Back to Dialogues</Button>
+                <p className="text-destructive">{t('../../invalidId')}</p>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button className="mt-4">{t('../../backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -199,9 +205,9 @@ export default function DialogueDetailPage() {
     if (error) {
         return (
             <div className="text-center py-12">
-                <p className="text-destructive">Error loading dialogue: {error.message}</p>
-                <Link href="/dialogues">
-                    <Button className="mt-4">Back to Dialogues</Button>
+                <p className="text-destructive">{t('../../errorLoading')}: {error.message}</p>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button className="mt-4">{t('../../backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -220,9 +226,9 @@ export default function DialogueDetailPage() {
     if (!dialogue) {
         return (
             <div className="text-center py-12">
-                <p>Dialogue not found</p>
-                <Link href="/dialogues">
-                    <Button className="mt-4">Back to Dialogues</Button>
+                <p>{t('../../errorLoading')}</p>
+                <Link href={`/${locale}/dialogues`}>
+                    <Button className="mt-4">{t('../../backToDialogues')}</Button>
                 </Link>
             </div>
         )
@@ -232,10 +238,10 @@ export default function DialogueDetailPage() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <Link href="/dialogues">
+                <Link href={`/${locale}/dialogues`}>
                     <Button variant="outline" size="sm">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back
+                        {t('back')}
                     </Button>
                 </Link>
                 <div className="flex-1">
@@ -246,23 +252,48 @@ export default function DialogueDetailPage() {
                     <Link href={`/dialogues/${dialogue.id}/edit`}>
                         <Button variant="outline">
                             <Edit className="mr-2 h-4 w-4" />
-                            Edit Dialogue
+                            {t('edit')}
                         </Button>
                     </Link>
                     <Link href={`/dialogues/${dialogue.id}/graph`}>
                         <Button variant="outline">
                             <GitBranch className="mr-2 h-4 w-4" />
-                            Graph Editor
+                            {t('viewGraph')}
                         </Button>
                     </Link>
-                    <Button
-                        variant="destructive"
-                        onClick={handleDelete}
-                        disabled={deleteDialogue.isLoading}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                    </Button>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button
+                                variant="destructive"
+                                disabled={deleteDialogue.isLoading}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t('delete')}
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>{t('deleteDialogueTitle')}</DialogTitle>
+                                <DialogDescription>
+                                    {t('deleteDialogueConfirm')}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="flex justify-end gap-2">
+                                <DialogClose asChild>
+                                    <Button variant="outline">
+                                        {t('cancel')}
+                                    </Button>
+                                </DialogClose>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDelete}
+                                    disabled={deleteDialogue.isLoading}
+                                >
+                                    {deleteDialogue.isLoading ? t('deleting') : t('delete')}
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
 
@@ -270,21 +301,21 @@ export default function DialogueDetailPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Basic Information</CardTitle>
+                        <CardTitle>{t('basicInformation')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Slug</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('slug')}</label>
                             <p className="font-mono">{dialogue.slug}</p>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Version</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('version')}</label>
                             <p>{dialogue.version}</p>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Start Node</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('startNode')}</label>
                             <p className="font-mono">
-                                {dialogue.startNodeId ? `#${dialogue.startNodeId}` : 'Not set'}
+                                {dialogue.startNodeId ? `#${dialogue.startNodeId}` : t('notSet')}
                             </p>
                         </div>
                     </CardContent>
@@ -292,19 +323,19 @@ export default function DialogueDetailPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Graph Statistics</CardTitle>
+                        <CardTitle>{t('graphStatistics')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Total Nodes</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('totalNodes')}</label>
                             <p className="text-2xl font-bold">{graphData?.nodes.length || 0}</p>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Total Edges</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('totalEdges')}</label>
                             <p className="text-2xl font-bold">{graphData?.edges.length || 0}</p>
                         </div>
                         <div>
-                            <label className="text-sm font-medium text-muted-foreground">Node Types</label>
+                            <label className="text-sm font-medium text-muted-foreground">{t('nodeTypes')}</label>
                             <div className="space-y-1 text-sm">
                                 {graphData?.nodes.reduce((acc, node) => {
                                     acc[node.type] = (acc[node.type] || 0) + 1
@@ -329,7 +360,7 @@ export default function DialogueDetailPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
+                        <CardTitle>{t('quickActions')}</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         <Button
@@ -338,7 +369,7 @@ export default function DialogueDetailPage() {
                             onClick={() => setNodeCreateOpen(true)}
                         >
                             <Plus className="mr-2 h-4 w-4" />
-                            Add Node
+                            {t('addNode')}
                         </Button>
                         <Button
                             className="w-full"
@@ -347,13 +378,13 @@ export default function DialogueDetailPage() {
                             disabled={!graphData?.nodes.length || graphData.nodes.length < 2}
                         >
                             <LinkIcon className="mr-2 h-4 w-4" />
-                            Add Connection (Edge)
+                            {t('addConnection')}
                         </Button>
                         <Button className="w-full" variant="outline">
-                            Export Dialogue
+                            {t('exportDialogue')}
                         </Button>
                         <Button className="w-full" variant="outline">
-                            Test Dialogue
+                            {t('testDialogue')}
                         </Button>
                     </CardContent>
                 </Card>
@@ -363,9 +394,9 @@ export default function DialogueDetailPage() {
             {graphData && graphData.nodes.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Dialogue Nodes</CardTitle>
+                        <CardTitle>{t('dialogueNodes')}</CardTitle>
                         <CardDescription>
-                            All nodes in this dialogue
+                            {t('allNodesDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -381,7 +412,7 @@ export default function DialogueDetailPage() {
                                             {node.type}
                                         </span>
                                         <span className="text-sm">
-                                            {node.clientNodeKey || 'No key set'}
+                                            {node.clientNodeKey || t('noKeySet')}
                                         </span>
                                     </div>
                                     <div className="flex gap-2">
@@ -390,16 +421,41 @@ export default function DialogueDetailPage() {
                                             size="sm"
                                             onClick={() => handleEditNode(node.id)}
                                         >
-                                            Edit
+                                            {t('edit')}
                                         </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleDeleteNode(node.id)}
-                                            disabled={deleteNode.isLoading}
-                                        >
-                                            Delete
-                                        </Button>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    disabled={deleteNode.isLoading}
+                                                >
+                                                    {t('delete')}
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>{t('deleteNodeTitle')}</DialogTitle>
+                                                    <DialogDescription>
+                                                        {t('deleteNodeConfirm')}
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <div className="flex justify-end gap-2">
+                                                    <DialogClose asChild>
+                                                        <Button variant="outline">
+                                                            {t('cancel')}
+                                                        </Button>
+                                                    </DialogClose>
+                                                    <Button
+                                                        variant="destructive"
+                                                        onClick={() => handleDeleteNode(node.id)}
+                                                        disabled={deleteNode.isLoading}
+                                                    >
+                                                        {deleteNode.isLoading ? t('deleting') : t('delete')}
+                                                    </Button>
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
                                     </div>
                                 </div>
                             ))}
@@ -412,9 +468,9 @@ export default function DialogueDetailPage() {
             {graphData && graphData.edges.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Dialogue Connections (Edges)</CardTitle>
+                        <CardTitle>{t('dialogueConnections')}</CardTitle>
                         <CardDescription>
-                            All connections (Edges) between nodes in this dialogue
+                            {t('allConnectionsDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -436,7 +492,7 @@ export default function DialogueDetailPage() {
                                                         #{edge.fromNodeId}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
-                                                        {fromNode?.type || 'Unknown'}
+                                                        {fromNode?.type || t('unknown')}
                                                     </span>
                                                 </div>
                                                 <span className="text-muted-foreground">→</span>
@@ -445,7 +501,7 @@ export default function DialogueDetailPage() {
                                                         #{edge.toNodeId}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
-                                                        {toNode?.type || 'Unknown'}
+                                                        {toNode?.type || t('unknown')}
                                                     </span>
                                                 </div>
                                             </div>
@@ -456,12 +512,12 @@ export default function DialogueDetailPage() {
                                             )}
                                             {edge.orderIndex > 0 && (
                                                 <span className="text-xs text-muted-foreground px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-                                                    Order: {edge.orderIndex}
+                                                    {t('order')}: {edge.orderIndex}
                                                 </span>
                                             )}
                                             {edge.hideIfLocked && (
                                                 <span className="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded">
-                                                    Hidden if locked
+                                                    {t('hiddenIfLocked')}
                                                 </span>
                                             )}
                                         </div>
@@ -471,16 +527,41 @@ export default function DialogueDetailPage() {
                                                 size="sm"
                                                 onClick={() => handleEditEdge(edge.id)}
                                             >
-                                                Edit
+                                                {t('edit')}
                                             </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDeleteEdge(edge.id)}
-                                                disabled={deleteEdge.isLoading}
-                                            >
-                                                Delete
-                                            </Button>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        disabled={deleteEdge.isLoading}
+                                                    >
+                                                        {t('delete')}
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>{t('deleteConnectionTitle')}</DialogTitle>
+                                                        <DialogDescription>
+                                                            {t('deleteConnectionConfirm')}
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="flex justify-end gap-2">
+                                                        <DialogClose asChild>
+                                                            <Button variant="outline">
+                                                                {t('cancel')}
+                                                            </Button>
+                                                        </DialogClose>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => handleDeleteEdge(edge.id)}
+                                                            disabled={deleteEdge.isLoading}
+                                                        >
+                                                            {deleteEdge.isLoading ? t('deleting') : t('delete')}
+                                                        </Button>
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
                                         </div>
                                     </div>
                                 )
@@ -495,11 +576,11 @@ export default function DialogueDetailPage() {
                 <Card>
                     <CardContent className="text-center py-12">
                         <p className="text-muted-foreground mb-4">
-                            This dialogue has no nodes yet
+                            {t('emptyStateDescription')}
                         </p>
                         <Button onClick={() => setNodeCreateOpen(true)}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Add First Node
+                            {t('addFirstNode')}
                         </Button>
                     </CardContent>
                 </Card>

@@ -13,7 +13,7 @@ export function LanguageSwitcher() {
     const handleLanguageChange = (newLocale: string) => {
         if (newLocale === locale) return; // Don't do anything if same locale
 
-        // Remove current locale from pathname if it exists
+        // Remove current locale from pathname
         const pathWithoutLocale = pathname.replace(/^\/(en|ru)/, '') || '/';
 
         // Navigate to new locale path - always include locale in path

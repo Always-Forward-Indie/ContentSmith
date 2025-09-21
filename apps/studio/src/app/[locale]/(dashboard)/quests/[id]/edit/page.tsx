@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { ArrowLeft } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +21,9 @@ import { UpdateQuestSchema } from '@contentsmith/validation'
 type UpdateQuestForm = z.infer<typeof UpdateQuestSchema>
 
 export default function EditQuestPage() {
+    const t = useTranslations('quests')
+    const tCommon = useTranslations('common')
+    const locale = useLocale()
     const params = useParams()
     const router = useRouter()
     const questId = parseInt(params.id as string, 10)
@@ -59,7 +63,7 @@ export default function EditQuestPage() {
 
     const updateQuest = trpc.quest.update.useMutation({
         onSuccess: () => {
-            router.push(`/quests/${questId}`)
+            router.push(`/${locale}/quests/${questId}`)
         },
         onError: (error) => {
             console.error('Failed to update quest:', error)
@@ -93,11 +97,11 @@ export default function EditQuestPage() {
         return (
             <div className="container mx-auto py-6">
                 <div className="text-center py-8">
-                    <h1 className="text-2xl font-bold mb-2">Ошибка загрузки</h1>
+                    <h1 className="text-2xl font-bold mb-2">{t('edit.errorLoading')}</h1>
                     <p className="text-red-600 mb-4">{error.message}</p>
-                    <Button onClick={() => router.back()}>
+                    <Button onClick={() => router.push(`/${locale}/quests/${questId}`)}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Назад
+                        {t('edit.back')}
                     </Button>
                 </div>
             </div>
@@ -107,29 +111,29 @@ export default function EditQuestPage() {
     return (
         <div className="container mx-auto py-6">
             <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" onClick={() => router.back()}>
+                <Button variant="outline" onClick={() => router.push(`/quests/${questId}`)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Назад
+                    {t('edit.back')}
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold">Редактировать квест</h1>
+                    <h1 className="text-3xl font-bold">{t('edit.title')}</h1>
                     <p className="text-muted-foreground">
-                        Изменение параметров квеста "{quest?.slug}"
+                        {t('edit.description', { slug: quest?.slug })}
                     </p>
                 </div>
             </div>
 
             <Card className="max-w-2xl">
                 <CardHeader>
-                    <CardTitle>Основная информация</CardTitle>
+                    <CardTitle>{t('edit.basicInfo')}</CardTitle>
                     <CardDescription>
-                        Обновите параметры квеста
+                        {t('edit.basicInfoDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="slug">Slug квеста *</Label>
+                            <Label htmlFor="slug">{t('form.slug')}</Label>
                             <Input
                                 id="slug"
                                 {...register('slug')}
@@ -141,7 +145,7 @@ export default function EditQuestPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="minLevel">Минимальный уровень *</Label>
+                            <Label htmlFor="minLevel">{t('form.minLevel')}</Label>
                             <Input
                                 id="minLevel"
                                 type="number"
@@ -163,16 +167,16 @@ export default function EditQuestPage() {
                                     {...register('repeatable')}
                                     disabled={isSubmitting}
                                 />
-                                Повторяемый квест
+                                {t('form.repeatable')}
                             </Label>
                             <p className="text-sm text-muted-foreground">
-                                Можно ли брать этот квест повторно после завершения
+                                {t('form.repeatableDescription')}
                             </p>
                         </div>
 
                         {repeatable && (
                             <div className="space-y-2">
-                                <Label htmlFor="cooldownSec">Кулдаун (секунды)</Label>
+                                <Label htmlFor="cooldownSec">{t('form.cooldown')}</Label>
                                 <Input
                                     id="cooldownSec"
                                     type="number"
@@ -181,7 +185,7 @@ export default function EditQuestPage() {
                                     disabled={isSubmitting}
                                 />
                                 <p className="text-sm text-muted-foreground">
-                                    Время ожидания перед повторным взятием квеста
+                                    {t('form.cooldownDescription')}
                                 </p>
                                 {errors.cooldownSec && (
                                     <p className="text-sm text-red-600">{errors.cooldownSec.message}</p>
@@ -191,12 +195,12 @@ export default function EditQuestPage() {
 
                         <div className="space-y-2">
                             <NPCSelect
-                                label="NPC выдающий квест"
+                                label={t('form.questGiver')}
                                 value={watch('giverNpcId') ?? null}
                                 onChange={(npcId) => setValue('giverNpcId', npcId)}
                             />
                             <p className="text-sm text-muted-foreground">
-                                NPC, который выдает этот квест игрокам
+                                {t('form.questGiverDescription')}
                             </p>
                             {errors.giverNpcId && (
                                 <p className="text-sm text-red-600">{errors.giverNpcId.message}</p>
@@ -205,12 +209,12 @@ export default function EditQuestPage() {
 
                         <div className="space-y-2">
                             <NPCSelect
-                                label="NPC принимающий квест"
+                                label={t('form.questReceiver')}
                                 value={watch('turninNpcId') ?? null}
                                 onChange={(npcId) => setValue('turninNpcId', npcId)}
                             />
                             <p className="text-sm text-muted-foreground">
-                                NPC, которому игрок сдает завершенный квест
+                                {t('form.questReceiverDescription')}
                             </p>
                             {errors.turninNpcId && (
                                 <p className="text-sm text-red-600">{errors.turninNpcId.message}</p>
@@ -218,7 +222,7 @@ export default function EditQuestPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="clientQuestKey">Ключ клиентского UI</Label>
+                            <Label htmlFor="clientQuestKey">{t('form.clientKey')}</Label>
                             <Input
                                 id="clientQuestKey"
                                 {...register('clientQuestKey', {
@@ -228,7 +232,7 @@ export default function EditQuestPage() {
                                 disabled={isSubmitting}
                             />
                             <p className="text-sm text-muted-foreground">
-                                Ключ для названия/описания квеста в клиентском интерфейсе
+                                {t('form.clientKeyDescription')}
                             </p>
                             {errors.clientQuestKey && (
                                 <p className="text-sm text-red-600">{errors.clientQuestKey.message}</p>
@@ -239,22 +243,22 @@ export default function EditQuestPage() {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => router.back()}
+                                onClick={() => router.push(`/${locale}/quests/${questId}`)}
                                 disabled={isSubmitting}
                             >
-                                Отмена
+                                {t('edit.cancel')}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={isSubmitting || updateQuest.isPending}
                             >
-                                {isSubmitting || updateQuest.isPending ? 'Сохранение...' : 'Сохранить изменения'}
+                                {isSubmitting || updateQuest.isPending ? t('edit.saving') : t('edit.saveChanges')}
                             </Button>
                         </div>
 
                         {updateQuest.error && (
                             <div className="text-sm text-red-600 mt-2">
-                                Ошибка обновления квеста: {updateQuest.error.message}
+                                {t('edit.updateError', { error: updateQuest.error.message })}
                             </div>
                         )}
                     </form>

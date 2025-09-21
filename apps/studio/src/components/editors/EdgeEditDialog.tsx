@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Edge } from 'reactflow'
 import {
     Dialog,
@@ -29,6 +30,8 @@ export default function EdgeEditDialog({
     onSave,
     onDelete,
 }: EdgeEditDialogProps) {
+    const t = useTranslations('editors.dialogs.edgeEdit')
+
     const [formData, setFormData] = useState({
         clientChoiceKey: '',
         conditionGroup: null as any,
@@ -75,26 +78,26 @@ export default function EdgeEditDialog({
             <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>
-                        Edit Connection (Edge)
+                        {t('title')}
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="clientChoiceKey">Choice Key/Text</Label>
+                        <Label htmlFor="clientChoiceKey">{t('fields.choiceKey.label')}</Label>
                         <Input
                             id="clientChoiceKey"
                             value={formData.clientChoiceKey}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientChoiceKey: e.target.value }))}
-                            placeholder="e.g., dialogue.choice.yes or 'Yes, I agree'"
+                            placeholder={t('fields.choiceKey.placeholder')}
                         />
                         <p className="text-xs text-muted-foreground">
-                            This key will be used by the client to display the choice text
+                            {t('fields.choiceKey.description')}
                         </p>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="orderIndex">Order Index</Label>
+                        <Label htmlFor="orderIndex">{t('fields.orderIndex.label')}</Label>
                         <Input
                             id="orderIndex"
                             type="number"
@@ -106,7 +109,7 @@ export default function EdgeEditDialog({
                             placeholder="0"
                         />
                         <p className="text-xs text-muted-foreground">
-                            Order of this choice in the list (lower numbers appear first)
+                            {t('fields.orderIndex.description')}
                         </p>
                     </div>
 
@@ -122,15 +125,15 @@ export default function EdgeEditDialog({
                                 }))}
                                 className="mr-2"
                             />
-                            Hide if locked
+                            {t('fields.hideIfLocked.label')}
                         </Label>
                         <p className="text-xs text-muted-foreground">
-                            Hide this choice if conditions are not met
+                            {t('fields.hideIfLocked.description')}
                         </p>
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="conditions">Conditions (JSON)</Label>
+                        <Label htmlFor="conditions">{t('fields.conditions.label')}</Label>
                         <Textarea
                             id="conditions"
                             value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
@@ -142,13 +145,13 @@ export default function EdgeEditDialog({
                                     // Invalid JSON, keep as string for user to fix
                                 }
                             }}
-                            placeholder='{"type": "and", "conditions": [{"type": "flag", "flag": "can_access", "value": true}, {"type": "item", "item": "key", "count": 1}]}'
+                            placeholder={t('fields.conditions.placeholder')}
                             rows={4}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="actions">Actions (JSON)</Label>
+                        <Label htmlFor="actions">{t('fields.actions.label')}</Label>
                         <Textarea
                             id="actions"
                             value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
@@ -160,7 +163,7 @@ export default function EdgeEditDialog({
                                     // Invalid JSON
                                 }
                             }}
-                            placeholder="Actions to execute when this choice is selected"
+                            placeholder={t('fields.actions.placeholder')}
                             rows={4}
                         />
                     </div>
@@ -168,13 +171,13 @@ export default function EdgeEditDialog({
 
                 <DialogFooter className="gap-2">
                     <Button variant="destructive" onClick={handleDelete}>
-                        Delete Edge
+                        {t('buttons.delete')}
                     </Button>
                     <Button variant="outline" onClick={() => onOpenChange(false)}>
-                        Cancel
+                        {t('buttons.cancel')}
                     </Button>
                     <Button onClick={handleSave}>
-                        Save Changes
+                        {t('buttons.save')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

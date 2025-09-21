@@ -1,6 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { ArrowLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,8 @@ import { trpc } from '@/lib/trpc'
 export default function EditQuestStepPage() {
     const params = useParams()
     const router = useRouter()
+    const locale = useLocale()
+    const t = useTranslations('quests.stepPages.edit')
     const questId = parseInt(params.id as string, 10)
     const stepId = parseInt(params.stepId as string, 10)
 
@@ -21,7 +24,7 @@ export default function EditQuestStepPage() {
 
     const updateStep = trpc.quest.updateStep.useMutation({
         onSuccess: () => {
-            router.push(`/quests/${questId}`)
+            router.push(`/${locale}/quests/${questId}`)
         },
     })
 
@@ -36,7 +39,7 @@ export default function EditQuestStepPage() {
     }
 
     const handleCancel = () => {
-        router.back()
+        router.push(`/${locale}/quests/${questId}`)
     }
 
     if (isLoading) {
@@ -55,13 +58,13 @@ export default function EditQuestStepPage() {
         return (
             <div className="container mx-auto py-6">
                 <div className="text-center py-8">
-                    <h1 className="text-2xl font-bold mb-2">Ошибка загрузки</h1>
+                    <h1 className="text-2xl font-bold mb-2">{t('errorLoading')}</h1>
                     <p className="text-red-600 mb-4">
-                        {error?.message || 'Шаг квеста не найден'}
+                        {error?.message || t('stepNotFound')}
                     </p>
-                    <Button onClick={() => router.back()}>
+                    <Button onClick={() => router.push(`/${locale}/quests/${questId}`)}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Назад
+                        {t('back')}
                     </Button>
                 </div>
             </div>
@@ -71,14 +74,14 @@ export default function EditQuestStepPage() {
     return (
         <div className="container mx-auto py-6">
             <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" onClick={() => router.back()}>
+                <Button variant="outline" onClick={() => router.push(`/${locale}/quests/${questId}`)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Назад
+                    {t('back')}
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold">Редактировать шаг квеста</h1>
+                    <h1 className="text-3xl font-bold">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Изменение шага #{currentStep.stepIndex} для квеста #{questId}
+                        {t('description', { stepIndex: currentStep.stepIndex, questId })}
                     </p>
                 </div>
             </div>
@@ -94,7 +97,7 @@ export default function EditQuestStepPage() {
 
                 {updateStep.error && (
                     <div className="mt-4 text-sm text-red-600">
-                        Ошибка обновления шага: {updateStep.error.message}
+                        {t('errorUpdating', { error: updateStep.error.message })}
                     </div>
                 )}
             </div>

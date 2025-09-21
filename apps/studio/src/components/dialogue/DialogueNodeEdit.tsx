@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,6 +29,7 @@ export default function DialogueNodeEdit({
     node,
     onSave,
 }: DialogueNodeEditProps) {
+    const t = useTranslations('dialogues.components.nodeEdit')
     const [formData, setFormData] = useState({
         type: 'line',
         clientNodeKey: '',
@@ -62,27 +64,27 @@ export default function DialogueNodeEdit({
     }
 
     const nodeTypes = [
-        { value: 'line', label: 'Line' },
-        { value: 'choice_hub', label: 'Choice Hub' },
-        { value: 'action', label: 'Action' },
-        { value: 'jump', label: 'Jump' },
-        { value: 'end', label: 'End' },
+        { value: 'line', label: t('fields.nodeTypeOptions.line') },
+        { value: 'choice_hub', label: t('fields.nodeTypeOptions.choice_hub') },
+        { value: 'action', label: t('fields.nodeTypeOptions.action') },
+        { value: 'jump', label: t('fields.nodeTypeOptions.jump') },
+        { value: 'end', label: t('fields.nodeTypeOptions.end') },
     ]
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Edit Node</DialogTitle>
+                    <DialogTitle>{t('title')}</DialogTitle>
                     <DialogDescription>
-                        Edit the properties of this dialogue node.
+                        {t('description')}
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Node Type */}
                     <div className="space-y-2">
-                        <Label htmlFor="type">Type</Label>
+                        <Label htmlFor="type">{t('fields.nodeType')}</Label>
                         <select
                             id="type"
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -99,15 +101,15 @@ export default function DialogueNodeEdit({
 
                     {/* Client Node Key */}
                     <div className="space-y-2">
-                        <Label htmlFor="clientNodeKey">Node Key</Label>
+                        <Label htmlFor="clientNodeKey">{t('fields.nodeKey')}</Label>
                         <Input
                             id="clientNodeKey"
                             value={formData.clientNodeKey}
                             onChange={(e) => setFormData(prev => ({ ...prev, clientNodeKey: e.target.value }))}
-                            placeholder="e.g., greeting.welcome, choice.help, action.give_item"
+                            placeholder={t('fields.nodeKeyPlaceholder')}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Unique identifier for this node in the game
+                            {t('fields.nodeKeyDescription')}
                         </p>
                     </div>
 
@@ -119,17 +121,17 @@ export default function DialogueNodeEdit({
                                 ...prev,
                                 speakerNpcId: npcId
                             }))}
-                            label="Speaker NPC"
+                            label={t('fields.speakerNpc')}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Select the NPC speaking this line (for line nodes)
+                            {t('fields.speakerNpcDescription')}
                         </p>
                     </div>
 
                     {/* Jump Target (only for jump nodes) */}
                     {formData.type === 'jump' && (
                         <div className="space-y-2">
-                            <Label htmlFor="jumpTargetNodeId">Jump Target Node ID</Label>
+                            <Label htmlFor="jumpTargetNodeId">{t('fields.jumpTargetNodeId')}</Label>
                             <Input
                                 id="jumpTargetNodeId"
                                 type="number"
@@ -138,14 +140,14 @@ export default function DialogueNodeEdit({
                                     ...prev,
                                     jumpTargetNodeId: e.target.value ? parseInt(e.target.value) : null
                                 }))}
-                                placeholder="Enter target node ID"
+                                placeholder={t('fields.jumpTargetPlaceholder')}
                             />
                         </div>
                     )}
 
                     {/* Condition Group */}
                     <div className="space-y-2">
-                        <Label htmlFor="conditionGroup">Conditions (JSON)</Label>
+                        <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
                         <Textarea
                             id="conditionGroup"
                             value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
@@ -157,17 +159,17 @@ export default function DialogueNodeEdit({
                                     // Invalid JSON, keep the string for editing
                                 }
                             }}
-                            placeholder='{"type": "and", "conditions": [{"type": "flag", "flag": "quest.completed", "value": true}, {"type": "level", "min": 5}]}'
+                            placeholder={t('fields.conditionsPlaceholder')}
                             rows={3}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Conditions that must be met for this node to be available
+                            {t('fields.conditionsDescription')}
                         </p>
                     </div>
 
                     {/* Action Group */}
                     <div className="space-y-2">
-                        <Label htmlFor="actionGroup">Actions (JSON)</Label>
+                        <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
                         <Textarea
                             id="actionGroup"
                             value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
@@ -179,20 +181,20 @@ export default function DialogueNodeEdit({
                                     // Invalid JSON, keep the string for editing
                                 }
                             }}
-                            placeholder='{"type": "set_flag", "flag": "example", "value": true}'
+                            placeholder={t('fields.actionsPlaceholder')}
                             rows={3}
                         />
                         <p className="text-xs text-muted-foreground">
-                            Actions to execute when this node is processed
+                            {t('fields.actionsDescription')}
                         </p>
                     </div>
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                            Cancel
+                            {t('buttons.cancel')}
                         </Button>
                         <Button type="submit">
-                            Save Changes
+                            {t('buttons.save')}
                         </Button>
                     </DialogFooter>
                 </form>

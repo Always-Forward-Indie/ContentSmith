@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import { EdgeProps, getBezierPath, EdgeLabelRenderer, BaseEdge } from 'reactflow'
 
 export default function DialogueEdge({
@@ -13,6 +14,8 @@ export default function DialogueEdge({
     data,
     markerEnd,
 }: EdgeProps) {
+    const t = useTranslations('editors.edges.dialogueEdge')
+
     const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
@@ -45,7 +48,7 @@ export default function DialogueEdge({
                             pointerEvents: 'all',
                         }}
                         className="nodrag nopan bg-white border rounded px-2 py-1 shadow-sm text-xs max-w-40 text-center"
-                        title={`Edge ID: ${id}${data?.clientChoiceKey ? `\nChoice: "${data.clientChoiceKey}"` : ''}${data?.orderIndex > 0 ? `\nOrder: ${data.orderIndex}` : ''}${data?.hideIfLocked ? '\nHidden if locked' : ''}${data?.conditionGroup ? '\nHas conditions' : ''}${data?.actionGroup ? '\nHas actions' : ''}`}
+                        title={`${t('tooltip.edgeId')}: ${id}${data?.clientChoiceKey ? `\n${t('tooltip.choice')}: "${data.clientChoiceKey}"` : ''}${data?.orderIndex > 0 ? `\n${t('tooltip.order')}: ${data.orderIndex}` : ''}${data?.hideIfLocked ? `\n${t('tooltip.hiddenIfLocked')}` : ''}${data?.conditionGroup ? `\n${t('tooltip.hasConditions')}` : ''}${data?.actionGroup ? `\n${t('tooltip.hasActions')}` : ''}`}
                     >
                         {data?.clientChoiceKey && (
                             <div className="font-medium text-blue-600 truncate">
@@ -54,7 +57,7 @@ export default function DialogueEdge({
                         )}
                         {(!data?.clientChoiceKey) && (
                             <div className="text-gray-500 italic text-xs">
-                                No choice text
+                                {t('labels.noChoiceText')}
                             </div>
                         )}
                         <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
@@ -64,12 +67,12 @@ export default function DialogueEdge({
                                 </span>
                             )}
                             {data?.hideIfLocked && (
-                                <span className="bg-orange-100 text-orange-800 px-1 rounded text-xs" title="Hidden if locked">
+                                <span className="bg-orange-100 text-orange-800 px-1 rounded text-xs" title={t('tooltip.hiddenIfLocked')}>
                                     🔒
                                 </span>
                             )}
                             {(data?.conditionGroup || data?.actionGroup) && (
-                                <span className="bg-purple-100 text-purple-800 px-1 rounded text-xs" title="Has conditions/actions">
+                                <span className="bg-purple-100 text-purple-800 px-1 rounded text-xs" title={t('tooltip.hasConditionsOrActions')}>
                                     ⚙️
                                 </span>
                             )}

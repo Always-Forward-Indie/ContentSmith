@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { Node } from 'reactflow'
 import {
     Dialog,
@@ -30,6 +31,8 @@ export default function NodeEditDialog({
     onSave,
     onDelete,
 }: NodeEditDialogProps) {
+    const t = useTranslations('editors.dialogs.nodeEdit')
+
     const [formData, setFormData] = useState({
         clientNodeKey: '',
         speakerNpcId: null as number | null,
@@ -65,7 +68,7 @@ export default function NodeEditDialog({
     }
 
     const handleDelete = () => {
-        if (node && confirm('Are you sure you want to delete this node?')) {
+        if (node && confirm(t('confirmDelete'))) {
             onDelete(node.id)
             onOpenChange(false)
         }
@@ -87,7 +90,7 @@ export default function NodeEditDialog({
                             label="Speaker NPC"
                         />
                         <div className="space-y-2">
-                            <Label htmlFor="conditions">Conditions (JSON)</Label>
+                            <Label htmlFor="conditions">{t('fields.conditions.label')}</Label>
                             <Textarea
                                 id="conditions"
                                 value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
@@ -99,7 +102,7 @@ export default function NodeEditDialog({
                                         // Invalid JSON, keep as string for user to fix
                                     }
                                 }}
-                                placeholder='{"type": "and", "conditions": [{"type": "flag", "flag": "quest.completed", "value": true}, {"type": "level", "min": 5}]}'
+                                placeholder={t('fields.conditions.placeholder')}
                                 rows={4}
                             />
                         </div>
@@ -109,7 +112,7 @@ export default function NodeEditDialog({
             case 'choice_hub':
                 return (
                     <div className="space-y-2">
-                        <Label htmlFor="conditions">Choice Conditions (JSON)</Label>
+                        <Label htmlFor="conditions">{t('nodeTypes.choice.conditionsLabel')}</Label>
                         <Textarea
                             id="conditions"
                             value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
@@ -121,7 +124,7 @@ export default function NodeEditDialog({
                                     // Invalid JSON, keep as string for user to fix
                                 }
                             }}
-                            placeholder='{"type": "and", "conditions": [{"type": "flag", "flag": "has_key", "value": true}, {"type": "level", "min": 10}]}'
+                            placeholder={t('nodeTypes.choice.placeholder')}
                             rows={4}
                         />
                     </div>
@@ -130,7 +133,7 @@ export default function NodeEditDialog({
             case 'action':
                 return (
                     <div className="space-y-2">
-                        <Label htmlFor="actions">Actions (JSON)</Label>
+                        <Label htmlFor="actions">{t('fields.actions.label')}</Label>
                         <Textarea
                             id="actions"
                             value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
@@ -142,7 +145,7 @@ export default function NodeEditDialog({
                                     // Invalid JSON, keep as string for user to fix
                                 }
                             }}
-                            placeholder="Action configuration"
+                            placeholder={t('fields.actions.placeholder')}
                             rows={4}
                         />
                     </div>
@@ -151,7 +154,7 @@ export default function NodeEditDialog({
             case 'jump':
                 return (
                     <div className="space-y-2">
-                        <Label htmlFor="jumpTarget">Jump Target Node ID</Label>
+                        <Label htmlFor="jumpTarget">{t('nodeTypes.jump.targetLabel')}</Label>
                         <Input
                             id="jumpTarget"
                             type="number"
@@ -160,7 +163,7 @@ export default function NodeEditDialog({
                                 ...prev,
                                 jumpTargetNodeId: e.target.value ? parseInt(e.target.value) : null
                             }))}
-                            placeholder="Target node ID"
+                            placeholder={t('nodeTypes.jump.targetPlaceholder')}
                         />
                     </div>
                 )
@@ -168,7 +171,7 @@ export default function NodeEditDialog({
             case 'end':
                 return (
                     <div className="text-sm text-muted-foreground">
-                        End nodes do not have additional configuration.
+                        {t('nodeTypes.end.description')}
                     </div>
                 )
 
@@ -184,13 +187,13 @@ export default function NodeEditDialog({
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>
-                        Edit {node.data.nodeType} Node
+                        {t('title', { nodeType: t(`nodeTypes.${node.data.nodeType}.title`) })}
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label>Node ID</Label>
+                        <Label>{t('fields.nodeId.label')}</Label>
                         <Input
                             value={node.id}
                             disabled
@@ -199,7 +202,7 @@ export default function NodeEditDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Node Type</Label>
+                        <Label>{t('fields.nodeType.label')}</Label>
                         <Input
                             value={node.data.nodeType}
                             disabled
@@ -208,7 +211,7 @@ export default function NodeEditDialog({
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="clientNodeKey">Node Key</Label>
+                        <Label htmlFor="clientNodeKey">{t('fields.nodeKey.label')}</Label>
                         <Input
                             id="clientNodeKey"
                             value={formData.clientNodeKey}
@@ -216,7 +219,7 @@ export default function NodeEditDialog({
                                 ...prev,
                                 clientNodeKey: e.target.value
                             }))}
-                            placeholder="e.g., greeting.welcome, choice.help, action.give_item"
+                            placeholder={t('fields.nodeKey.placeholder')}
                         />
                     </div>
 
@@ -228,17 +231,17 @@ export default function NodeEditDialog({
                         variant="destructive"
                         onClick={handleDelete}
                     >
-                        Delete Node
+                        {t('buttons.delete')}
                     </Button>
                     <div className="space-x-2">
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
                         >
-                            Cancel
+                            {t('buttons.cancel')}
                         </Button>
                         <Button onClick={handleSave}>
-                            Save Changes
+                            {t('buttons.save')}
                         </Button>
                     </div>
                 </DialogFooter>

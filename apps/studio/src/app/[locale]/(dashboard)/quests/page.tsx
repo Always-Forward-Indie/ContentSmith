@@ -23,6 +23,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
+    DialogClose,
 } from '@/components/ui/dialog'
 
 import { trpc } from '@/lib/trpc'
@@ -104,7 +105,7 @@ export default function QuestsPage() {
 
                     {error && (
                         <div className="text-center py-8 text-red-600">
-                            Ошибка загрузки: {error.message}
+                            {t('quests.errorLoading')}: {error.message}
                         </div>
                     )}
 
@@ -114,18 +115,18 @@ export default function QuestsPage() {
                                 <TableRow>
                                     <TableHead>ID</TableHead>
                                     <TableHead>Slug</TableHead>
-                                    <TableHead>Мин. уровень</TableHead>
-                                    <TableHead>Повторяемый</TableHead>
-                                    <TableHead>Кулдаун (сек)</TableHead>
-                                    <TableHead>Ключ клиента</TableHead>
-                                    <TableHead className="text-right">Действия</TableHead>
+                                    <TableHead>{t('quests.table.minLevel')}</TableHead>
+                                    <TableHead>{t('quests.table.repeatable')}</TableHead>
+                                    <TableHead>{t('quests.table.cooldown')}</TableHead>
+                                    <TableHead>{t('quests.table.clientKey')}</TableHead>
+                                    <TableHead className="text-right">{t('common.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {quests.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} className="text-center py-8">
-                                            {searchTerm ? 'Квесты не найдены' : 'Нет квестов'}
+                                            {searchTerm ? t('quests.questsNotFound') : t('quests.noQuests')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -137,7 +138,7 @@ export default function QuestsPage() {
                                             <TableCell>{quest.slug}</TableCell>
                                             <TableCell>{quest.minLevel}</TableCell>
                                             <TableCell>
-                                                {quest.repeatable ? 'Да' : 'Нет'}
+                                                {quest.repeatable ? t('common.yes') : t('common.no')}
                                             </TableCell>
                                             <TableCell>{quest.cooldownSec}</TableCell>
                                             <TableCell>
@@ -163,22 +164,23 @@ export default function QuestsPage() {
                                                         </DialogTrigger>
                                                         <DialogContent>
                                                             <DialogHeader>
-                                                                <DialogTitle>Удалить квест</DialogTitle>
+                                                                <DialogTitle>{t('quests.deleteQuest')}</DialogTitle>
                                                                 <DialogDescription>
-                                                                    Вы уверены, что хотите удалить квест "{quest.slug}"?
-                                                                    Это действие нельзя отменить.
+                                                                    {t('quests.deleteConfirm', { slug: quest.slug })}
                                                                 </DialogDescription>
                                                             </DialogHeader>
                                                             <div className="flex justify-end gap-2">
-                                                                <Button variant="outline">
-                                                                    Отмена
-                                                                </Button>
+                                                                <DialogClose asChild>
+                                                                    <Button variant="outline">
+                                                                        {t('common.cancel')}
+                                                                    </Button>
+                                                                </DialogClose>
                                                                 <Button
                                                                     variant="destructive"
                                                                     onClick={() => handleDeleteQuest(quest.id)}
                                                                     disabled={deleteQuest.isPending}
                                                                 >
-                                                                    {deleteQuest.isPending ? 'Удаление...' : 'Удалить'}
+                                                                    {deleteQuest.isPending ? t('quests.deleting') : t('common.delete')}
                                                                 </Button>
                                                             </div>
                                                         </DialogContent>
@@ -195,7 +197,10 @@ export default function QuestsPage() {
                     {questsData && questsData.data.length > 0 && (
                         <div className="flex items-center justify-between mt-4">
                             <div className="text-sm text-muted-foreground">
-                                Страница {page}
+                                {t('quests.showingResults', {
+                                    current: questsData.data.length,
+                                    page: page
+                                })}
                             </div>
                             <div className="flex gap-2">
                                 <Button
@@ -204,7 +209,7 @@ export default function QuestsPage() {
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
                                 >
-                                    Предыдущая
+                                    {t('common.previous')}
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -212,7 +217,7 @@ export default function QuestsPage() {
                                     onClick={() => setPage(p => p + 1)}
                                     disabled={questsData.data.length < 10}
                                 >
-                                    Следующая
+                                    {t('common.next')}
                                 </Button>
                             </div>
                         </div>
