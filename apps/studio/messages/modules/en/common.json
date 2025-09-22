@@ -21,5 +21,10 @@
     "close": "Close",
     "yes": "Yes",
     "no": "No",
-    "slug": "Slug"
+    "slug": "Slug",
+    "add": "Add",
+    "adding": "Adding...",
+    "update": "Update",
+    "updating": "Updating...",
+    "saving": "Saving..."
 }

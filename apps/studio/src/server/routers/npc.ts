@@ -25,7 +25,12 @@ import {
   createEntityAttributesSchema,
   updateEntityAttributesSchema,
   createNpcAttributesSchema,
-  updateNpcAttributesSchema
+  updateNpcAttributesSchema,
+  addNpcAttributeSchema,
+  removeNpcAttributeSchema,
+  addNpcSkillSchema,
+  updateNpcSkillSchema,
+  removeNpcSkillSchema
 } from '@contentsmith/validation'
 
 // В режиме разработки используем dev процедуры
@@ -432,5 +437,58 @@ export const npcRouter = createTRPCRouter({
       }
       
       return result[0]
+    }),
+
+  // ===== NPC SKILLS CRUD =====
+  
+  // Add or update NPC skill
+  setNpcSkill: requirePerm('npc:write')
+    .input(addNpcSkillSchema)
+    .mutation(async ({ input }) => {
+      // Try to update existing skill first
+      const existing = await db.select().from(npcSkills)
+        .where(and(
+          eq(npcSkills.npcId, input.npcId),
+          eq(npcSkills.skillId, input.skillId)
+        ))
+      
+      if (existing.length > 0) {
+        const result = await db.update(npcSkills)
+          .set({ currentLevel: input.currentLevel })
+          .where(and(
+            eq(npcSkills.npcId, input.npcId),
+            eq(npcSkills.skillId, input.skillId)
+          ))
+          .returning()
+        return result[0]
+      } else {
+        // Create new skill if doesn't exist
+        const result = await db.insert(npcSkills).values(input).returning()
+        return result[0]
+      }
+    }),
+
+  // Remove NPC skill
+  removeNpcSkill: requirePerm('npc:delete')
+    .input(removeNpcSkillSchema)
+    .mutation(async ({ input }) => {
+      const result = await db.delete(npcSkills)
+        .where(and(
+          eq(npcSkills.npcId, input.npcId),
+          eq(npcSkills.skillId, input.skillId)
+        ))
+        .returning()
+      
+      if (result.length === 0) {
+        throw new Error(`NPC Skill not found`)
+      }
+      
+      return result[0]
+    }),
+
+  // Get all available skills for dropdown
+  getAvailableSkills: requirePerm('npc:read')
+    .query(async () => {
+      return await db.select().from(skills).orderBy(skills.name)
     }),
 })

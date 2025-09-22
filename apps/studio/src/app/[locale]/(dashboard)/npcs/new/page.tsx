@@ -92,7 +92,7 @@ export default function CreateNPCPage() {
                     <CardHeader>
                         <CardTitle>{t('basicInfo')}</CardTitle>
                         <CardDescription>
-                            Core information about the NPC
+                            {t('basicInfoDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">

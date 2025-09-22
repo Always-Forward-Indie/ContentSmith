@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { NpcAttributesManager } from '@/components/npc/NpcAttributesManager'
+import { NpcSkillsManager } from '@/components/npc/NpcSkillsManager'
 import { trpc } from '@/lib/trpc'
 
 // Schema for NPC editing
@@ -52,7 +54,7 @@ export default function EditNPCPage() {
     })
 
     // Fetch NPC data
-    const { data: npc, isLoading, error } = trpc.npc.getById.useQuery(npcId)
+    const { data: npc, isLoading, error, refetch } = trpc.npc.getById.useQuery(npcId)
 
     // Fetch reference data
     const { data: races } = trpc.npc.getRaces.useQuery()
@@ -143,7 +145,7 @@ export default function EditNPCPage() {
                     <CardHeader>
                         <CardTitle>{t('basicInfo')}</CardTitle>
                         <CardDescription>
-                            Core information about the NPC
+                            {t('basicInfoDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -310,6 +312,25 @@ export default function EditNPCPage() {
                     </Button>
                 </div>
             </form>
+
+            <div className="container mx-auto px-0 py-8">
+                {/* Attributes Management */}
+                {npc && (
+                    <NpcAttributesManager
+                        npcId={npcId}
+                        attributes={npc.attributes || []}
+                        onUpdate={() => refetch()}
+                    />
+                )}
+            </div>
+            {/* Skills Management */}
+            {npc && (
+                <NpcSkillsManager
+                    npcId={npcId}
+                    skills={npc.skills || []}
+                    onUpdate={() => refetch()}
+                />
+            )}
         </div>
     )
 }

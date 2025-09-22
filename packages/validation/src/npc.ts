@@ -105,6 +105,35 @@ export const npcSkillsSchema = z.object({
 export const createNpcSkillsSchema = npcSkillsSchema.omit({ id: true });
 export const updateNpcSkillsSchema = npcSkillsSchema.partial().required({ id: true });
 
+// Additional schemas for attribute and skill management
+export const addNpcAttributeSchema = z.object({
+  npcId: z.number().int().positive(),
+  attributeId: z.number().int().positive(),
+  value: z.number().int(),
+});
+
+export const removeNpcAttributeSchema = z.object({
+  npcId: z.number().int().positive(),
+  attributeId: z.number().int().positive(),
+});
+
+export const addNpcSkillSchema = z.object({
+  npcId: z.number().int().positive(),
+  skillId: z.number().int().positive(),
+  currentLevel: z.number().int().positive().default(1),
+});
+
+export const updateNpcSkillSchema = z.object({
+  npcId: z.number().int().positive(),
+  skillId: z.number().int().positive(),
+  currentLevel: z.number().int().positive(),
+});
+
+export const removeNpcSkillSchema = z.object({
+  npcId: z.number().int().positive(),
+  skillId: z.number().int().positive(),
+});
+
 // Comprehensive NPC with relations
 export const npcWithRelationsSchema = npcSchema.extend({
   race: raceSchema.optional(),
@@ -160,3 +189,10 @@ export type UpdateNpcAttributes = z.infer<typeof updateNpcAttributesSchema>;
 export type NpcSkills = z.infer<typeof npcSkillsSchema>;
 export type CreateNpcSkills = z.infer<typeof createNpcSkillsSchema>;
 export type UpdateNpcSkills = z.infer<typeof updateNpcSkillsSchema>;
+
+// Additional types for attribute and skill management
+export type AddNpcAttribute = z.infer<typeof addNpcAttributeSchema>;
+export type RemoveNpcAttribute = z.infer<typeof removeNpcAttributeSchema>;
+export type AddNpcSkill = z.infer<typeof addNpcSkillSchema>;
+export type UpdateNpcSkill = z.infer<typeof updateNpcSkillSchema>;
+export type RemoveNpcSkill = z.infer<typeof removeNpcSkillSchema>;

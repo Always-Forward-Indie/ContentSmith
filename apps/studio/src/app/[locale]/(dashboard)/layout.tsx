@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { NavigationSkillsDropdown } from '@/components/navigation/SkillsDropdown'
 import { useTranslations, useLocale } from 'next-intl'
 
 export default function DashboardLayout({
@@ -42,42 +43,7 @@ export default function DashboardLayout({
                         >
                             {t('navigation.npcs')}
                         </Link>
-                        <Link
-                            href={`/${locale}/skills`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skills')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/skill-schools`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skillSchools')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/skill-scale-types`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skillScaleTypes')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/skill-properties`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skillProperties')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/skill-effects-type`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skillEffectsType')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/skill-effects`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.skillEffects')}
-                        </Link>
+                        <NavigationSkillsDropdown />
                         <Link
                             href={`/${locale}/entity-attributes`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
@@ -90,24 +56,9 @@ export default function DashboardLayout({
                         >
                             {t('navigation.races')}
                         </Link>
-                        <Link
-                            href={`/${locale}/localization`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.localization')}
-                        </Link>
-                        <Link
-                            href={`/${locale}/analytics`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.analytics')}
-                        </Link>
                     </nav>
                     <div className="ml-auto flex items-center space-x-4">
                         <LanguageSwitcher />
-                        <Button variant="outline" size="sm">
-                            {t('navigation.settings')}
-                        </Button>
                     </div>
                 </div>
             </header>
