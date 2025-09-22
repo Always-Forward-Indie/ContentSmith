@@ -35,6 +35,7 @@ const skillEffectsType = loadJson('skill-effects-type.json');
 const skillEffects = loadJson('skill-effects.json');
 const entityAttributes = loadJson('entity-attributes.json');
 const races = loadJson('races.json');
+const items = loadJson('items.json');
 
 export default {
   common,
@@ -53,4 +54,5 @@ export default {
   skillEffects,
   entityAttributes,
   races,
+  items,
 };

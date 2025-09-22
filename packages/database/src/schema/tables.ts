@@ -12,6 +12,9 @@ import {
   unique,
   check,
   primaryKey,
+  doublePrecision,
+  smallint,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { nodeTypeEnum, questStateEnum, questStepTypeEnum } from './enums';
@@ -274,4 +277,67 @@ export const skillEffectsMapping = pgTable('skill_effects_mapping', {
 }, (table) => ({
   effectMappingIdx: index('ix_skill_effects_mapping').on(table.effectInstanceId, table.level),
   uniqueEffectMapping: unique().on(table.effectInstanceId, table.level, table.effectId),
+}));
+
+// ===== ITEMS =====
+export const itemTypes = pgTable('item_types', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  slug: varchar('slug', { length: 50 }).notNull(),
+}, (table) => ({
+  slugIdx: index('ix_item_types_slug').on(table.slug),
+}));
+
+export const itemsRarity = pgTable('items_rarity', {
+  id: smallint('id').primaryKey(),
+  name: varchar('name', { length: 30 }).notNull(),
+  colorHex: varchar('color_hex', { length: 7 }).notNull(),
+  slug: varchar('slug', { length: 30 }),
+}, (table) => ({
+  slugIdx: index('ix_items_rarity_slug').on(table.slug),
+}));
+
+export const itemAttributes = pgTable('item_attributes', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  slug: varchar('slug', { length: 100 }).notNull(),
+}, (table) => ({
+  slugIdx: index('ix_item_attributes_slug').on(table.slug),
+}));
+
+export const items = pgTable('items', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  slug: varchar('slug', { length: 50 }).notNull(),
+  description: text('description'),
+  isQuestItem: boolean('is_quest_item').notNull().default(false),
+  itemType: bigint('item_type', { mode: 'number' }).notNull().references(() => itemTypes.id),
+  weight: doublePrecision('weight').notNull().default(0.0),
+  rarityId: bigint('rarity_id', { mode: 'number' }).notNull().default(1).references(() => itemsRarity.id),
+  stackMax: bigint('stack_max', { mode: 'number' }).notNull().default(64),
+  isContainer: boolean('is_container').notNull().default(false),
+  isDurable: boolean('is_durable').notNull().default(false),
+  isTradable: boolean('is_tradable').notNull().default(true),
+  durabilityMax: bigint('durability_max', { mode: 'number' }).notNull().default(100),
+  vendorPriceBuy: bigint('vendor_price_buy', { mode: 'number' }).notNull().default(1),
+  vendorPriceSell: bigint('vendor_price_sell', { mode: 'number' }).notNull().default(1),
+  equipSlot: bigint('equip_slot', { mode: 'number' }).default(0),
+  levelRequirement: bigint('level_requirement', { mode: 'number' }).notNull().default(0),
+  isEquippable: boolean('is_equippable').notNull().default(false),
+  isHarvest: boolean('is_harvest').notNull().default(false),
+}, (table) => ({
+  nameIdx: index('ix_items_name').on(table.name),
+  slugIdx: index('ix_items_slug').on(table.slug),
+  typeIdx: index('ix_items_type').on(table.itemType),
+  rarityIdx: index('ix_items_rarity').on(table.rarityId),
+}));
+
+export const itemAttributesMapping = pgTable('item_attributes_mapping', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  itemId: bigint('item_id', { mode: 'number' }).notNull().references(() => items.id, { onDelete: 'cascade' }),
+  attributeId: integer('attribute_id').notNull().references(() => itemAttributes.id),
+  value: integer('value').notNull(),
+}, (table) => ({
+  itemAttrIdx: index('ix_item_attributes_mapping_item').on(table.itemId),
+  uniqueItemAttr: unique().on(table.itemId, table.attributeId),
 }));

@@ -56,6 +56,12 @@ export default function DashboardLayout({
                         >
                             {t('navigation.races')}
                         </Link>
+                        <Link
+                            href={`/${locale}/items`}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t('navigation.items')}
+                        </Link>
                     </nav>
                     <div className="ml-auto flex items-center space-x-4">
                         <LanguageSwitcher />
