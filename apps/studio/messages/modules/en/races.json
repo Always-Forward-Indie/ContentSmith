@@ -1,0 +1,20 @@
+{
+    "race": "Race",
+    "races": "Races",
+    "racesManagement": "Races Management",
+    "createRace": "Create Race",
+    "editRace": "Edit Race",
+    "newRace": "New Race",
+    "deleteRace": "Delete Race",
+    "raceSlug": "Race Slug",
+    "raceCreated": "Race created successfully",
+    "raceUpdated": "Race updated successfully",
+    "raceDeleted": "Race deleted successfully",
+    "raceNotFound": "Race not found",
+    "confirmDeleteRace": "Are you sure you want to delete this race?",
+    "raceDescription": "Character race system management",
+    "enterRaceName": "Enter race name",
+    "raceSlugPlaceholder": "race-slug",
+    "slugDescription": "Used for URLs and identification. Automatically created from name.",
+    "editRaceDescription": "Editing race"
+}

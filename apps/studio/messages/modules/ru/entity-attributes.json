@@ -1,0 +1,22 @@
+{
+    "title": "Атрибуты сущностей",
+    "entityAttributes": "Атрибуты сущностей",
+    "entityAttribute": "Атрибут сущности",
+    "entityAttributesList": "Список атрибутов сущностей",
+    "addEntityAttribute": "Добавить атрибут сущности",
+    "createEntityAttribute": "Создать атрибут сущности",
+    "editEntityAttribute": "Редактировать атрибут сущности",
+    "entityAttributeName": "Название",
+    "entityAttributeSlug": "Слаг",
+    "noEntityAttributes": "Атрибуты сущностей не найдены",
+    "entityAttributeCreated": "Атрибут сущности успешно создан",
+    "entityAttributeUpdated": "Атрибут сущности успешно обновлён",
+    "entityAttributeDeleted": "Атрибут сущности успешно удалён",
+    "deleteEntityAttribute": "Удалить атрибут сущности",
+    "deleteEntityAttributeConfirm": "Вы уверены, что хотите удалить этот атрибут сущности?",
+    "entityAttributeNotFound": "Атрибут сущности не найден",
+    "nameRequired": "Название обязательно",
+    "slugRequired": "Слаг обязателен",
+    "search": "Поиск атрибутов сущностей...",
+    "actions": "Действия"
+}

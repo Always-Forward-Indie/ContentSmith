@@ -1,0 +1,22 @@
+{
+    "title": "Entity Attributes",
+    "entityAttributes": "Entity Attributes",
+    "entityAttribute": "Entity Attribute",
+    "entityAttributesList": "Entity Attributes List",
+    "addEntityAttribute": "Add Entity Attribute",
+    "createEntityAttribute": "Create Entity Attribute",
+    "editEntityAttribute": "Edit Entity Attribute",
+    "entityAttributeName": "Name",
+    "entityAttributeSlug": "Slug",
+    "noEntityAttributes": "No entity attributes found",
+    "entityAttributeCreated": "Entity attribute created successfully",
+    "entityAttributeUpdated": "Entity attribute updated successfully",
+    "entityAttributeDeleted": "Entity attribute deleted successfully",
+    "deleteEntityAttribute": "Delete Entity Attribute",
+    "deleteEntityAttributeConfirm": "Are you sure you want to delete this entity attribute?",
+    "entityAttributeNotFound": "Entity attribute not found",
+    "nameRequired": "Name is required",
+    "slugRequired": "Slug is required",
+    "search": "Search entity attributes...",
+    "actions": "Actions"
+}

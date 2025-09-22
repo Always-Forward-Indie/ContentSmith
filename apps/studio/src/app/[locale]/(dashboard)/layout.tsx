@@ -79,6 +79,18 @@ export default function DashboardLayout({
                             {t('navigation.skillEffects')}
                         </Link>
                         <Link
+                            href={`/${locale}/entity-attributes`}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t('navigation.entityAttributes')}
+                        </Link>
+                        <Link
+                            href={`/${locale}/races`}
+                            className="transition-colors hover:text-foreground/80 text-foreground/60"
+                        >
+                            {t('navigation.races')}
+                        </Link>
+                        <Link
                             href={`/${locale}/localization`}
                             className="transition-colors hover:text-foreground/80 text-foreground/60"
                         >

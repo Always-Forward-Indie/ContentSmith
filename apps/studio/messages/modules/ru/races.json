@@ -1,0 +1,20 @@
+{
+    "race": "Раса",
+    "races": "Расы",
+    "racesManagement": "Управление расами",
+    "createRace": "Создать расу",
+    "editRace": "Редактировать расу",
+    "newRace": "Новая раса",
+    "deleteRace": "Удалить расу",
+    "raceSlug": "Слаг расы",
+    "raceCreated": "Раса успешно создана",
+    "raceUpdated": "Раса успешно обновлена",
+    "raceDeleted": "Раса успешно удалена",
+    "raceNotFound": "Раса не найдена",
+    "confirmDeleteRace": "Вы уверены, что хотите удалить эту расу?",
+    "raceDescription": "Управление расами персонажей",
+    "enterRaceName": "Введите название расы",
+    "raceSlugPlaceholder": "slug-расы",
+    "slugDescription": "Используется для URL и идентификации. Автоматически создается из названия.",
+    "editRaceDescription": "Редактирование расы"
+}

@@ -8,6 +8,8 @@ import { skillScaleTypesRouter } from './skill-scale-types';
 import { skillPropertiesRouter } from './skill-properties';
 import { skillEffectsTypeRouter } from './skill-effects-type';
 import { skillEffectRouter } from './skill-effects';
+import { entityAttributesRouter } from './entity-attributes';
+import { raceRouter } from './race';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -19,7 +21,8 @@ export const appRouter = createTRPCRouter({
   skillProperties: skillPropertiesRouter,
   skillEffectsType: skillEffectsTypeRouter,
   skillEffects: skillEffectRouter,
-  // localization: localizationRouter, // TODO: implement
+  entityAttributes: entityAttributesRouter,
+  race: raceRouter,
 });
 
 export type AppRouter = typeof appRouter;
