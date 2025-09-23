@@ -2,14 +2,17 @@
     "home": "Главная",
     "dialogues": "Диалоги",
     "quests": "Квесты",
-    "npcs": "NPC",
+    "npcs": "НПС",
     "skills": "Навыки",
     "skillSchools": "Школы навыков",
-    "skillScaleTypes": "Типы шкал навыков",
+    "skillScaleTypes": "Типы масштабов навыков",
     "skillProperties": "Свойства навыков",
     "skillEffectsType": "Типы эффектов навыков",
     "skillEffects": "Эффекты навыков",
     "entityAttributes": "Атрибуты сущностей",
     "races": "Расы",
-    "items": "Предметы"
+    "items": "Предметы",
+    "itemAttributes": "Атрибуты предметов",
+    "itemsRarity": "Редкость предметов",
+    "itemTypes": "Типы предметов"
 }

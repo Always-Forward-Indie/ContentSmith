@@ -1,9 +1,14 @@
 import { getRequestConfig } from 'next-intl/server';
+import { loadMessages } from './loader';
+import { Locale } from './config';
 
 export default getRequestConfig(async ({ locale }) => {
-  // Layout handles message loading, so we return minimal config
+  // Load messages for the current locale with fallback to 'en'
+  const currentLocale = (locale || 'en') as Locale;
+  const messages = await loadMessages(currentLocale);
+  
   return {
-    locale: locale || 'en',
-    messages: {}
+    locale: currentLocale,
+    messages
   };
 });

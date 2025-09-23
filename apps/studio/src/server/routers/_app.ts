@@ -11,6 +11,9 @@ import { skillEffectRouter } from './skill-effects';
 import { entityAttributesRouter } from './entity-attributes';
 import { raceRouter } from './race';
 import { itemsRouter } from './items';
+import { itemAttributesRouter } from './itemAttributes';
+import { itemsRarityRouter } from './itemsRarity';
+import { itemTypesRouter } from './itemTypes';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -25,6 +28,9 @@ export const appRouter = createTRPCRouter({
   entityAttributes: entityAttributesRouter,
   race: raceRouter,
   items: itemsRouter,
+  itemAttributes: itemAttributesRouter,
+  itemsRarity: itemsRarityRouter,
+  itemTypes: itemTypesRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { NavigationSkillsDropdown } from '@/components/navigation/SkillsDropdown'
+import { NavigationItemsDropdown } from '@/components/navigation/ItemsDropdown'
 import { useTranslations, useLocale } from 'next-intl'
 
 export default function DashboardLayout({
@@ -56,12 +57,7 @@ export default function DashboardLayout({
                         >
                             {t('navigation.races')}
                         </Link>
-                        <Link
-                            href={`/${locale}/items`}
-                            className="transition-colors hover:text-foreground/80 text-foreground/60"
-                        >
-                            {t('navigation.items')}
-                        </Link>
+                        <NavigationItemsDropdown />
                     </nav>
                     <div className="ml-auto flex items-center space-x-4">
                         <LanguageSwitcher />

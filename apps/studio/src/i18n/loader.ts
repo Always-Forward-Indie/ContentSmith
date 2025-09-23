@@ -29,7 +29,20 @@ async function loadIndividualModules(locale: Locale): Promise<Messages> {
     'quests',
     'editors',
     'errors',
-    'home'
+    'home',
+    'npcs',
+    'skills',
+    'skill-schools',
+    'skill-scale-types',
+    'skill-properties',
+    'skill-effects-type',
+    'skill-effects',
+    'entity-attributes',
+    'races',
+    'items',
+    'item-attributes',
+    'items-rarity',
+    'item-types'
   ] as const;
 
   const messages: Messages = {};

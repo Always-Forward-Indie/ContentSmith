@@ -9,6 +9,7 @@ export * from './skill-schools';
 export * from './skill-scale-types';
 export * from './skill-properties';
 export * from './items';
+export * from './item-types';
 
 // Common validation utilities
 export { z } from 'zod';

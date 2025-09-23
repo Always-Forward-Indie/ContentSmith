@@ -38,6 +38,35 @@ export const itemAttributeIdSchema = z.object({
   id: z.number().int().positive(),
 });
 
+export const itemAttributesListQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(50),
+  sortBy: z.enum(['name', 'slug']).default('name'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+});
+
+// Items Rarity schemas
+export const createItemsRaritySchema = z.object({
+  name: z.string().min(1).max(30),
+  colorHex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Must be a valid hex color'),
+  slug: z.string().min(1).max(30).optional(),
+});
+
+export const updateItemsRaritySchema = createItemsRaritySchema.partial();
+
+export const itemsRarityIdSchema = z.object({
+  id: z.number().int().positive(),
+});
+
+export const itemsRarityListQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.number().int().positive().default(1),
+  limit: z.number().int().positive().max(100).default(50),
+  sortBy: z.enum(['name', 'slug', 'colorHex']).default('name'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+});
+
 // Item schemas
 export const createItemSchema = z.object({
   name: z.string().min(1).max(50),

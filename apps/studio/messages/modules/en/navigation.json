@@ -11,5 +11,8 @@
     "skillEffects": "Skill Effects",
     "entityAttributes": "Entity Attributes",
     "races": "Races",
-    "items": "Items"
+    "items": "Items",
+    "itemAttributes": "Item Attributes",
+    "itemsRarity": "Items Rarity",
+    "itemTypes": "Item Types"
 }

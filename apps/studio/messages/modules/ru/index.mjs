@@ -36,6 +36,9 @@ const skillEffects = loadJson('skill-effects.json');
 const entityAttributes = loadJson('entity-attributes.json');
 const races = loadJson('races.json');
 const items = loadJson('items.json');
+const itemAttributes = loadJson('item-attributes.json');
+const itemsRarity = loadJson('items-rarity.json');
+const itemTypes = loadJson('item-types.json');
 
 export default {
   common,
@@ -55,4 +58,7 @@ export default {
   entityAttributes,
   races,
   items,
+  itemAttributes,
+  itemsRarity,
+  itemTypes,
 };
