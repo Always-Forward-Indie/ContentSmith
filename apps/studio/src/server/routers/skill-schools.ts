@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skillSchool } from '@contentsmith/database';
-import { and, eq, like } from '@contentsmith/database';
+import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillSchoolListQuerySchema,
   skillSchoolIdSchema,
@@ -15,29 +15,31 @@ export const skillSchoolsRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillSchoolListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-      
-      if (search) {
-        conditions.push(like(skillSchool.name, `%${search}%`));
-      }
-
+      if (search) conditions.push(like(skillSchool.name, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем школы скилов
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skillSchool)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const skillSchools = await db
-        .select({
-          id: skillSchool.id,
-          name: skillSchool.name,
-          slug: skillSchool.slug,
-        })
+        .select({ id: skillSchool.id, name: skillSchool.name, slug: skillSchool.slug })
         .from(skillSchool)
         .where(whereClause)
-        .orderBy(skillSchool.name);
+        .orderBy(skillSchool.name)
+        .limit(pageSize)
+        .offset(offset);
 
-      return skillSchools;
+      return {
+        data: skillSchools,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить школу скилов по ID

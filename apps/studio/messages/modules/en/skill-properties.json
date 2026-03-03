@@ -14,5 +14,7 @@
     "searchSkillProperties": "Search skill properties...",
     "noSkillPropertiesFound": "No skill properties found",
     "nameRequired": "Name is required",
-    "slugRequired": "Slug is required"
+    "slugRequired": "Slug is required",
+    "description": "Manage skill properties that define numeric parameters of skills",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

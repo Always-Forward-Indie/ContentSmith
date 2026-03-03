@@ -1,7 +1,15 @@
 {
     "title": "Скилы",
+    "description": "Управление всеми скилами, школами и типами масштабирования в игре",
     "skillsManagement": "Управление скилами",
     "createSkill": "Создать скил",
+    "table": {
+        "name": "Название",
+        "school": "Школа",
+        "scaleType": "Тип масштабирования"
+    },
+    "showingResults": "Показано {from}–{to} из {total}",
+    "allFilters": "Все",
     "editSkill": "Редактировать скил",
     "skillName": "Название скила",
     "skillSlug": "Слаг скила",

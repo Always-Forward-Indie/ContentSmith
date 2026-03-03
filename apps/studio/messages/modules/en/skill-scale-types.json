@@ -14,5 +14,7 @@
     "searchSkillScaleTypes": "Search skill scale types...",
     "noSkillScaleTypesFound": "No skill scale types found",
     "nameRequired": "Name is required",
-    "slugRequired": "Slug is required"
+    "slugRequired": "Slug is required",
+    "description": "Manage scale types that define how skill values grow with stats",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

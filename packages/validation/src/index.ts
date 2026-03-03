@@ -10,6 +10,8 @@ export * from './skill-scale-types';
 export * from './skill-properties';
 export * from './items';
 export * from './item-types';
+export * from './equip-slots';
+export * from './mobs';
 
 // Common validation utilities
 export { z } from 'zod';

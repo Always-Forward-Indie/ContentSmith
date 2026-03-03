@@ -12,5 +12,7 @@
     "skillEffectsTypeNotFound": "Тип эффекта навыка не найден",
     "searchSkillEffectsTypes": "Поиск типов эффектов навыков...",
     "noSkillEffectsTypesFound": "Типы эффектов навыков не найдены",
-    "slugRequired": "Слаг обязателен"
+    "slugRequired": "Слаг обязателен",
+    "description": "Управление идентификаторами типов эффектов для категоризации эффектов навыков",
+    "showingResults": "Показано {from}–{to} из {total}"
 }

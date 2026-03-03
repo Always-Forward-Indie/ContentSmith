@@ -30,12 +30,13 @@ export default function NPCSelect({ value, onChange, label }: NPCSelectProps) {
     const [selectedNpc, setSelectedNpc] = useState<any>(null)
 
     // Загружаем список NPC с поиском
-    const { data: npcs = [], isLoading } = trpc.npc.list.useQuery({
+    const { data: npcData, isLoading } = trpc.npc.list.useQuery({
         search: search.trim() || undefined,
         limit: 20
     }, {
         enabled: isOpen // Загружаем только когда выпадающий список открыт
     })
+    const npcs = npcData?.data ?? []
 
     // Загружаем выбранный NPC по ID
     const { data: currentNpc } = trpc.npc.getById.useQuery(value!, {

@@ -1,19 +1,28 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { ChevronRight, Users, Plus } from 'lucide-react'
+import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Separator } from '@/components/ui/separator'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import { trpc } from '@/lib/trpc'
 
-// Simple schema for NPC creation
 const createNpcFormSchema = z.object({
     name: z.string().min(1).max(50),
     slug: z.string().max(50).nullable().optional(),
@@ -25,8 +34,6 @@ const createNpcFormSchema = z.object({
     isDead: z.boolean().default(false),
     raceId: z.number().int().positive().default(1),
     npcType: z.number().int().positive().default(1),
-    dialogueId: z.number().int().positive().nullable().optional(),
-    questId: z.number().int().positive().nullable().optional(),
 })
 
 type CreateNpcForm = z.infer<typeof createNpcFormSchema>
@@ -40,6 +47,7 @@ export default function CreateNPCPage() {
     const {
         register,
         handleSubmit,
+        control,
         formState: { errors },
     } = useForm<CreateNpcForm>({
         resolver: zodResolver(createNpcFormSchema),
@@ -55,7 +63,6 @@ export default function CreateNPCPage() {
         },
     })
 
-    // Fetch reference data
     const { data: races } = trpc.npc.getRaces.useQuery()
     const { data: npcTypes } = trpc.npc.getNpcTypes.useQuery()
 
@@ -69,181 +76,179 @@ export default function CreateNPCPage() {
     })
 
     const onSubmit = (data: CreateNpcForm) => {
-        const npcData = {
+        createNpcMutation.mutate({
             ...data,
             slug: data.slug || null,
-            dialogueId: data.dialogueId || null,
-            questId: data.questId || null,
-        }
-        createNpcMutation.mutate(npcData)
+        })
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold tracking-tight">{t('create')}</h1>
-                <p className="text-muted-foreground">
-                    {t('description')}
-                </p>
+        <div className="space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/npcs`} className="hover:text-foreground transition-colors">
+                    {t('title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('create')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Users className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('create')}</h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">{t('description')}</p>
+                </div>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t('basicInfo')}</CardTitle>
-                        <CardDescription>
-                            {t('basicInfoDescription')}
-                        </CardDescription>
+                        <CardTitle className="text-base">{t('basicInfo')}</CardTitle>
+                        <CardDescription>{t('basicInfoDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="name">{t('name')}</Label>
-                                <Input
-                                    id="name"
-                                    {...register('name')}
-                                    placeholder="Enter NPC name..."
-                                />
+                                <Input id="name" {...register('name')} />
                                 {errors.name && (
-                                    <p className="text-sm text-red-500">{errors.name.message}</p>
+                                    <p className="text-xs text-destructive">{errors.name.message}</p>
                                 )}
                             </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="slug">{t('slug')}</Label>
-                                <Input
-                                    id="slug"
-                                    {...register('slug')}
-                                    placeholder="npc-slug (optional)"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    {t('slugDescription')}
-                                </p>
+                                <Input id="slug" {...register('slug')} className="font-mono" />
+                                <p className="text-xs text-muted-foreground">{t('slugDescription')}</p>
                                 {errors.slug && (
-                                    <p className="text-sm text-red-500">{errors.slug.message}</p>
+                                    <p className="text-xs text-destructive">{errors.slug.message}</p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="level">{t('levelField')}</Label>
-                                <Input
-                                    id="level"
-                                    type="number"
-                                    min="1"
-                                    {...register('level', { valueAsNumber: true })}
-                                />
+                                <Input id="level" type="number" min="1"
+                                    {...register('level', { valueAsNumber: true })} />
                                 {errors.level && (
-                                    <p className="text-sm text-red-500">{errors.level.message}</p>
+                                    <p className="text-xs text-destructive">{errors.level.message}</p>
                                 )}
                             </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="radius">{t('radius')}</Label>
-                                <Input
-                                    id="radius"
-                                    type="number"
-                                    min="1"
-                                    {...register('radius', { valueAsNumber: true })}
-                                />
+                                <Input id="radius" type="number" min="1"
+                                    {...register('radius', { valueAsNumber: true })} />
                                 {errors.radius && (
-                                    <p className="text-sm text-red-500">{errors.radius.message}</p>
+                                    <p className="text-xs text-destructive">{errors.radius.message}</p>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="currentHealth">{t('currentHealth')}</Label>
-                                <Input
-                                    id="currentHealth"
-                                    type="number"
-                                    min="1"
-                                    {...register('currentHealth', { valueAsNumber: true })}
-                                />
+                                <Input id="currentHealth" type="number" min="1"
+                                    {...register('currentHealth', { valueAsNumber: true })} />
                                 {errors.currentHealth && (
-                                    <p className="text-sm text-red-500">{errors.currentHealth.message}</p>
+                                    <p className="text-xs text-destructive">{errors.currentHealth.message}</p>
                                 )}
                             </div>
-
                             <div className="space-y-2">
                                 <Label htmlFor="currentMana">{t('currentMana')}</Label>
-                                <Input
-                                    id="currentMana"
-                                    type="number"
-                                    min="1"
-                                    {...register('currentMana', { valueAsNumber: true })}
-                                />
+                                <Input id="currentMana" type="number" min="1"
+                                    {...register('currentMana', { valueAsNumber: true })} />
                                 {errors.currentMana && (
-                                    <p className="text-sm text-red-500">{errors.currentMana.message}</p>
+                                    <p className="text-xs text-destructive">{errors.currentMana.message}</p>
                                 )}
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="raceId">{t('raceId')}</Label>
-                                <select
-                                    id="raceId"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register('raceId', { valueAsNumber: true })}
-                                >
-                                    {races?.map((race) => (
-                                        <option key={race.id} value={race.id}>
-                                            {race.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Label>{t('raceId')}</Label>
+                                <Controller
+                                    name="raceId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            value={field.value?.toString()}
+                                            onValueChange={(v) => field.onChange(parseInt(v))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {races?.map((race) => (
+                                                    <SelectItem key={race.id} value={race.id.toString()}>
+                                                        {race.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                                 {errors.raceId && (
-                                    <p className="text-sm text-red-500">{errors.raceId.message}</p>
+                                    <p className="text-xs text-destructive">{errors.raceId.message}</p>
                                 )}
                             </div>
-
                             <div className="space-y-2">
-                                <Label htmlFor="npcType">{t('npcType')}</Label>
-                                <select
-                                    id="npcType"
-                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                    {...register('npcType', { valueAsNumber: true })}
-                                >
-                                    {npcTypes?.map((type) => (
-                                        <option key={type.id} value={type.id}>
-                                            {type.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <Label>{t('npcType')}</Label>
+                                <Controller
+                                    name="npcType"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            value={field.value?.toString()}
+                                            onValueChange={(v) => field.onChange(parseInt(v))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {npcTypes?.map((type) => (
+                                                    <SelectItem key={type.id} value={type.id.toString()}>
+                                                        {type.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
                                 {errors.npcType && (
-                                    <p className="text-sm text-red-500">{errors.npcType.message}</p>
+                                    <p className="text-xs text-destructive">{errors.npcType.message}</p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex flex-col space-y-4">
-                            <div className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    id="isInteractable"
-                                    className="rounded border border-input"
-                                    {...register('isInteractable')}
-                                />
-                                <Label htmlFor="isInteractable">{t('isInteractable')}</Label>
-                            </div>
+                        <Separator />
 
-                            <div className="flex items-center space-x-2">
-                                <input
-                                    type="checkbox"
-                                    id="isDead"
-                                    className="rounded border border-input"
-                                    {...register('isDead')}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="flex items-center justify-between rounded-lg border p-3">
+                                <p className="text-sm font-medium">{t('isInteractable')}</p>
+                                <Controller
+                                    name="isInteractable"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    )}
                                 />
-                                <Label htmlFor="isDead">{t('isDead')}</Label>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg border p-3">
+                                <p className="text-sm font-medium">{t('isDead')}</p>
+                                <Controller
+                                    name="isDead"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                    )}
+                                />
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <div className="flex justify-end space-x-4">
+                <div className="flex justify-end gap-3">
                     <Button
                         type="button"
                         variant="outline"
@@ -251,10 +256,8 @@ export default function CreateNPCPage() {
                     >
                         {commonT('cancel')}
                     </Button>
-                    <Button
-                        type="submit"
-                        disabled={createNpcMutation.isPending}
-                    >
+                    <Button type="submit" disabled={createNpcMutation.isPending} className="gap-1.5">
+                        <Plus className="h-4 w-4" />
                         {createNpcMutation.isPending ? commonT('saving') : t('create')}
                     </Button>
                 </div>

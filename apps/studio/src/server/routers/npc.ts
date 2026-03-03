@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, devRequirePermission } from '../trpc'
 import { db } from '../db'
+import { toJsonb } from '../utils/json'
 import { 
   npc, 
   race, 
@@ -9,9 +10,11 @@ import {
   entityAttributes, 
   npcAttributes,
   skills,
-  npcSkills
+  npcSkills,
+  npcDialogue,
+  dialogue,
 } from '@contentsmith/database'
-import { like, or, desc, eq, and } from '@contentsmith/database'
+import { like, or, desc, eq, and, count, gte, lte, asc } from '@contentsmith/database'
 import { 
   npcListQuerySchema, 
   createNpcSchema, 
@@ -45,38 +48,34 @@ export const npcRouter = createTRPCRouter({
   list: requirePerm('npc:read')
     .input(npcListQuerySchema)
     .query(async ({ input }) => {
-      const conditions = []
+      const { search, page, limit, raceId, npcType: npcTypeFilter, minLevel, maxLevel, isInteractable, isDead, sortBy, sortOrder } = input;
+      const offset = (page - 1) * limit;
 
-      if (input.search) {
-        conditions.push(
-          or(
-            like(npc.name, `%${input.search}%`),
-            like(npc.slug, `%${input.search}%`)
-          )
-        )
-      }
+      const conditions = [];
+      if (search) conditions.push(or(like(npc.name, `%${search}%`), like(npc.slug, `%${search}%`)));
+      if (raceId) conditions.push(eq(npc.raceId, raceId));
+      if (npcTypeFilter) conditions.push(eq(npc.npcType, npcTypeFilter));
+      if (minLevel) conditions.push(gte(npc.level, minLevel));
+      if (maxLevel) conditions.push(lte(npc.level, maxLevel));
+      if (isInteractable !== undefined) conditions.push(eq(npc.isInteractable, isInteractable));
+      if (isDead !== undefined) conditions.push(eq(npc.isDead, isDead));
 
-      if (input.raceId) {
-        conditions.push(eq(npc.raceId, input.raceId))
-      }
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      if (input.npcType) {
-        conditions.push(eq(npc.npcType, input.npcType))
-      }
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(npc)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
 
-      if (input.level) {
-        conditions.push(eq(npc.level, input.level))
-      }
+      const dir = sortOrder === 'asc' ? asc : desc;
+      const orderByClause = (
+        sortBy === 'name'  ? dir(npc.name) :
+        sortBy === 'level' ? dir(npc.level) :
+        dir(npc.id)
+      );
 
-      if (input.isInteractable !== undefined) {
-        conditions.push(eq(npc.isInteractable, input.isInteractable))
-      }
-
-      if (input.isDead !== undefined) {
-        conditions.push(eq(npc.isDead, input.isDead))
-      }
-
-      const baseQuery = db.select({
+      const npcs = await db.select({
         id: npc.id,
         name: npc.name,
         raceId: npc.raceId,
@@ -88,29 +87,20 @@ export const npcRouter = createTRPCRouter({
         radius: npc.radius,
         isInteractable: npc.isInteractable,
         npcType: npc.npcType,
-        dialogueId: npc.dialogueId,
-        questId: npc.questId,
         raceName: race.name,
         npcTypeName: npcType.name,
       }).from(npc)
         .leftJoin(race, eq(npc.raceId, race.id))
         .leftJoin(npcType, eq(npc.npcType, npcType.id))
+        .where(whereClause)
+        .orderBy(orderByClause)
+        .limit(limit)
+        .offset(offset);
 
-      let npcs
-      if (conditions.length > 0) {
-        npcs = await baseQuery
-          .where(and(...conditions))
-          .orderBy(desc(npc.id))
-          .limit(input.limit)
-          .offset(input.offset)
-      } else {
-        npcs = await baseQuery
-          .orderBy(desc(npc.id))
-          .limit(input.limit)
-          .offset(input.offset)
-      }
-
-      return npcs
+      return {
+        data: npcs,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      };
     }),
 
   // Get NPC by ID with relations
@@ -129,8 +119,6 @@ export const npcRouter = createTRPCRouter({
         radius: npc.radius,
         isInteractable: npc.isInteractable,
         npcType: npc.npcType,
-        dialogueId: npc.dialogueId,
-        questId: npc.questId,
         // Relations
         raceName: race.name,
         npcTypeName: npcType.name,
@@ -170,10 +158,23 @@ export const npcRouter = createTRPCRouter({
         .leftJoin(skills, eq(npcSkills.skillId, skills.id))
         .where(eq(npcSkills.npcId, input))
 
+      // Get dialogues
+      const npcDialoguesData = await db.select({
+        npcId: npcDialogue.npcId,
+        dialogueId: npcDialogue.dialogueId,
+        priority: npcDialogue.priority,
+        conditionGroup: npcDialogue.conditionGroup,
+        dialogueSlug: dialogue.slug,
+        dialogueVersion: dialogue.version,
+      }).from(npcDialogue)
+        .leftJoin(dialogue, eq(npcDialogue.dialogueId, dialogue.id))
+        .where(eq(npcDialogue.npcId, input))
+
       return {
         ...npcData,
         attributes,
         skills: npcSkillsData,
+        dialogues: npcDialoguesData,
       }
     }),
 
@@ -331,14 +332,24 @@ export const npcRouter = createTRPCRouter({
       const existing = await db.select().from(npcPosition).where(eq(npcPosition.npcId, npcId))
       
       if (existing.length > 0) {
+        const updateFields: { x?: number; y?: number; z?: number; rotZ?: number } = {}
+        if (positionData.x != null) updateFields.x = positionData.x
+        if (positionData.y != null) updateFields.y = positionData.y
+        if (positionData.z != null) updateFields.z = positionData.z
+        if (positionData.rotZ != null) updateFields.rotZ = positionData.rotZ
         const result = await db.update(npcPosition)
-          .set(positionData)
+          .set(updateFields)
           .where(eq(npcPosition.npcId, npcId))
           .returning()
         return result[0]
       } else {
         // Create new position if doesn't exist
-        const result = await db.insert(npcPosition).values(input).returning()
+        const result = await db.insert(npcPosition).values({
+          ...input,
+          x: input.x ?? 0,
+          y: input.y ?? 0,
+          z: input.z ?? 0,
+        }).returning()
         return result[0]
       }
     }),
@@ -490,5 +501,99 @@ export const npcRouter = createTRPCRouter({
   getAvailableSkills: requirePerm('npc:read')
     .query(async () => {
       return await db.select().from(skills).orderBy(skills.name)
+    }),
+
+  // ===== NPC DIALOGUES =====
+
+  // Get all dialogues linked to an NPC
+  getNpcDialogues: requirePerm('npc:read')
+    .input(z.number())
+    .query(async ({ input }) => {
+      return await db.select({
+        npcId: npcDialogue.npcId,
+        dialogueId: npcDialogue.dialogueId,
+        priority: npcDialogue.priority,
+        conditionGroup: npcDialogue.conditionGroup,
+        dialogueSlug: dialogue.slug,
+        dialogueVersion: dialogue.version,
+      }).from(npcDialogue)
+        .leftJoin(dialogue, eq(npcDialogue.dialogueId, dialogue.id))
+        .where(eq(npcDialogue.npcId, input))
+    }),
+
+  // Get all dialogues available for linking
+  getAvailableDialogues: requirePerm('npc:read')
+    .query(async () => {
+      return await db.select().from(dialogue).orderBy(dialogue.slug)
+    }),
+
+  // Add dialogue to NPC
+  addNpcDialogue: requirePerm('npc:write')
+    .input(z.object({
+      npcId: z.number(),
+      dialogueId: z.number(),
+      priority: z.number().min(0).default(0),
+      conditionGroup: z.any().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const result = await db
+        .insert(npcDialogue)
+        .values({
+          ...input,
+          conditionGroup: toJsonb(input.conditionGroup),
+        })
+        .returning()
+      return result[0]
+    }),
+
+  // Update NPC dialogue priority / condition
+  updateNpcDialogue: requirePerm('npc:write')
+    .input(z.object({
+      npcId: z.number(),
+      dialogueId: z.number(),
+      priority: z.number().min(0).optional(),
+      conditionGroup: z.any().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { npcId, dialogueId, ...updateData } = input
+      const result = await db
+        .update(npcDialogue)
+        .set({
+          ...updateData,
+          conditionGroup: toJsonb(updateData.conditionGroup),
+        })
+        .where(and(
+          eq(npcDialogue.npcId, npcId),
+          eq(npcDialogue.dialogueId, dialogueId),
+        ))
+        .returning()
+
+      if (result.length === 0) {
+        throw new Error('NPC Dialogue link not found')
+      }
+
+      return result[0]
+    }),
+
+  // Remove dialogue from NPC
+  removeNpcDialogue: requirePerm('npc:delete')
+    .input(z.object({
+      npcId: z.number(),
+      dialogueId: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+      const result = await db
+        .delete(npcDialogue)
+        .where(and(
+          eq(npcDialogue.npcId, input.npcId),
+          eq(npcDialogue.dialogueId, input.dialogueId),
+        ))
+        .returning()
+
+      if (result.length === 0) {
+        throw new Error('NPC Dialogue link not found')
+      }
+
+      return result[0]
     }),
 })

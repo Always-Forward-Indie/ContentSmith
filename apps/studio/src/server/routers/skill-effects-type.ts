@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skillEffectsType } from '@contentsmith/database';
-import { and, eq, like } from '@contentsmith/database';
+import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillEffectsTypeSchema,
   createSkillEffectsTypeSchema,
@@ -25,28 +25,31 @@ export const skillEffectsTypeRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillEffectsTypeListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-      
-      if (search) {
-        conditions.push(like(skillEffectsType.slug, `%${search}%`));
-      }
-
+      if (search) conditions.push(like(skillEffectsType.slug, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем типы эффектов навыков
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skillEffectsType)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const skillEffectsTypes = await db
-        .select({
-          id: skillEffectsType.id,
-          slug: skillEffectsType.slug,
-        })
+        .select({ id: skillEffectsType.id, slug: skillEffectsType.slug })
         .from(skillEffectsType)
         .where(whereClause)
-        .orderBy(skillEffectsType.slug);
+        .orderBy(skillEffectsType.slug)
+        .limit(pageSize)
+        .offset(offset);
 
-      return skillEffectsTypes;
+      return {
+        data: skillEffectsTypes,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить тип эффекта по ID

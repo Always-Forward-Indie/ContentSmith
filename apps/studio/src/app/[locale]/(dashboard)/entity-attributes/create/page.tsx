@@ -1,143 +1,144 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
+import Link from 'next/link'
+import { ChevronRight, SlidersHorizontal } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function CreateEntityAttributePage() {
-    const t = useTranslations('entityAttributes');
-    const tCommon = useTranslations('common');
-    const router = useRouter();
-    const { toast } = useToast();
+    const t = useTranslations('entityAttributes')
+    const tCommon = useTranslations('common')
+    const router = useRouter()
+    const locale = useLocale()
 
-    const [formData, setFormData] = useState({
-        name: '',
-        slug: '',
-    });
+    const [formData, setFormData] = useState({ name: '', slug: '' })
+    const [errors, setErrors] = useState<Record<string, string>>({})
 
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    // Мутация для создания
     const createEntityAttribute = trpc.entityAttributes.create.useMutation({
         onSuccess: () => {
-            toast({
-                title: tCommon('success'),
-                description: t('entityAttributeCreated'),
-            });
-            router.push('/entity-attributes');
+            router.push(`/${locale}/entity-attributes`)
         },
-        onError: (error) => {
-            toast({
-                title: tCommon('error'),
-                description: error.message,
-                variant: 'error',
-            });
-        },
-    });
+    })
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+        e.preventDefault()
 
-        // Простая валидация
-        const newErrors: Record<string, string> = {};
-
-        if (!formData.name.trim()) {
-            newErrors.name = t('nameRequired');
-        }
-
-        if (!formData.slug.trim()) {
-            newErrors.slug = t('slugRequired');
-        }
-
-        setErrors(newErrors);
+        const newErrors: Record<string, string> = {}
+        if (!formData.name.trim()) newErrors.name = t('nameRequired')
+        if (!formData.slug.trim()) newErrors.slug = t('slugRequired')
+        setErrors(newErrors)
 
         if (Object.keys(newErrors).length === 0) {
             createEntityAttribute.mutate({
                 name: formData.name.trim(),
                 slug: formData.slug.trim(),
-            });
+            })
         }
-    };
+    }
 
-    const handleInputChange = (field: keyof typeof formData) => (
-        e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setFormData({ ...formData, [field]: e.target.value });
-        // Очищаем ошибку при вводе
-        if (errors[field]) {
-            setErrors({ ...errors, [field]: '' });
-        }
-    };
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const name = e.target.value
+        const slug = name
+            .toLowerCase()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '')
+        setFormData(prev => ({ ...prev, name, slug }))
+        if (errors.name) setErrors(prev => ({ ...prev, name: '' }))
+    }
+
+    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({ ...prev, slug: e.target.value }))
+        if (errors.slug) setErrors(prev => ({ ...prev, slug: '' }))
+    }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            {/* Заголовок */}
-            <div className="flex items-center gap-4">
-                <Button asChild variant="outline" size="sm">
-                    <Link href="/entity-attributes">{tCommon('back')}</Link>
-                </Button>
-                <h1 className="text-3xl font-bold">{t('createEntityAttribute')}</h1>
+        <div className="max-w-lg mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/entity-attributes`} className="hover:text-foreground transition-colors">
+                    {t('entityAttributes')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('createEntityAttribute')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <SlidersHorizontal className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('createEntityAttribute')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('description')}</p>
+                </div>
             </div>
 
-            {/* Форма */}
+            {/* Form Card */}
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('createEntityAttribute')}</CardTitle>
+                    <CardTitle className="text-base">{t('entityAttribute')}</CardTitle>
+                    <CardDescription>{t('deleteEntityAttributeConfirm').replace('?', '')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Название */}
-                        <div className="space-y-2">
-                            <Label htmlFor="name">{t('entityAttributeName')}</Label>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Name */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="name" className="text-sm font-medium">
+                                {t('entityAttributeName')}
+                            </label>
                             <Input
                                 id="name"
                                 value={formData.name}
-                                onChange={handleInputChange('name')}
+                                onChange={handleNameChange}
                                 placeholder={t('entityAttributeName')}
-                                className={errors.name ? 'border-red-500' : ''}
+                                aria-invalid={errors.name ? 'true' : 'false'}
                             />
-                            {errors.name && (
-                                <p className="text-sm text-red-500">{errors.name}</p>
-                            )}
+                            {errors.name ? (
+                                <p className="text-xs text-destructive">{errors.name}</p>
+                            ) : null}
                         </div>
 
-                        {/* Слаг */}
-                        <div className="space-y-2">
-                            <Label htmlFor="slug">{t('entityAttributeSlug')}</Label>
+                        {/* Slug */}
+                        <div className="space-y-1.5">
+                            <label htmlFor="slug" className="text-sm font-medium">
+                                {t('entityAttributeSlug')}
+                            </label>
                             <Input
                                 id="slug"
                                 value={formData.slug}
-                                onChange={handleInputChange('slug')}
-                                placeholder={t('entityAttributeSlug')}
-                                className={errors.slug ? 'border-red-500' : ''}
+                                onChange={handleSlugChange}
+                                placeholder="entity-attribute-slug"
+                                className="font-mono"
+                                aria-invalid={errors.slug ? 'true' : 'false'}
                             />
-                            {errors.slug && (
-                                <p className="text-sm text-red-500">{errors.slug}</p>
+                            {errors.slug ? (
+                                <p className="text-xs text-destructive">{errors.slug}</p>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">
+                                    {tCommon('slug')} — используется для URL и идентификации
+                                </p>
                             )}
                         </div>
 
-                        {/* Кнопки */}
-                        <div className="flex justify-end gap-2 pt-4">
+                        <div className="flex justify-end gap-2 pt-2">
                             <Button type="button" variant="outline" asChild>
-                                <Link href="/entity-attributes">{tCommon('cancel')}</Link>
+                                <Link href={`/${locale}/entity-attributes`}>{tCommon('cancel')}</Link>
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={createEntityAttribute.isLoading}
-                            >
-                                {createEntityAttribute.isLoading ? tCommon('loading') : tCommon('create')}
+                            <Button type="submit" disabled={createEntityAttribute.isPending}>
+                                {createEntityAttribute.isPending ? tCommon('loading') : tCommon('create')}
                             </Button>
                         </div>
                     </form>
                 </CardContent>
             </Card>
         </div>
-    );
+    )
 }
+
+

@@ -11,6 +11,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 import NPCSelect from '@/components/editors/NPCSelect'
 
 const QuestStepFormSchema = z.object({
@@ -198,24 +205,25 @@ export function QuestStepEditor({
             case 'talk':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">{t('visualEditors.talk.title')}</h4>
+                        <h4 className="text-sm font-medium">{t('visualEditors.talk.title')}</h4>
                         <div className="space-y-4">
                             <NPCSelect
                                 label={t('visualEditors.talk.npcLabel')}
                                 value={stepParams?.npcId ? parseInt(stepParams.npcId) : null}
                                 onChange={(npcId) => updateParams({ npcId: npcId?.toString() })}
                             />
-                            <div className="space-y-2">
-                                <Label htmlFor="dialogueId">ID диалога (опционально)</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="dialogueId">{t('visualEditors.talk.dialogueId')}</Label>
                                 <Input
                                     id="dialogueId"
-                                    placeholder="quest_intro_dialogue"
+                                    placeholder={t('visualEditors.talk.dialogueIdPlaceholder')}
+                                    className="font-mono"
                                     defaultValue={stepParams?.dialogueId || ''}
                                     onChange={(e) => updateParams({ dialogueId: e.target.value || undefined })}
                                     disabled={isSubmitting}
                                 />
-                                <p className="text-sm text-muted-foreground">
-                                    Конкретный диалог для активации. Оставьте пустым для любого диалога с NPC.
+                                <p className="text-xs text-muted-foreground">
+                                    {t('visualEditors.talk.dialogueIdDescription')}
                                 </p>
                             </div>
                         </div>
@@ -225,21 +233,22 @@ export function QuestStepEditor({
             case 'reach':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">Параметры достижения локации</h4>
+                        <h4 className="text-sm font-medium">{t('visualEditors.reach.title')}</h4>
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="mapId">ID карты</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="mapId">{t('visualEditors.reach.mapId')}</Label>
                                 <Input
                                     id="mapId"
-                                    placeholder="forest_1"
+                                    placeholder={t('visualEditors.reach.mapIdPlaceholder')}
+                                    className="font-mono"
                                     defaultValue={stepParams?.mapId || ''}
                                     onChange={(e) => updateParams({ mapId: e.target.value })}
                                     disabled={isSubmitting}
                                 />
                             </div>
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="x">X координата</Label>
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="x">{t('visualEditors.reach.x')}</Label>
                                     <Input
                                         id="x"
                                         type="number"
@@ -249,8 +258,8 @@ export function QuestStepEditor({
                                         disabled={isSubmitting}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="y">Y координата</Label>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="y">{t('visualEditors.reach.y')}</Label>
                                     <Input
                                         id="y"
                                         type="number"
@@ -260,13 +269,13 @@ export function QuestStepEditor({
                                         disabled={isSubmitting}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="radius">Радиус</Label>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="radius">{t('visualEditors.reach.radius')}</Label>
                                     <Input
                                         id="radius"
                                         type="number"
                                         min="0"
-                                        placeholder="5"
+                                        placeholder={t('visualEditors.reach.radiusPlaceholder')}
                                         defaultValue={stepParams?.radius || 5}
                                         onChange={(e) => updateParams({ radius: parseFloat(e.target.value) || 5 })}
                                         disabled={isSubmitting}
@@ -280,13 +289,14 @@ export function QuestStepEditor({
             case 'custom':
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">Пользовательские параметры</h4>
+                        <h4 className="text-sm font-medium">{t('visualEditors.custom.title')}</h4>
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="script">Скрипт</Label>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="script">{t('visualEditors.custom.script')}</Label>
                                 <Input
                                     id="script"
-                                    placeholder="custom_quest_handler"
+                                    placeholder={t('visualEditors.custom.scriptPlaceholder')}
+                                    className="font-mono"
                                     defaultValue={stepParams?.script || ''}
                                     onChange={(e) => updateParams({ script: e.target.value })}
                                     disabled={isSubmitting}
@@ -317,55 +327,58 @@ export function QuestStepEditor({
     return (
         <Card>
             <CardHeader>
-                <CardTitle>
+                <CardTitle className="text-base">
                     {step ? t('editingStep') : t('addingStep')}
                 </CardTitle>
-                <CardDescription>
-                    {t('title')}
-                </CardDescription>
+                <CardDescription>{t('title')}</CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="space-y-2">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                    <div className="space-y-1.5">
                         <Label htmlFor="stepIndex">{t('fields.stepIndex')}</Label>
                         <Input
                             id="stepIndex"
                             type="number"
                             min="0"
+                            className="w-24"
                             {...register('stepIndex', { valueAsNumber: true })}
                             disabled={isSubmitting}
                         />
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                             {t('fields.stepIndexDescription')}
                         </p>
                         {errors.stepIndex && (
-                            <p className="text-sm text-red-600">{errors.stepIndex.message}</p>
+                            <p className="text-xs text-destructive">{errors.stepIndex.message}</p>
                         )}
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <Label htmlFor="stepType">{t('fields.stepType')}</Label>
-                        <select
-                            id="stepType"
-                            {...register('stepType')}
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <Select
+                            value={watch('stepType')}
+                            onValueChange={(v) => setValue('stepType', v as any)}
                             disabled={isSubmitting}
                         >
-                            {stepTypeOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                    {option.label}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger id="stepType">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {stepTypeOptions.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         {errors.stepType && (
-                            <p className="text-sm text-red-600">{errors.stepType.message}</p>
+                            <p className="text-xs text-destructive">{errors.stepType.message}</p>
                         )}
                     </div>
 
                     {/* Visual parameter editor */}
                     {renderVisualEditor()}
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <Label htmlFor="clientStepKey">{t('fields.clientStepKey')}</Label>
                         <Input
                             id="clientStepKey"
@@ -373,17 +386,18 @@ export function QuestStepEditor({
                                 setValueAs: (value) => value === '' ? null : value
                             })}
                             placeholder={t('fields.clientStepKeyPlaceholder')}
+                            className="font-mono"
                             disabled={isSubmitting}
                         />
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                             {t('fields.clientStepKeyDescription')}
                         </p>
                         {errors.clientStepKey && (
-                            <p className="text-sm text-red-600">{errors.clientStepKey.message}</p>
+                            <p className="text-xs text-destructive">{errors.clientStepKey.message}</p>
                         )}
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                         <Label>{t('fields.parameters')}</Label>
                         <Textarea
                             value={paramsJson}
@@ -396,17 +410,17 @@ export function QuestStepEditor({
                                     // Ignore invalid JSON
                                 }
                             }}
-                            className="font-mono text-sm"
+                            className="font-mono text-xs"
                             rows={6}
                             disabled={isSubmitting}
                             placeholder={t('fields.parametersDescription')}
                         />
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                             {t('fields.parametersDescription')}
                         </p>
                     </div>
 
-                    <div className="flex gap-4">
+                    <div className="flex gap-3 pt-2">
                         <Button
                             type="button"
                             variant="outline"

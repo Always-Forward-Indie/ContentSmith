@@ -8,9 +8,14 @@
     "dialoguesNotFound": "Нет диалогов, соответствующих вашему поиску",
     "table": {
         "version": "Версия",
-        "startNode": "Начальный узел"
+        "startNode": "Начальный узел",
+        "noStartNode": "Не настроен",
+        "npc": "НПС"
     },
-    "showingResults": "Показано {current} элементов • Страница {page}",
+    "actions": {
+        "view": "Просмотр"
+    },
+    "showingResults": "Показано {from}–{to} из {total}",
     "newDialogue": "Новый диалог",
     "editDialogue": "Редактировать диалог",
     "dialogueName": "Название диалога",
@@ -108,6 +113,9 @@
         "nodeTypes": "Типы узлов",
         "quickActions": "Быстрые действия",
         "addConnection": "Добавить соединение",
+        "statusReady": "Начальный узел задан",
+        "statusDraft": "Нет начального узла",
+        "statusStart": "Начало",
         "exportDialogue": "Экспортировать диалог",
         "testDialogue": "Тестировать диалог",
         "dialogueNodes": "Узлы диалога",
@@ -168,7 +176,12 @@
                 "conditionsDescription": "JSON условия, которые должны быть выполнены для доступности этого ребра",
                 "actions": "Действия (JSON)",
                 "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
-                "actionsDescription": "JSON действия для выполнения при выборе этого ребра"
+                "actionsDescription": "JSON действия для выполнения при выборе этого ребра",
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON",
+                "nodesUntitled": "Без имени",
+                "connectionSetup": "Настройка связи",
+                "edgeSettings": "Параметры связи"
             },
             "validation": {
                 "selectBothNodes": "Пожалуйста, выберите исходный и целевой узлы"
@@ -200,7 +213,12 @@
                 "conditionsDescription": "JSON условия, которые должны быть выполнены для доступности этого ребра",
                 "actions": "Действия (JSON)",
                 "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
-                "actionsDescription": "JSON действия для выполнения при выборе этого ребра"
+                "actionsDescription": "JSON действия для выполнения при выборе этого ребра",
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON",
+                "nodesUntitled": "Без имени",
+                "connectionSetup": "Настройка связи",
+                "edgeSettings": "Параметры связи"
             },
             "validation": {
                 "selectBothNodes": "Пожалуйста, выберите исходный и целевой узлы"
@@ -235,7 +253,9 @@
                 "conditionsDescription": "Дополнительные условия для этого узла",
                 "actions": "Действия (JSON)",
                 "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
-                "actionsDescription": "Дополнительные действия для выполнения при достижении этого узла"
+                "actionsDescription": "Дополнительные действия для выполнения при достижении этого узла",
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON"
             },
             "buttons": {
                 "cancel": "Отменить",
@@ -266,7 +286,9 @@
                 "conditionsDescription": "Условия, которые должны быть выполнены для доступности этого узла",
                 "actions": "Действия (JSON)",
                 "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
-                "actionsDescription": "Действия для выполнения при обработке этого узла"
+                "actionsDescription": "Действия для выполнения при обработке этого узла",
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON"
             },
             "buttons": {
                 "cancel": "Отменить",

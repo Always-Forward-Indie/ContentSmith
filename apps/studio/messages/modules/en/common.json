@@ -26,5 +26,9 @@
     "adding": "Adding...",
     "update": "Update",
     "updating": "Updating...",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "remove": "Remove",
+    "removing": "Removing...",
+    "reset": "Reset filters",
+    "filters": "Filters"
 }

@@ -11,9 +11,45 @@
         "description": "Design complex quest chains with objectives, rewards, and player progression",
         "openEditor": "Open Quest Editor"
     },
+    "npcs": {
+        "title": "NPC Management",
+        "description": "Create and configure non-player characters, their stats and behaviour",
+        "open": "Open NPC Editor"
+    },
+    "skills": {
+        "title": "Skills",
+        "description": "Design skills, spell schools, effects and scale types",
+        "open": "Open Skill Editor"
+    },
+    "entityAttributes": {
+        "title": "Entity Attributes",
+        "description": "Manage base attributes for characters, monsters and other entities",
+        "open": "Open Attributes"
+    },
+    "races": {
+        "title": "Races",
+        "description": "Configure playable and non-playable races with their stat modifiers",
+        "open": "Open Races"
+    },
+    "items": {
+        "title": "Items",
+        "description": "Manage items, equipment, rarity and item types",
+        "open": "Open Item Editor"
+    },
+    "mobs": {
+        "title": "Mobs",
+        "description": "Create and manage monsters, their stats, spawn zones and loot",
+        "open": "Open Mob Editor"
+    },
     "localization": {
         "title": "Localization Tools",
-        "description": "Manage translations and localized content for multiple languages"
+        "description": "Manage translations and localized content for multiple languages",
+        "open": "Open Localization"
+    },
+    "categories": {
+        "narrative": "Narrative & Story",
+        "world": "World Building",
+        "tools": "Tools"
     },
     "welcome": {
         "title": "Welcome to ContentSmith",

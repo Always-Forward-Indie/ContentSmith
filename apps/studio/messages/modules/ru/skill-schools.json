@@ -14,5 +14,7 @@
     "searchSkillSchools": "Поиск школ скилов...",
     "noSkillSchoolsFound": "Школы скилов не найдены",
     "nameRequired": "Название обязательно",
-    "slugRequired": "Слаг обязателен"
+    "slugRequired": "Слаг обязателен",
+    "description": "Управление школами скилов, объединяющими навыки по магическим дисциплинам",
+    "showingResults": "Показано {from}–{to} из {total}"
 }

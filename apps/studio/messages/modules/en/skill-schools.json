@@ -14,5 +14,7 @@
     "searchSkillSchools": "Search skill schools...",
     "noSkillSchoolsFound": "No skill schools found",
     "nameRequired": "Name is required",
-    "slugRequired": "Slug is required"
+    "slugRequired": "Slug is required",
+    "description": "Manage skill schools that group skills by magical discipline",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

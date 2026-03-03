@@ -18,5 +18,7 @@
     "slugRequired": "Slug is required",
     "effectTypeRequired": "Effect type is required",
     "search": "Search skill effects...",
-    "actions": "Actions"
+    "actions": "Actions",
+    "description": "Manage skill effects that define what happens when a skill is used",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

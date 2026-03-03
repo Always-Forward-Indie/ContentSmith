@@ -14,5 +14,7 @@
     "searchSkillScaleTypes": "Поиск типов масштабирования...",
     "noSkillScaleTypesFound": "Типы масштабирования не найдены",
     "nameRequired": "Название обязательно",
-    "slugRequired": "Слаг обязателен"
+    "slugRequired": "Слаг обязателен",
+    "description": "Управление типами масштабирования, определяющими рост значений навыков",
+    "showingResults": "Показано {from}–{to} из {total}"
 }

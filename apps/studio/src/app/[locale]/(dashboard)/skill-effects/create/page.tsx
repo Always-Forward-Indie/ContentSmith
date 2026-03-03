@@ -166,7 +166,7 @@ export default function CreateSkillEffectPage() {
                                     }`}
                             >
                                 <option value="">{t('effectType')}</option>
-                                {effectTypes?.map((effectType) => (
+                                {(effectTypes?.data ?? []).map((effectType) => (
                                     <option key={effectType.id} value={effectType.id.toString()}>
                                         {effectType.slug}
                                     </option>

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { entityAttributes } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and } from '@contentsmith/database';
+import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
 import {
   entityAttributesSchema,
   createEntityAttributesSchema,
@@ -11,6 +11,8 @@ import {
 
 const entityAttributesListQuerySchema = z.object({
   search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
 });
 
 const entityAttributesIdSchema = z.object({
@@ -22,34 +24,33 @@ export const entityAttributesRouter = createTRPCRouter({
   list: publicProcedure
     .input(entityAttributesListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-
       if (search) {
-        conditions.push(
-          or(
-            like(entityAttributes.name, `%${search}%`),
-            like(entityAttributes.slug, `%${search}%`)
-          )
-        );
+        conditions.push(or(like(entityAttributes.name, `%${search}%`), like(entityAttributes.slug, `%${search}%`)));
       }
-
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем атрибуты сущностей
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(entityAttributes)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const results = await db
-        .select({
-          id: entityAttributes.id,
-          name: entityAttributes.name,
-          slug: entityAttributes.slug,
-        })
+        .select({ id: entityAttributes.id, name: entityAttributes.name, slug: entityAttributes.slug })
         .from(entityAttributes)
         .where(whereClause)
-        .orderBy(entityAttributes.name);
+        .orderBy(entityAttributes.name)
+        .limit(pageSize)
+        .offset(offset);
 
-      return results;
+      return {
+        data: results,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить атрибут сущности по ID

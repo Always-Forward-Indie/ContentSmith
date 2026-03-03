@@ -13,8 +13,6 @@ export const npcSchema = z.object({
   radius: z.number().int().positive().default(100),
   isInteractable: z.boolean().default(true),
   npcType: z.number().int().positive().default(1),
-  dialogueId: z.number().int().positive().nullable(),
-  questId: z.number().int().positive().nullable(),
 });
 
 export const createNpcSchema = npcSchema.omit({ id: true });
@@ -44,10 +42,10 @@ export const updateNpcTypeSchema = npcTypeSchema.partial().required({ id: true }
 export const npcPositionSchema = z.object({
   id: z.number().int().nullable(),
   npcId: z.number().int().positive(),
-  x: z.number().int().nullable(),
-  y: z.number().int().nullable(),
-  z: z.number().int().nullable(),
-  rotZ: z.number().int().default(0),
+  x: z.number().nullable(),
+  y: z.number().nullable(),
+  z: z.number().nullable(),
+  rotZ: z.number().default(0),
 });
 
 export const createNpcPositionSchema = npcPositionSchema.omit({ id: true });
@@ -150,13 +148,16 @@ export const npcWithRelationsSchema = npcSchema.extend({
 // Query/Filter schemas
 export const npcListQuerySchema = z.object({
   search: z.string().optional(),
-  limit: z.number().min(1).max(100).default(50),
-  offset: z.number().min(0).default(0),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(20),
   raceId: z.number().int().positive().optional(),
   npcType: z.number().int().positive().optional(),
-  level: z.number().int().positive().optional(),
+  minLevel: z.number().int().min(1).optional(),
+  maxLevel: z.number().int().min(1).optional(),
   isInteractable: z.boolean().optional(),
   isDead: z.boolean().optional(),
+  sortBy: z.enum(['id', 'name', 'level']).default('id'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
 });
 
 // Export types

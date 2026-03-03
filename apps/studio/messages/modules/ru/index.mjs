@@ -39,6 +39,7 @@ const items = loadJson('items.json');
 const itemAttributes = loadJson('item-attributes.json');
 const itemsRarity = loadJson('items-rarity.json');
 const itemTypes = loadJson('item-types.json');
+const mobs = loadJson('mobs.json');
 
 export default {
   common,
@@ -61,4 +62,5 @@ export default {
   itemAttributes,
   itemsRarity,
   itemTypes,
+  mobs,
 };

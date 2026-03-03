@@ -16,7 +16,9 @@
             "export": "Export",
             "import": "Import",
             "resetLayout": "Reset Layout",
-            "autoLayout": "Auto Layout"
+            "autoLayout": "Auto Layout",
+            "cancel": "Cancel",
+            "confirm": "Reset"
         },
         "nodeTypes": {
             "line": "Line",
@@ -89,6 +91,7 @@
     "dialogs": {
         "edgeEdit": {
             "title": "Edit Connection (Edge)",
+            "confirmDelete": "Are you sure you want to delete this connection?",
             "fields": {
                 "choiceKey": {
                     "label": "Choice Key/Text",
@@ -110,7 +113,9 @@
                 "actions": {
                     "label": "Actions (JSON)",
                     "placeholder": "Actions to execute when this choice is selected"
-                }
+                },
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON"
             },
             "buttons": {
                 "delete": "Delete Edge",
@@ -139,7 +144,9 @@
                 "actions": {
                     "label": "Actions (JSON)",
                     "placeholder": "Action configuration"
-                }
+                },
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON"
             },
             "nodeTypes": {
                 "line": {
@@ -200,12 +207,14 @@
         "choice": {
             "title": "Choice Hub",
             "untitled": "Untitled Choice Hub",
-            "choices": "Choices"
+            "choices": "Choices",
+            "more": "more"
         },
         "action": {
             "title": "Action Node",
             "untitled": "Untitled Action",
-            "parameters": "Parameters"
+            "parameters": "Parameters",
+            "hasActions": "Has actions"
         },
         "jump": {
             "title": "Jump Node",

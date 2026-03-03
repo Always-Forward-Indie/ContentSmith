@@ -1,18 +1,18 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl'
 import { z } from 'zod'
+import Link from 'next/link'
+import { ChevronRight, ScrollText } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import NPCSelect from '@/components/editors/NPCSelect'
 
 import { trpc } from '@/lib/trpc'
@@ -21,15 +21,14 @@ import { CreateQuestSchema } from '@contentsmith/validation'
 type CreateQuestForm = z.infer<typeof CreateQuestSchema>
 
 export default function NewQuestPage() {
-    const t = useTranslations();
+    const t = useTranslations()
     const locale = useLocale()
     const router = useRouter()
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
         setValue,
         watch,
     } = useForm<CreateQuestForm>({
@@ -45,154 +44,169 @@ export default function NewQuestPage() {
         onSuccess: (data) => {
             router.push(`/${locale}/quests/${data.id}`)
         },
-        onError: (error) => {
-            console.error('Failed to create quest:', error)
-        },
     })
 
     const onSubmit = async (data: CreateQuestForm) => {
-        setIsSubmitting(true)
-        try {
-            await createQuest.mutateAsync(data)
-        } finally {
-            setIsSubmitting(false)
-        }
+        await createQuest.mutateAsync(data)
     }
 
     const repeatable = watch('repeatable')
 
     return (
-        <div className="container mx-auto py-6">
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold">{t('quests.newQuest')}</h1>
-                <p className="text-muted-foreground">
-                    {t('quests.form.fillBasicInfo')}
-                </p>
+        <div className="max-w-lg mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/quests`} className="hover:text-foreground transition-colors">
+                    {t('quests.title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('quests.newQuest')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <ScrollText className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('quests.newQuest')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('quests.form.fillBasicInfo')}</p>
+                </div>
             </div>
 
-            <Card className="max-w-2xl">
+            {/* Form Card */}
+            <Card>
                 <CardHeader>
-                    <CardTitle>{t('quests.form.basicInfo')}</CardTitle>
-                    <CardDescription>
-                        {t('quests.form.basicInfoDescription')}
-                    </CardDescription>
+                    <CardTitle className="text-base">{t('quests.form.basicInfo')}</CardTitle>
+                    <CardDescription>{t('quests.form.basicInfoDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Slug */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="slug">{t('quests.form.slug')}</Label>
                             <Input
                                 id="slug"
                                 {...register('slug')}
                                 placeholder="wolf_hunt_intro"
-                                disabled={isSubmitting}
+                                className="font-mono"
+                                disabled={isSubmitting || createQuest.isPending}
                             />
                             {errors.slug && (
-                                <p className="text-sm text-red-600">{errors.slug.message}</p>
+                                <p className="text-xs text-destructive">{errors.slug.message}</p>
                             )}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Min Level */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="minLevel">{t('quests.form.minLevel')}</Label>
                             <Input
                                 id="minLevel"
                                 type="number"
                                 min="1"
                                 max="999"
+                                className="w-28"
                                 {...register('minLevel', { valueAsNumber: true })}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || createQuest.isPending}
                             />
                             {errors.minLevel && (
-                                <p className="text-sm text-red-600">{errors.minLevel.message}</p>
+                                <p className="text-xs text-destructive">{errors.minLevel.message}</p>
                             )}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="repeatable" className="flex items-center gap-2">
-                                <input
-                                    id="repeatable"
-                                    type="checkbox"
-                                    {...register('repeatable')}
-                                    disabled={isSubmitting}
-                                />
-                                {t('quests.form.repeatable')}
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                {t('quests.form.repeatableDescription')}
-                            </p>
+                        {/* Repeatable toggle */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="repeatable" className="text-sm font-medium cursor-pointer">
+                                    {t('quests.form.repeatable')}
+                                </Label>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    {t('quests.form.repeatableDescription')}
+                                </p>
+                            </div>
+                            <Switch
+                                id="repeatable"
+                                checked={!!repeatable}
+                                onCheckedChange={(v) => setValue('repeatable', v)}
+                                disabled={isSubmitting || createQuest.isPending}
+                            />
                         </div>
 
+                        {/* Cooldown (only if repeatable) */}
                         {repeatable && (
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="cooldownSec">{t('quests.form.cooldown')}</Label>
                                 <Input
                                     id="cooldownSec"
                                     type="number"
                                     min="0"
+                                    className="w-36"
                                     {...register('cooldownSec', { valueAsNumber: true })}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || createQuest.isPending}
                                 />
-                                <p className="text-sm text-muted-foreground">
-                                    {t('quests.form.cooldownDescription')}
-                                </p>
+                                <p className="text-xs text-muted-foreground">{t('quests.form.cooldownDescription')}</p>
                                 {errors.cooldownSec && (
-                                    <p className="text-sm text-red-600">{errors.cooldownSec.message}</p>
+                                    <p className="text-xs text-destructive">{errors.cooldownSec.message}</p>
                                 )}
                             </div>
                         )}
 
-                        <div className="space-y-2">
+                        {/* Quest Giver */}
+                        <div className="space-y-1.5">
                             <NPCSelect
                                 label={t('quests.form.questGiver')}
                                 value={watch('giverNpcId') ?? null}
                                 onChange={(npcId) => setValue('giverNpcId', npcId)}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('quests.form.questGiverDescription')}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{t('quests.form.questGiverDescription')}</p>
                             {errors.giverNpcId && (
-                                <p className="text-sm text-red-600">{errors.giverNpcId.message}</p>
+                                <p className="text-xs text-destructive">{errors.giverNpcId.message}</p>
                             )}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Quest Receiver */}
+                        <div className="space-y-1.5">
                             <NPCSelect
                                 label={t('quests.form.questReceiver')}
                                 value={watch('turninNpcId') ?? null}
                                 onChange={(npcId) => setValue('turninNpcId', npcId)}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('quests.form.questReceiverDescription')}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{t('quests.form.questReceiverDescription')}</p>
                             {errors.turninNpcId && (
-                                <p className="text-sm text-red-600">{errors.turninNpcId.message}</p>
+                                <p className="text-xs text-destructive">{errors.turninNpcId.message}</p>
                             )}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Client Key */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="clientQuestKey">{t('quests.form.clientKey')}</Label>
                             <Input
                                 id="clientQuestKey"
                                 {...register('clientQuestKey', {
-                                    setValueAs: (value) => value === '' ? null : value
+                                    setValueAs: (v) => v === '' ? null : v,
                                 })}
                                 placeholder="quest_wolf_hunt_intro_title"
-                                disabled={isSubmitting}
+                                className="font-mono"
+                                disabled={isSubmitting || createQuest.isPending}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('quests.form.clientKeyDescription')}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{t('quests.form.clientKeyDescription')}</p>
                             {errors.clientQuestKey && (
-                                <p className="text-sm text-red-600">{errors.clientQuestKey.message}</p>
+                                <p className="text-xs text-destructive">{errors.clientQuestKey.message}</p>
                             )}
                         </div>
 
-                        <div className="flex gap-4">
+                        {createQuest.error && (
+                            <p className="text-sm text-destructive">
+                                {t('quests.createError')}: {createQuest.error.message}
+                            </p>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => router.push(`/${locale}/quests`)}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || createQuest.isPending}
                             >
                                 {t('common.cancel')}
                             </Button>
@@ -203,12 +217,6 @@ export default function NewQuestPage() {
                                 {isSubmitting || createQuest.isPending ? t('quests.creating') : t('quests.createNew')}
                             </Button>
                         </div>
-
-                        {createQuest.error && (
-                            <div className="text-sm text-red-600 mt-2">
-                                {t('quests.createError')}: {createQuest.error.message}
-                            </div>
-                        )}
                     </form>
                 </CardContent>
             </Card>

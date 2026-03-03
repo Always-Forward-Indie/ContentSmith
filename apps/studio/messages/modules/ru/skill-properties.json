@@ -14,5 +14,7 @@
     "searchSkillProperties": "Поиск свойств навыков...",
     "noSkillPropertiesFound": "Свойства навыков не найдены",
     "nameRequired": "Название обязательно",
-    "slugRequired": "Слаг обязателен"
+    "slugRequired": "Слаг обязателен",
+    "description": "Управление свойствами навыков, определяющими числовые параметры скилов",
+    "showingResults": "Показано {from}–{to} из {total}"
 }

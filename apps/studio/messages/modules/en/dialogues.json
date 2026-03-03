@@ -8,9 +8,14 @@
     "dialoguesNotFound": "No dialogues match your search",
     "table": {
         "version": "Version",
-        "startNode": "Start Node"
+        "startNode": "Start Node",
+        "noStartNode": "Not configured",
+        "npc": "NPC"
     },
-    "showingResults": "Showing {current} items • Page {page}",
+    "actions": {
+        "view": "View details"
+    },
+    "showingResults": "Showing {from}–{to} of {total}",
     "newDialogue": "New Dialogue",
     "editDialogue": "Edit Dialogue",
     "dialogueName": "Dialogue Name",
@@ -108,6 +113,9 @@
         "nodeTypes": "Node Types",
         "quickActions": "Quick Actions",
         "addConnection": "Add Connection",
+        "statusReady": "Start node set",
+        "statusDraft": "No start node",
+        "statusStart": "Start",
         "exportDialogue": "Export Dialogue",
         "testDialogue": "Test Dialogue",
         "dialogueNodes": "Dialogue Nodes",
@@ -168,7 +176,12 @@
                 "conditionsDescription": "JSON conditions that must be met for this edge to be available",
                 "actions": "Actions (JSON)",
                 "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
-                "actionsDescription": "JSON actions to execute when this edge is taken"
+                "actionsDescription": "JSON actions to execute when this edge is taken",
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON",
+                "nodesUntitled": "Unnamed",
+                "connectionSetup": "Connection Setup",
+                "edgeSettings": "Edge Settings"
             },
             "validation": {
                 "selectBothNodes": "Please select both source and target nodes"
@@ -200,7 +213,12 @@
                 "conditionsDescription": "JSON conditions that must be met for this edge to be available",
                 "actions": "Actions (JSON)",
                 "actionsPlaceholder": "{\"type\": \"sequence\", \"actions\": [{\"type\": \"flag\", \"flag\": \"quest.started\", \"value\": true}, {\"type\": \"item\", \"item\": \"gold\", \"count\": -10}]}",
-                "actionsDescription": "JSON actions to execute when this edge is chosen"
+                "actionsDescription": "JSON actions to execute when this edge is chosen",
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON",
+                "nodesUntitled": "Unnamed",
+                "connectionSetup": "Connection Setup",
+                "edgeSettings": "Edge Settings"
             },
             "validation": {
                 "selectBothNodes": "Please select both source and target nodes"
@@ -235,7 +253,9 @@
                 "conditionsDescription": "Optional conditions for this node",
                 "actions": "Actions (JSON)",
                 "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
-                "actionsDescription": "Optional actions to execute when this node is reached"
+                "actionsDescription": "Optional actions to execute when this node is reached",
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON"
             },
             "buttons": {
                 "cancel": "Cancel",
@@ -266,7 +286,9 @@
                 "conditionsDescription": "Conditions that must be met for this node to be available",
                 "actions": "Actions (JSON)",
                 "actionsPlaceholder": "{\"type\": \"set_flag\", \"flag\": \"example\", \"value\": true}",
-                "actionsDescription": "Actions to execute when this node is processed"
+                "actionsDescription": "Actions to execute when this node is processed",
+                "advanced": "Advanced",
+                "jsonError": "Invalid JSON"
             },
             "buttons": {
                 "cancel": "Cancel",

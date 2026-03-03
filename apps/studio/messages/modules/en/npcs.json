@@ -12,6 +12,7 @@
     "type": "Type",
     "level": "Level",
     "health": "Health",
+    "vitals": "Vitals",
     "status": "Status",
     "interactable": "Interactable",
     "alive": "Alive",
@@ -65,5 +66,33 @@
     "attributeUpdated": "Attribute updated successfully",
     "attributeRemoved": "Attribute removed successfully",
     "skillUpdated": "Skill updated successfully",
-    "skillRemoved": "Skill removed successfully"
+    "skillRemoved": "Skill removed successfully",
+    "dialogues": {
+        "title": "Dialogues",
+        "description": "Dialogues triggered when interacting with this NPC",
+        "add": "Add Dialogue",
+        "addDescription": "Link an existing dialogue to this NPC",
+        "edit": "Edit Link",
+        "removeTitle": "Unlink Dialogue",
+        "removeDescription": "Remove dialogue \"{dialogue}\" from this NPC?",
+        "noDialogues": "No dialogues linked",
+        "addFirst": "Click the button above to link the first dialogue",
+        "added": "Dialogue linked successfully",
+        "updated": "Dialogue link updated successfully",
+        "removed": "Dialogue unlinked successfully",
+        "priorityLabel": "Priority",
+        "hasCondition": "Has condition",
+        "fields": {
+            "dialogue": "Dialogue",
+            "selectDialogue": "Select a dialogue...",
+            "priority": "Priority",
+            "priorityDescription": "Higher value = checked first. If condition passes, this dialogue is used.",
+            "condition": "Condition (JSON)",
+            "conditionPlaceholder": "{\"op\": \"AND\", \"items\": []}",
+            "conditionDescription": "Optional condition group for when this dialogue should be available"
+        }
+    },
+    "positionNotSet": "No position set — assign coordinates in the edit form",
+    "positionDescription": "Location and orientation in the game world",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

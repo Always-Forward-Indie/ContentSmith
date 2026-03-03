@@ -28,7 +28,7 @@
     "actions": "Действия",
     "noData": "Атрибуты не найдены",
     "noSearchResults": "Нет атрибутов, соответствующих вашему поиску",
-    "showingResults": "Показано {from} - {to} из {total} результатов",
+    "showingResults": "Показано {from}–{to} из {total}",
     "previous": "Предыдущая",
     "next": "Следующая",
     "pageOf": "Страница {current} из {total}",

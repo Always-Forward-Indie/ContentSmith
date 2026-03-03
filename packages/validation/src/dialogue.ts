@@ -51,6 +51,15 @@ export const DialogueSchema = z.object({
 export const CreateDialogueSchema = DialogueSchema.omit({ id: true });
 export const UpdateDialogueSchema = DialogueSchema.partial().required({ id: true });
 
+export const dialogueListQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(10),
+  npcId: z.number().int().positive().optional(),
+  sortBy: z.enum(['id', 'slug', 'version']).default('id'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
 export type DialogueNodeType = z.infer<typeof DialogueNodeTypeSchema>;
 export type DialogueNode = z.infer<typeof DialogueNodeSchema>;
 export type DialogueEdge = z.infer<typeof DialogueEdgeSchema>;

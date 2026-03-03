@@ -8,6 +8,5 @@ interface ItemViewPageProps {
 
 export default function ItemViewPage({ params }: ItemViewPageProps) {
     const itemId = parseInt(params.id);
-
     return <ItemView itemId={itemId} />;
 }

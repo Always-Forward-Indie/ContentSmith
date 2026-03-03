@@ -16,7 +16,9 @@
             "export": "Экспорт",
             "import": "Импорт",
             "resetLayout": "Сбросить макет",
-            "autoLayout": "Авто макет"
+            "autoLayout": "Авто макет",
+            "cancel": "Отмена",
+            "confirm": "Сбросить"
         },
         "nodeTypes": {
             "line": "Строка",
@@ -89,6 +91,7 @@
     "dialogs": {
         "edgeEdit": {
             "title": "Редактировать связь (ребро)",
+            "confirmDelete": "Удалить это соединение?",
             "fields": {
                 "choiceKey": {
                     "label": "Ключ/Текст выбора",
@@ -110,7 +113,9 @@
                 "actions": {
                     "label": "Действия (JSON)",
                     "placeholder": "Действия для выполнения когда этот выбор выбран"
-                }
+                },
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON"
             },
             "buttons": {
                 "delete": "Удалить связь",
@@ -139,7 +144,9 @@
                 "actions": {
                     "label": "Действия (JSON)",
                     "placeholder": "Конфигурация действий"
-                }
+                },
+                "advanced": "Дополнительно",
+                "jsonError": "Некорректный JSON"
             },
             "nodeTypes": {
                 "line": {
@@ -200,12 +207,14 @@
         "choice": {
             "title": "Узел выбора",
             "untitled": "Безымянный выбор",
-            "choices": "Варианты"
+            "choices": "Варианты",
+            "more": "ещё"
         },
         "action": {
             "title": "Узел действия",
             "untitled": "Безымянное действие",
-            "parameters": "Параметры"
+            "parameters": "Параметры",
+            "hasActions": "Есть действия"
         },
         "jump": {
             "title": "Узел перехода",

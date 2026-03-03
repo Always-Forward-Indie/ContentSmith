@@ -1,16 +1,18 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { createTRPCRouter, requirePermission, devRequirePermission, permissions } from '../trpc';
+import { toJsonb } from '../utils/json';
 import { 
   DialogueSchema, 
   CreateDialogueSchema, 
   UpdateDialogueSchema,
   DialogueNodeSchema,
   DialogueNodeBaseSchema,
-  DialogueEdgeSchema
+  DialogueEdgeSchema,
+  dialogueListQuerySchema,
 } from '@contentsmith/validation';
-import { dialogue, dialogueNode, dialogueEdge } from '@contentsmith/database';
-import { eq, desc, like, or, inArray } from '@contentsmith/database';
+import { dialogue, dialogueNode, dialogueEdge, npc, npcDialogue } from '@contentsmith/database';
+import { eq, desc, like, or, inArray, count, and, asc, sql } from '@contentsmith/database';
 
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development';
@@ -20,33 +22,62 @@ const requirePerm = (permission: string) =>
 export const dialogueRouter = createTRPCRouter({
   // Get all dialogues with pagination
   list: requirePerm(permissions.DIALOGUE_READ)
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(100).default(10),
-      search: z.string().optional(),
-    }))
+    .input(dialogueListQuerySchema)
     .query(async ({ input, ctx }) => {
-      const offset = (input.page - 1) * input.limit;
-      
-      const whereClause = input.search 
-        ? like(dialogue.slug, `%${input.search}%`)
-        : undefined;
-      
-      const dialogues = await ctx.db.select()
+      const { search, page, limit, npcId, sortBy, sortOrder } = input;
+      const offset = (page - 1) * limit;
+
+      const conditions = [];
+      if (search) conditions.push(like(dialogue.slug, `%${search}%`));
+      if (npcId) conditions.push(
+        sql`EXISTS (SELECT 1 FROM npc_dialogue nd WHERE nd.dialogue_id = ${dialogue.id} AND nd.npc_id = ${npcId})`
+      );
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [totalResult] = await ctx.db
+        .select({ count: count() })
         .from(dialogue)
+        .where(whereClause);
+      const total = totalResult?.count ?? 0;
+
+      const dir = sortOrder === 'asc' ? asc : desc;
+      const orderByClause = (
+        sortBy === 'slug'    ? dir(dialogue.slug) :
+        sortBy === 'version' ? dir(dialogue.version) :
+        dir(dialogue.id)
+      );
+
+      const dialogues = await ctx.db.select({
+        id: dialogue.id,
+        slug: dialogue.slug,
+        version: dialogue.version,
+        startNodeId: dialogue.startNodeId,
+        npcNames: sql<string | null>`string_agg(${npc.name}, ', ' ORDER BY ${npc.name})`,
+      })
+        .from(dialogue)
+        .leftJoin(npcDialogue, eq(npcDialogue.dialogueId, dialogue.id))
+        .leftJoin(npc, eq(npc.id, npcDialogue.npcId))
         .where(whereClause)
-        .limit(input.limit)
-        .offset(offset)
-        .orderBy(desc(dialogue.id));
-      
+        .groupBy(dialogue.id, dialogue.slug, dialogue.version, dialogue.startNodeId)
+        .orderBy(orderByClause)
+        .limit(limit)
+        .offset(offset);
+
       return {
         data: dialogues,
-        pagination: {
-          page: input.page,
-          limit: input.limit,
-          total: dialogues.length, // TODO: Get actual count
-        },
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       };
+    }),
+
+  // Get distinct NPCs that have dialogues linked
+  getDialogueNpcs: requirePerm(permissions.DIALOGUE_READ)
+    .query(async ({ ctx }) => {
+      const npcs = await ctx.db
+        .selectDistinct({ id: npc.id, name: npc.name })
+        .from(npc)
+        .innerJoin(npcDialogue, eq(npcDialogue.npcId, npc.id))
+        .orderBy(asc(npc.name));
+      return npcs;
     }),
 
   // Get single dialogue by ID
@@ -168,7 +199,11 @@ export const dialogueRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.db
         .insert(dialogueNode)
-        .values(input)
+        .values({
+          ...input,
+          conditionGroup: toJsonb(input.conditionGroup),
+          actionGroup: toJsonb(input.actionGroup),
+        })
         .returning();
       
       return result[0];
@@ -181,7 +216,11 @@ export const dialogueRouter = createTRPCRouter({
       
       const result = await ctx.db
         .update(dialogueNode)
-        .set(updateData)
+        .set({
+          ...updateData,
+          conditionGroup: toJsonb(updateData.conditionGroup),
+          actionGroup: toJsonb(updateData.actionGroup),
+        })
         .where(eq(dialogueNode.id, id))
         .returning();
       
@@ -228,7 +267,11 @@ export const dialogueRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.db
         .insert(dialogueEdge)
-        .values(input)
+        .values({
+          ...input,
+          conditionGroup: toJsonb(input.conditionGroup),
+          actionGroup: toJsonb(input.actionGroup),
+        })
         .returning();
       
       return result[0];
@@ -241,7 +284,11 @@ export const dialogueRouter = createTRPCRouter({
       
       const result = await ctx.db
         .update(dialogueEdge)
-        .set(updateData)
+        .set({
+          ...updateData,
+          conditionGroup: toJsonb(updateData.conditionGroup),
+          actionGroup: toJsonb(updateData.actionGroup),
+        })
         .where(eq(dialogueEdge.id, id))
         .returning();
       
@@ -292,7 +339,11 @@ export const dialogueRouter = createTRPCRouter({
         // Update existing node
         const result = await ctx.db
           .update(dialogueNode)
-          .set(nodeData)
+          .set({
+            ...nodeData,
+            conditionGroup: toJsonb(nodeData.conditionGroup),
+            actionGroup: toJsonb(nodeData.actionGroup),
+          })
           .where(eq(dialogueNode.id, id))
           .returning();
         return result[0];
@@ -300,7 +351,11 @@ export const dialogueRouter = createTRPCRouter({
         // Create new node
         const result = await ctx.db
           .insert(dialogueNode)
-          .values(nodeData)
+          .values({
+            ...nodeData,
+            conditionGroup: toJsonb(nodeData.conditionGroup),
+            actionGroup: toJsonb(nodeData.actionGroup),
+          })
           .returning();
         return result[0];
       }
@@ -324,7 +379,11 @@ export const dialogueRouter = createTRPCRouter({
         // Update existing edge
         const result = await ctx.db
           .update(dialogueEdge)
-          .set(edgeData)
+          .set({
+            ...edgeData,
+            conditionGroup: toJsonb(edgeData.conditionGroup),
+            actionGroup: toJsonb(edgeData.actionGroup),
+          })
           .where(eq(dialogueEdge.id, id))
           .returning();
         return result[0];
@@ -332,7 +391,11 @@ export const dialogueRouter = createTRPCRouter({
         // Create new edge
         const result = await ctx.db
           .insert(dialogueEdge)
-          .values(edgeData)
+          .values({
+            ...edgeData,
+            conditionGroup: toJsonb(edgeData.conditionGroup),
+            actionGroup: toJsonb(edgeData.actionGroup),
+          })
           .returning();
         return result[0];
       }

@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslations, useLocale } from 'next-intl'
+import { MessageSquare, ChevronRight, ArrowLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,42 +61,56 @@ export default function NewDialoguePage() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t('form.newDialogueTitle')}</h1>
-                <p className="text-muted-foreground">
-                    {t('form.newDialogueDescription')}
-                </p>
+        <div className="max-w-lg mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/dialogues`} className="hover:text-foreground transition-colors">
+                    {t('title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('form.newDialogueTitle')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <MessageSquare className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('form.newDialogueTitle')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('form.newDialogueDescription')}</p>
+                </div>
             </div>
 
+            {/* Form Card */}
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('form.dialogueDetails')}</CardTitle>
-                    <CardDescription>
-                        {t('form.dialogueDetailsDescription')}
-                    </CardDescription>
+                    <CardTitle className="text-base">{t('form.dialogueDetails')}</CardTitle>
+                    <CardDescription>{t('form.dialogueDetailsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="space-y-2">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Slug */}
+                        <div className="space-y-1.5">
                             <label htmlFor="slug" className="text-sm font-medium">
                                 {t('form.slug')}
                             </label>
                             <Input
                                 id="slug"
                                 placeholder={t('form.slugPlaceholder')}
+                                className="font-mono"
                                 {...register('slug')}
                                 aria-invalid={errors.slug ? 'true' : 'false'}
                             />
-                            {errors.slug && (
-                                <p className="text-sm text-destructive">{errors.slug.message}</p>
+                            {errors.slug ? (
+                                <p className="text-xs text-destructive">{errors.slug.message}</p>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">{t('form.slugDescription')}</p>
                             )}
-                            <p className="text-xs text-muted-foreground">
-                                {t('form.slugDescription')}
-                            </p>
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Version */}
+                        <div className="space-y-1.5">
                             <label htmlFor="version" className="text-sm font-medium">
                                 {t('form.version')}
                             </label>
@@ -102,27 +118,31 @@ export default function NewDialoguePage() {
                                 id="version"
                                 type="number"
                                 min="1"
+                                className="w-28"
                                 {...register('version', { valueAsNumber: true })}
                                 aria-invalid={errors.version ? 'true' : 'false'}
                             />
-                            {errors.version && (
-                                <p className="text-sm text-destructive">{errors.version.message}</p>
+                            {errors.version ? (
+                                <p className="text-xs text-destructive">{errors.version.message}</p>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">{t('form.versionDescription')}</p>
                             )}
-                            <p className="text-xs text-muted-foreground">
-                                {t('form.versionDescription')}
-                            </p>
                         </div>
 
-                        <div className="flex gap-3 pt-4">
+                        {/* Actions */}
+                        <div className="flex gap-2 pt-2 border-t">
                             <Button
                                 type="submit"
+                                size="sm"
                                 disabled={isSubmitting || createDialogue.isLoading}
+                                className="gap-1.5"
                             >
                                 {isSubmitting ? t('creating') : t('createNew')}
                             </Button>
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="ghost"
+                                size="sm"
                                 onClick={() => router.push(`/${locale}/dialogues`)}
                             >
                                 {commonT('cancel')}
@@ -131,24 +151,7 @@ export default function NewDialoguePage() {
                     </form>
                 </CardContent>
             </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('form.nextSteps')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                        <p>{t('form.nextStepsDescription')}</p>
-                        <ul className="list-disc list-inside space-y-1 ml-4">
-                            <li>{t('form.nextStepsItems.0')}</li>
-                            <li>{t('form.nextStepsItems.1')}</li>
-                            <li>{t('form.nextStepsItems.2')}</li>
-                            <li>{t('form.nextStepsItems.3')}</li>
-                            <li>{t('form.nextStepsItems.4')}</li>
-                        </ul>
-                    </div>
-                </CardContent>
-            </Card>
         </div>
     )
 }
+

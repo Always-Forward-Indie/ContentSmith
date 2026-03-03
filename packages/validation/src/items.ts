@@ -83,7 +83,7 @@ export const createItemSchema = z.object({
   durabilityMax: z.number().int().positive().default(100),
   vendorPriceBuy: z.number().int().positive().default(1),
   vendorPriceSell: z.number().int().positive().default(1),
-  equipSlot: z.number().int().min(0).default(0).optional(),
+  equipSlot: z.number().int().min(1).nullable().optional(),
   levelRequirement: z.number().int().min(0).default(0),
   isEquippable: z.boolean().default(false),
   isHarvest: z.boolean().default(false),

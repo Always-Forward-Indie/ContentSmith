@@ -1,206 +1,192 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Plus, Search, Edit, Trash2, Tag, AlertCircle, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { trpc } from '@/lib/trpc'
+
+interface SkillEffectsType {
+    id: number
+    slug: string
+}
+
+function TableSkeleton() {
+    return (
+        <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-4">
+                    <div className="h-4 bg-muted rounded animate-pulse flex-1" />
+                    <div className="h-8 bg-muted rounded animate-pulse w-20" />
+                </div>
+            ))}
+        </div>
+    )
+}
 
 export default function SkillEffectsTypePage() {
-    const t = useTranslations('skillEffectsType');
-    const tCommon = useTranslations('common');
-    const { toast } = useToast();
+    const t = useTranslations('skillEffectsType')
+    const commonT = useTranslations('common')
+    const locale = useLocale()
+    const router = useRouter()
+    const [searchInput, setSearchInput] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [page, setPage] = useState(1)
+    const [itemToDelete, setItemToDelete] = useState<SkillEffectsType | null>(null)
 
-    const [search, setSearch] = useState('');
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [selectedSkillEffectsType, setSelectedSkillEffectsType] = useState<{
-        id: number;
-        slug: string;
-    } | null>(null);
+    useEffect(() => {
+        const timer = setTimeout(() => { setSearchTerm(searchInput); setPage(1) }, 350)
+        return () => clearTimeout(timer)
+    }, [searchInput])
 
-    // Получаем список типов эффектов навыков
-    const {
-        data: skillEffectsTypes,
-        isLoading,
-        refetch,
-    } = trpc.skillEffectsType.list.useQuery({
-        search,
-    });
+    const { data, isLoading, error, refetch } = trpc.skillEffectsType.list.useQuery({ search: searchTerm || undefined, page, pageSize: 20 })
+    const deleteItem = trpc.skillEffectsType.delete.useMutation({ onSuccess: () => { refetch(); setItemToDelete(null) } })
+    const list: SkillEffectsType[] = data?.data ?? []
 
-    // Мутация для удаления
-    const deleteSkillEffectsType = trpc.skillEffectsType.delete.useMutation({
-        onSuccess: () => {
-            toast({
-                title: tCommon('success'),
-                description: t('skillEffectsTypeDeleted'),
-            });
-            refetch();
-            setDeleteDialogOpen(false);
-            setSelectedSkillEffectsType(null);
-        },
-        onError: (error) => {
-            toast({
-                title: tCommon('error'),
-                description: error.message,
-                variant: 'error',
-            });
-        },
-    });
-
-    const handleDelete = (skillEffectsType: { id: number; slug: string }) => {
-        setSelectedSkillEffectsType(skillEffectsType);
-        setDeleteDialogOpen(true);
-    };
-
-    const confirmDelete = () => {
-        if (selectedSkillEffectsType) {
-            deleteSkillEffectsType.mutate({ id: selectedSkillEffectsType.id });
-        }
-    };
-
-    if (isLoading) {
-        return (
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <Skeleton className="h-8 w-64" />
-                    <Skeleton className="h-10 w-32" />
-                </div>
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-48" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <Skeleton className="h-10 w-full" />
-                            <div className="space-y-2">
-                                {[...Array(5)].map((_, i) => (
-                                    <Skeleton key={i} className="h-16 w-full" />
-                                ))}
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
-    }
+    if (error) return (
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <AlertCircle className="h-10 w-10 text-destructive/70" />
+            <p className="text-destructive font-medium">{commonT('error')}: {error.message}</p>
+        </div>
+    )
 
     return (
-        <div className="space-y-6">
-            {/* Заголовок и кнопка создания */}
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold">{t('title')}</h1>
-                <Button asChild>
-                    <Link href="/skill-effects-type/create">{t('createSkillEffectsType')}</Link>
-                </Button>
-            </div>
-
-            {/* Карточка со списком */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('skillEffectsTypesManagement')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {/* Поиск */}
-                    <div className="mb-6">
-                        <Input
-                            placeholder={t('searchSkillEffectsTypes')}
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="max-w-sm"
-                        />
+        <TooltipProvider delayDuration={300}>
+            <div className="space-y-6">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                            <Tag className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-2xl font-bold tracking-tight">{t('skillEffectsTypesManagement')}</h1>
+                                {!isLoading && <Badge variant="secondary" className="text-xs font-normal">{data?.pagination?.total ?? 0}</Badge>}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-0.5">{t('description')}</p>
+                        </div>
                     </div>
+                    <Link href={`/${locale}/skill-effects-type/create`}>
+                        <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t('createSkillEffectsType')}</Button>
+                    </Link>
+                </div>
 
-                    {/* Таблица */}
-                    {skillEffectsTypes?.length ? (
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input placeholder={t('searchSkillEffectsTypes')} value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8 max-w-sm" />
+                    {searchInput && (
+                        <button
+                            onClick={() => setSearchInput('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+                </div>
+
+                <div className="rounded-lg border bg-card">
+                    {isLoading ? <div className="p-6"><TableSkeleton /></div> : (
                         <Table>
                             <TableHeader>
-                                <TableRow>
-                                    <TableHead>{t('skillEffectsTypeSlug')}</TableHead>
-                                    <TableHead className="text-right">{tCommon('actions')}</TableHead>
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="pl-4">{t('skillEffectsTypeSlug')}</TableHead>
+                                    <TableHead className="text-right pr-4">{commonT('actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {skillEffectsTypes.map((skillEffectsType) => (
-                                    <TableRow key={skillEffectsType.id}>
-                                        <TableCell className="font-medium">
-                                            {skillEffectsType.slug}
+                                {list.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="py-16">
+                                            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                                                <Tag className="h-10 w-10 opacity-30" />
+                                                <p className="text-sm font-medium">{t('noSkillEffectsTypesFound')}</p>
+                                                <Link href={`/${locale}/skill-effects-type/create`}>
+                                                    <Button variant="outline" size="sm" className="mt-1 gap-1.5"><Plus className="h-3.5 w-3.5" />{t('createSkillEffectsType')}</Button>
+                                                </Link>
+                                            </div>
                                         </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <Button asChild variant="outline" size="sm">
-                                                    <Link href={`/skill-effects-type/${skillEffectsType.id}/edit`}>
-                                                        {tCommon('edit')}
-                                                    </Link>
-                                                </Button>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(skillEffectsType)}
-                                                >
-                                                    {tCommon('delete')}
-                                                </Button>
+                                    </TableRow>
+                                ) : list.map((item) => (
+                                    <TableRow key={item.id} className="group cursor-pointer" onClick={() => router.push(`/${locale}/skill-effects-type/${item.id}/edit`)}>
+                                        <TableCell className="pl-4">
+                                            <span className="font-medium font-mono text-sm">{item.slug}</span>
+                                        </TableCell>
+                                        <TableCell className="pr-4" onClick={e => e.stopPropagation()}>
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link href={`/${locale}/skill-effects-type/${item.id}/edit`}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>{commonT('edit')}</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setItemToDelete(item)} disabled={deleteItem.isLoading}>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>{commonT('delete')}</TooltipContent>
+                                                </Tooltip>
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
-                    ) : (
-                        <div className="text-center py-8 text-muted-foreground">
-                            {t('noSkillEffectsTypesFound')}
+                    )}
+                    {!isLoading && list.length > 0 && data?.pagination && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t">
+                            <p className="text-sm text-muted-foreground">{t('showingResults', {
+                                from: (data.pagination.page - 1) * data.pagination.pageSize + 1,
+                                to: Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total),
+                                total: data.pagination.total,
+                            })}</p>
+                            {data.pagination.totalPages > 1 && (
+                                <div className="flex items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium px-2">{page}</span>
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => p + 1)} disabled={page >= data.pagination.totalPages}>
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
-                </CardContent>
-            </Card>
+                </div>
+            </div>
 
-            {/* Диалог подтверждения удаления */}
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <DialogContent>
+            <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('deleteSkillEffectsTypeTitle')}</DialogTitle>
-                        <DialogDescription>
-                            {selectedSkillEffectsType &&
-                                t('deleteSkillEffectsTypeDescription', {
-                                    slug: selectedSkillEffectsType.slug,
-                                })}
-                        </DialogDescription>
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-destructive/10 text-destructive shrink-0">
+                                <Trash2 className="h-5 w-5" />
+                            </div>
+                            <DialogTitle className="text-lg">{t('deleteSkillEffectsTypeTitle')}</DialogTitle>
+                        </div>
+                        <DialogDescription className="pt-1">{t('deleteSkillEffectsTypeDescription', { slug: itemToDelete?.slug || '' })}</DialogDescription>
                     </DialogHeader>
-                    <div className="flex justify-end gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={() => setDeleteDialogOpen(false)}
-                        >
-                            {tCommon('cancel')}
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setItemToDelete(null)} disabled={deleteItem.isLoading}>{commonT('cancel')}</Button>
+                        <Button variant="destructive" onClick={() => itemToDelete && deleteItem.mutate({ id: itemToDelete.id })} disabled={deleteItem.isLoading}>
+                            {deleteItem.isLoading ? commonT('loading') : commonT('delete')}
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={confirmDelete}
-                            disabled={deleteSkillEffectsType.isLoading}
-                        >
-                            {deleteSkillEffectsType.isLoading ? tCommon('loading') : tCommon('delete')}
-                        </Button>
-                    </div>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </div>
-    );
+        </TooltipProvider>
+    )
 }

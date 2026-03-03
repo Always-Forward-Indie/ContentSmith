@@ -30,7 +30,7 @@
     "questsNotFound": "Квесты не найдены",
     "errorLoading": "Ошибка загрузки",
     "page": "Страница",
-    "showingResults": "Показано {current} элементов • Страница {page}",
+    "showingResults": "Показано {from}–{to} из {total}",
     "deleteQuest": "Удалить квест",
     "deleteConfirm": "Вы уверены, что хотите удалить квест \"{slug}\"? Это действие нельзя отменить.",
     "deleting": "Удаление...",
@@ -69,7 +69,9 @@
         "minLevel": "Мин. уровень",
         "repeatable": "Повторяемый",
         "cooldown": "Кулдаун (сек)",
-        "clientKey": "Ключ клиента"
+        "clientKey": "Ключ клиента",
+        "giver": "Даёт квест",
+        "receiver": "Принимает квест"
     },
     "detail": {
         "title": "Детали квеста и его шаги",
@@ -190,10 +192,15 @@
             },
             "talk": {
                 "title": "Параметры разговора с NPC",
-                "npcLabel": "Целевой NPC"
+                "npcLabel": "Целевой NPC",
+                "dialogueId": "ID диалога (опционально)",
+                "dialogueIdPlaceholder": "quest_intro_dialogue",
+                "dialogueIdDescription": "Конкретный диалог для активации. Оставьте пустым для любого диалога с NPC."
             },
             "reach": {
                 "title": "Параметры достижения местоположения",
+                "mapId": "ID карты",
+                "mapIdPlaceholder": "forest_1",
                 "x": "Координата X",
                 "y": "Координата Y",
                 "z": "Координата Z",
@@ -202,8 +209,43 @@
             },
             "custom": {
                 "title": "Параметры пользовательского шага",
-                "description": "Настройте пользовательские параметры в поле JSON ниже"
+                "description": "Настройте пользовательские параметры в поле JSON ниже",
+                "script": "Скрипт",
+                "scriptPlaceholder": "custom_quest_handler"
             }
+        }
+    },
+    "rewards": {
+        "title": "Награды",
+        "description": "Предметы, валюта и опыт, выдаваемые по завершении квеста",
+        "add": "Добавить награду",
+        "addDescription": "Выберите тип награды и настройте её",
+        "edit": "Редактировать награду",
+        "editDescription": "Измените параметры награды",
+        "deleteTitle": "Удалить награду",
+        "deleteDescription": "Вы уверены, что хотите удалить награду \u00ab{reward}\u00bb?",
+        "noRewards": "Награды не настроены",
+        "addFirst": "Нажмите кнопку выше, чтобы добавить первую награду",
+        "created": "Награда успешно добавлена",
+        "updated": "Награда успешно обновлена",
+        "deleted": "Награда успешно удалена",
+        "gold": "Золото",
+        "exp": "Опыт",
+        "currency": "Валюта",
+        "types": {
+            "item": "Предмет",
+            "gold": "Золото",
+            "exp": "Опыт",
+            "currency": "Валюта"
+        },
+        "fields": {
+            "rewardType": "Тип награды",
+            "item": "Предмет",
+            "selectItem": "Выберите предмет...",
+            "itemSearch": "Поиск предметов",
+            "itemSearchPlaceholder": "Начните ввод для фильтрации...",
+            "quantity": "Количество",
+            "amount": "Сумма"
         }
     }
 }

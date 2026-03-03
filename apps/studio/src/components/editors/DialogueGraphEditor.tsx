@@ -16,15 +16,18 @@ import {
     MiniMap,
     Panel,
     MarkerType,
+    ReactFlowInstance,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
+import Dagre from '@dagrejs/dagre'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Save, Download, Upload, RotateCcw } from 'lucide-react'
+import { Plus, Save, Download, Upload, RotateCcw, MessageSquare, GitBranch, Zap, CornerDownRight, CircleDot, MousePointerClick, MoveHorizontal, Trash2, Link, Tag, Wand2, HardDrive, ChevronDown, ChevronUp } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { DialoguePositionManager } from '@/lib/dialogue-positions'
 import { toast } from '@/hooks/use-toast'
+import { cn } from '@/lib/utils'
 
 // Custom node types
 import {
@@ -106,24 +109,26 @@ export default function DialogueGraphEditor({
     }, [dialogueId, positionManager])
 
     const convertDataToEdges = useCallback((dbEdges: any[]): Edge[] => {
-        return dbEdges.map((edge) => ({
-            id: edge.id.toString(),
-            source: edge.fromNodeId.toString(),
-            target: edge.toNodeId.toString(),
-            type: 'dialogue',
-            animated: false,
-            markerEnd: {
-                type: MarkerType.Arrow,
-                color: '#64748b',
-            },
-            data: {
-                clientChoiceKey: edge.clientChoiceKey || '',
-                conditionGroup: edge.conditionGroup,
-                actionGroup: edge.actionGroup,
-                orderIndex: edge.orderIndex || 0,
-                hideIfLocked: edge.hideIfLocked || false,
-            },
-        }))
+        return dbEdges.map((edge) => {
+            return {
+                id: edge.id.toString(),
+                source: edge.fromNodeId.toString(),
+                target: edge.toNodeId.toString(),
+                type: 'dialogue',
+                animated: false,
+                markerEnd: {
+                    type: MarkerType.Arrow,
+                    color: '#64748b',
+                },
+                data: {
+                    clientChoiceKey: edge.clientChoiceKey || '',
+                    conditionGroup: edge.conditionGroup,
+                    actionGroup: edge.actionGroup,
+                    orderIndex: edge.orderIndex || 0,
+                    hideIfLocked: edge.hideIfLocked || false,
+                },
+            }
+        })
     }, [])
 
     const initialNodes = useMemo(() => {
@@ -136,6 +141,7 @@ export default function DialogueGraphEditor({
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+    const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
 
     // Save positions to localStorage when nodes move
     const handleNodesChange = useCallback((changes: any[]) => {
@@ -157,6 +163,9 @@ export default function DialogueGraphEditor({
     // Edge editing state
     const [editingEdge, setEditingEdge] = useState<Edge | null>(null)
     const [isEdgeEditDialogOpen, setIsEdgeEditDialogOpen] = useState(false)
+
+    // UI state
+    const [showResetConfirm, setShowResetConfirm] = useState(false)
 
     // tRPC mutations
     const saveNodeMutation = trpc.dialogue.saveNode.useMutation()
@@ -261,39 +270,65 @@ export default function DialogueGraphEditor({
         [dialogueId, setNodes, positionManager]
     )
 
-    // Auto-layout all nodes
+    // Auto-layout all nodes using dagre
     const handleAutoLayout = useCallback(() => {
-        if (!graphData?.nodes.length) return
+        if (!nodes.length) return
 
-        const newPositions = DialoguePositionManager.autoLayoutNodes(graphData.nodes)
+        const g = new Dagre.graphlib.Graph()
+        g.setDefaultEdgeLabel(() => ({}))
+        g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 120, marginx: 40, marginy: 40 })
 
-        // Update React Flow nodes
-        setNodes(currentNodes =>
-            currentNodes.map(node => ({
-                ...node,
-                position: newPositions[node.id] || node.position
-            }))
-        )
+        const NODE_WIDTHS: Record<string, number> = {
+            choice_hub: 220,
+            line: 200,
+            action: 200,
+            jump: 200,
+            end: 180,
+        }
+        const NODE_HEIGHT = 120
 
-        // Save to localStorage
+        nodes.forEach((node) => {
+            const width = NODE_WIDTHS[node.type ?? ''] ?? 200
+            g.setNode(node.id, { width, height: NODE_HEIGHT })
+        })
+
+        edges.forEach((edge) => {
+            g.setEdge(edge.source, edge.target)
+        })
+
+        Dagre.layout(g)
+
+        const newPositions: Record<string, { x: number; y: number }> = {}
+        const layoutedNodes = nodes.map((node) => {
+            const { x, y } = g.node(node.id)
+            const width = NODE_WIDTHS[node.type ?? ''] ?? 200
+            const position = { x: x - width / 2, y: y - NODE_HEIGHT / 2 }
+            newPositions[node.id] = position
+            return { ...node, position }
+        })
+
+        setNodes(layoutedNodes)
         positionManager.savePositions(newPositions)
 
+        window.requestAnimationFrame(() => {
+            rfInstance?.fitView({ padding: 0.12, duration: 400 })
+        })
+
         toast.success(t('messages.layoutApplied'), t('messages.layoutAppliedDescription'))
-    }, [graphData?.nodes, setNodes, positionManager])
+    }, [nodes, edges, setNodes, positionManager, rfInstance, t])
 
     // Reset positions (clear localStorage)
     const handleResetPositions = useCallback(() => {
-        if (confirm(t('confirmations.resetPositions'))) {
-            positionManager.clearStoredPositions()
+        positionManager.clearStoredPositions()
 
-            // Reload nodes with default positions
-            if (graphData?.nodes) {
-                const resetNodes = convertDataToNodes(graphData.nodes)
-                setNodes(resetNodes)
-                toast.success(t('messages.positionsReset'), t('messages.positionsResetDescription'))
-            }
+        // Reload nodes with default positions
+        if (graphData?.nodes) {
+            const resetNodes = convertDataToNodes(graphData.nodes)
+            setNodes(resetNodes)
+            toast.success(t('messages.positionsReset'), t('messages.positionsResetDescription'))
         }
-    }, [positionManager, graphData?.nodes, convertDataToNodes, setNodes])
+        setShowResetConfirm(false)
+    }, [positionManager, graphData?.nodes, convertDataToNodes, setNodes, t])
 
     const handleNodeDoubleClick = useCallback((_event: React.MouseEvent, node: Node) => {
         setEditingNode(node)
@@ -467,6 +502,7 @@ export default function DialogueGraphEditor({
                     edgeTypes={edgeTypes}
                     connectionMode={ConnectionMode.Loose}
                     fitView
+                    onInit={setRfInstance}
                     proOptions={proOptions}
                 >
                     <Background />
@@ -479,53 +515,35 @@ export default function DialogueGraphEditor({
 
                     {!readOnly && (
                         <Panel position="top-left" className="space-y-2">
-                            <Card className="p-3">
+                            <Card className="p-3 min-w-[160px]">
                                 <div className="space-y-2">
-                                    <h3 className="font-medium text-sm">{t('panels.addNodes')}</h3>
+                                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                        {t('panels.addNodes')}
+                                    </p>
                                     <div className="grid grid-cols-2 gap-1">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => addNewNode('line')}
-                                            className="text-xs h-8"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" />
+                                        <Button size="sm" variant="outline" onClick={() => addNewNode('line')}
+                                            className="text-xs h-8 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-950/40">
+                                            <MessageSquare className="w-3 h-3 mr-1 text-blue-500" />
                                             {t('nodeTypes.line')}
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => addNewNode('choice_hub')}
-                                            className="text-xs h-8"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" />
+                                        <Button size="sm" variant="outline" onClick={() => addNewNode('choice_hub')}
+                                            className="text-xs h-8 border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-purple-950/40">
+                                            <GitBranch className="w-3 h-3 mr-1 text-purple-500" />
                                             {t('nodeTypes.choice')}
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => addNewNode('action')}
-                                            className="text-xs h-8"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" />
+                                        <Button size="sm" variant="outline" onClick={() => addNewNode('action')}
+                                            className="text-xs h-8 border-amber-200 text-amber-700 hover:bg-amber-50 hover:text-amber-800 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950/40">
+                                            <Zap className="w-3 h-3 mr-1 text-amber-500" />
                                             {t('nodeTypes.action')}
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => addNewNode('jump')}
-                                            className="text-xs h-8"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" />
+                                        <Button size="sm" variant="outline" onClick={() => addNewNode('jump')}
+                                            className="text-xs h-8 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/40">
+                                            <CornerDownRight className="w-3 h-3 mr-1 text-emerald-500" />
                                             {t('nodeTypes.jump')}
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => addNewNode('end')}
-                                            className="text-xs h-8 col-span-2"
-                                        >
-                                            <Plus className="w-3 h-3 mr-1" />
+                                        <Button size="sm" variant="outline" onClick={() => addNewNode('end')}
+                                            className="text-xs h-8 col-span-2 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800 dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-950/40">
+                                            <CircleDot className="w-3 h-3 mr-1 text-rose-500" />
                                             {t('nodeTypes.end')}
                                         </Button>
                                     </div>
@@ -535,9 +553,11 @@ export default function DialogueGraphEditor({
                     )}
 
                     <Panel position="top-right" className="space-y-2">
-                        <Card className="p-3">
+                        <Card className="p-3 min-w-[148px]">
                             <div className="space-y-2">
-                                <h3 className="font-medium text-sm">{t('panels.actions')}</h3>
+                                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('panels.actions')}
+                                </p>
                                 <div className="space-y-1">
                                     {!readOnly && (
                                         <Button size="sm" onClick={handleSave} className="w-full text-xs">
@@ -545,23 +565,40 @@ export default function DialogueGraphEditor({
                                             {t('controls.save')}
                                         </Button>
                                     )}
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={handleAutoLayout}
-                                        className="w-full text-xs"
-                                    >
-                                        <RotateCcw className="w-3 h-3 mr-1" />
+                                    <Button size="sm" variant="outline" onClick={handleAutoLayout} className="w-full text-xs">
+                                        <Wand2 className="w-3 h-3 mr-1" />
                                         {t('controls.autoLayout')}
                                     </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={handleResetPositions}
-                                        className="w-full text-xs text-destructive hover:text-destructive"
-                                    >
-                                        {t('controls.resetLayout')}
-                                    </Button>
+                                    {showResetConfirm ? (
+                                        <div className="flex gap-1">
+                                            <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setShowResetConfirm(false)}
+                                                className="flex-1 text-xs h-8 text-muted-foreground"
+                                            >
+                                                {t('controls.cancel')}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={handleResetPositions}
+                                                className="flex-1 text-xs h-8"
+                                            >
+                                                {t('controls.confirm')}
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setShowResetConfirm(true)}
+                                            className="w-full text-xs text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/5"
+                                        >
+                                            <RotateCcw className="w-3 h-3 mr-1" />
+                                            {t('controls.resetLayout')}
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </Card>
@@ -586,46 +623,139 @@ export default function DialogueGraphEditor({
             />
 
             {/* Help/Instructions */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('help.title')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <HelpPanel t={t} />
+        </div>
+    )
+}
+
+// ─── Help Panel ───────────────────────────────────────────────────────────────
+
+const NODE_TYPES_VISUAL = [
+    { key: 'line', tKey: 'line', icon: MessageSquare, color: 'blue', bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-600 dark:text-blue-400' },
+    { key: 'choice_hub', tKey: 'choice', icon: GitBranch, color: 'purple', bg: 'bg-purple-50 dark:bg-purple-950/40', border: 'border-purple-200 dark:border-purple-800', text: 'text-purple-600 dark:text-purple-400' },
+    { key: 'action', tKey: 'action', icon: Zap, color: 'amber', bg: 'bg-amber-50 dark:bg-amber-950/40', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-600 dark:text-amber-400' },
+    { key: 'jump', tKey: 'jump', icon: CornerDownRight, color: 'emerald', bg: 'bg-emerald-50 dark:bg-emerald-950/40', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-600 dark:text-emerald-400' },
+    { key: 'end', tKey: 'end', icon: CircleDot, color: 'rose', bg: 'bg-rose-50 dark:bg-rose-950/40', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-600 dark:text-rose-400' },
+] as const
+
+const CONTROLS_VISUAL = [
+    { icon: MousePointerClick, actionKey: 'doubleClickNode' },
+    { icon: MousePointerClick, actionKey: 'doubleClickEdge' },
+    { icon: Tag, actionKey: 'edgeLabels' },
+    { icon: Link, actionKey: 'dragFromNode' },
+    { icon: MoveHorizontal, actionKey: 'dragNode' },
+    { icon: Trash2, actionKey: 'selectDelete' },
+    { icon: Save, actionKey: 'saveButton' },
+] as const
+
+const LAYOUT_VISUAL = [
+    { icon: Wand2, key: 'autoLayout' },
+    { icon: RotateCcw, key: 'resetLayout' },
+    { icon: HardDrive, key: 'positions' },
+    { icon: HardDrive, key: 'persistent' },
+] as const
+
+function HelpPanel({ t }: { t: any }) {
+    const [open, setOpen] = useState(false)
+
+    return (
+        <Card className="overflow-hidden">
+            {/* Toggle header */}
+            <button
+                type="button"
+                onClick={() => setOpen(v => !v)}
+                className="flex w-full items-center justify-between px-6 py-4 text-left hover:bg-muted/40 transition-colors"
+            >
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm">{t('help.title')}</span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground font-mono">?</span>
+                </div>
+                {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+            </button>
+
+            {open && (
+                <CardContent className="pt-0 pb-6">
+                    <div className="border-t border-border/60 pt-5 space-y-7">
+
+                        {/* Node Types */}
                         <div>
-                            <h4 className="font-medium mb-2">{t('help.sections.nodeTypes')}</h4>
-                            <ul className="space-y-1 text-muted-foreground">
-                                <li><strong>{t('nodeTypes.line')}:</strong> {t('help.nodeTypeDescriptions.line')}</li>
-                                <li><strong>{t('nodeTypes.choice')}:</strong> {t('help.nodeTypeDescriptions.choice')}</li>
-                                <li><strong>{t('nodeTypes.action')}:</strong> {t('help.nodeTypeDescriptions.action')}</li>
-                                <li><strong>{t('nodeTypes.jump')}:</strong> {t('help.nodeTypeDescriptions.jump')}</li>
-                                <li><strong>{t('nodeTypes.end')}:</strong> {t('help.nodeTypeDescriptions.end')}</li>
-                            </ul>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+                                {t('help.sections.nodeTypes')}
+                            </p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                                {NODE_TYPES_VISUAL.map(({ key, tKey, icon: Icon, bg, border, text }) => {
+                                    const raw = t(`help.nodeTypeDescriptions.${tKey}`) as string
+                                    return (
+                                        <div
+                                            key={key}
+                                            className={cn('flex flex-col gap-2 rounded-lg border p-3', bg, border)}
+                                        >
+                                            <div className="flex items-center gap-1.5">
+                                                <Icon className={cn('h-3.5 w-3.5 shrink-0', text)} />
+                                                <span className={cn('text-xs font-semibold', text)}>
+                                                    {t(`nodeTypes.${tKey}`)}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground leading-snug">{raw}</p>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
+
+                        {/* Controls */}
                         <div>
-                            <h4 className="font-medium mb-2">{t('help.sections.controls')}</h4>
-                            <ul className="space-y-1 text-muted-foreground">
-                                <li>{t('help.controlDescriptions.doubleClickNode')}</li>
-                                <li>{t('help.controlDescriptions.doubleClickEdge')}</li>
-                                <li>{t('help.controlDescriptions.edgeLabels')}</li>
-                                <li>{t('help.controlDescriptions.dragFromNode')}</li>
-                                <li>{t('help.controlDescriptions.dragNode')}</li>
-                                <li>{t('help.controlDescriptions.selectDelete')}</li>
-                                <li>{t('help.controlDescriptions.saveButton')}</li>
-                            </ul>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+                                {t('help.sections.controls')}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5">
+                                {CONTROLS_VISUAL.map(({ icon: Icon, actionKey }) => {
+                                    const raw = t(`help.controlDescriptions.${actionKey}`) as string
+                                    const [action, ...rest] = raw.split(': ')
+                                    const desc = rest.join(': ')
+                                    return (
+                                        <div key={actionKey} className="flex items-start gap-2.5">
+                                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted">
+                                                <Icon className="h-3 w-3 text-muted-foreground" />
+                                            </div>
+                                            <div className="text-xs">
+                                                <span className="font-medium text-foreground">{action}</span>
+                                                {desc && <span className="text-muted-foreground"> — {desc}</span>}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
+
+                        {/* Layout */}
                         <div>
-                            <h4 className="font-medium mb-2">{t('help.sections.layout')}</h4>
-                            <ul className="space-y-1 text-muted-foreground">
-                                <li>{t('help.layoutDescriptions.autoLayout')}</li>
-                                <li>{t('help.layoutDescriptions.resetLayout')}</li>
-                                <li>{t('help.layoutDescriptions.positions')}</li>
-                                <li>{t('help.layoutDescriptions.persistent')}</li>
-                            </ul>
+                            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+                                {t('help.sections.layout')}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5">
+                                {LAYOUT_VISUAL.map(({ icon: Icon, key }) => {
+                                    const raw = t(`help.layoutDescriptions.${key}`) as string
+                                    const [action, ...rest] = raw.split(': ')
+                                    const desc = rest.join(': ')
+                                    return (
+                                        <div key={key} className="flex items-start gap-2.5">
+                                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-muted">
+                                                <Icon className="h-3 w-3 text-muted-foreground" />
+                                            </div>
+                                            <div className="text-xs">
+                                                <span className="font-medium text-foreground">{action}</span>
+                                                {desc && <span className="text-muted-foreground"> — {desc}</span>}
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
+
                     </div>
                 </CardContent>
-            </Card>
-        </div>
+            )}
+        </Card>
     )
 }

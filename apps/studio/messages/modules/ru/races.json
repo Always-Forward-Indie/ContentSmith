@@ -16,5 +16,10 @@
     "enterRaceName": "Введите название расы",
     "raceSlugPlaceholder": "slug-расы",
     "slugDescription": "Используется для URL и идентификации. Автоматически создается из названия.",
-    "editRaceDescription": "Редактирование расы"
+    "editRaceDescription": "Редактирование расы",
+    "nameRequired": "Название обязательно",
+    "slugRequired": "Слаг обязателен",
+    "noRaces": "Расы не найдены"
+,
+    "showingResults": "Показано {from}–{to} из {total}"
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit3 } from 'lucide-react'
+import { Plus, Trash2, Edit3, Activity } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
     Select,
     SelectContent,
@@ -228,40 +234,55 @@ export function NpcAttributesManager({ npcId, attributes, onUpdate }: NpcAttribu
 
             <CardContent>
                 {attributes.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                        <p>{t('noAttributes')}</p>
-                        <p className="text-sm">{t('addFirstAttribute')}</p>
+                    <div className="flex flex-col items-center gap-2 py-8 text-muted-foreground">
+                        <Activity className="h-8 w-8 opacity-30" />
+                        <p className="text-sm font-medium">{t('noAttributes')}</p>
+                        <p className="text-xs">{t('addFirstAttribute')}</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {attributes.map((attr) => (
-                            <div key={attr.id} className="flex justify-between items-center p-3 border rounded">
-                                <div>
-                                    <span className="font-medium">{attr.attributeName || `Attribute ${attr.attributeId}`}</span>
-                                    <Badge variant="outline" className="ml-2">{attr.value}</Badge>
+                    <TooltipProvider delayDuration={300}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {attributes.map((attr) => (
+                                <div key={attr.id} className="group flex justify-between items-center p-3 rounded-lg border bg-muted/30">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <span className="text-sm font-medium truncate">{attr.attributeName || `#${attr.attributeId}`}</span>
+                                        <Badge variant="outline" className="text-xs shrink-0">{attr.value}</Badge>
+                                    </div>
+                                    <div className="flex gap-0.5 shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7"
+                                                    onClick={(e) => handleEditClick(e, attr)}
+                                                >
+                                                    <Edit3 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>{commonT('edit')}</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={(e) => handleDeleteClick(e, attr)}
+                                                    disabled={removeAttributeMutation.isPending}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>{commonT('delete')}</TooltipContent>
+                                        </Tooltip>
+                                    </div>
                                 </div>
-                                <div className="flex gap-1">
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(e) => handleEditClick(e, attr)}
-                                    >
-                                        <Edit3 className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={(e) => handleDeleteClick(e, attr)}
-                                        disabled={removeAttributeMutation.isPending}
-                                    >
-                                        <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    </TooltipProvider>
                 )}
             </CardContent>
 
@@ -312,19 +333,24 @@ export function NpcAttributesManager({ npcId, attributes, onUpdate }: NpcAttribu
 
             {/* Delete confirmation dialog */}
             <Dialog open={!!deleteConfirmAttribute} onOpenChange={() => setDeleteConfirmAttribute(null)}>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{t('removeAttribute')}</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to remove {deleteConfirmAttribute?.attributeName || `Attribute ${deleteConfirmAttribute?.attributeId}`}? This action cannot be undone.
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-destructive/10 text-destructive shrink-0">
+                                <Trash2 className="h-5 w-5" />
+                            </div>
+                            <DialogTitle className="text-lg">{t('removeAttribute')}</DialogTitle>
+                        </div>
+                        <DialogDescription className="pt-1">
+                            Are you sure you want to remove <strong>{deleteConfirmAttribute?.attributeName || `Attribute ${deleteConfirmAttribute?.attributeId}`}</strong>?
                         </DialogDescription>
                     </DialogHeader>
-
-                    <DialogFooter>
+                    <DialogFooter className="gap-2 sm:gap-0">
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => setDeleteConfirmAttribute(null)}
+                            disabled={removeAttributeMutation.isPending}
                         >
                             {commonT('cancel')}
                         </Button>
@@ -334,7 +360,7 @@ export function NpcAttributesManager({ npcId, attributes, onUpdate }: NpcAttribu
                             onClick={() => deleteConfirmAttribute && handleRemoveAttribute(deleteConfirmAttribute.attributeId)}
                             disabled={removeAttributeMutation.isPending}
                         >
-                            {removeAttributeMutation.isPending ? 'Removing...' : 'Remove'}
+                            {removeAttributeMutation.isPending ? commonT('loading') : commonT('delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

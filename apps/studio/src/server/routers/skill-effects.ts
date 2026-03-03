@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skillEffects, skillEffectsType } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and } from '@contentsmith/database';
+import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
 import {
   skillEffectSchema,
   createSkillEffectSchema,
@@ -12,6 +12,8 @@ import {
 const skillEffectListQuerySchema = z.object({
   search: z.string().optional(),
   effectTypeId: z.number().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
 });
 
 const skillEffectIdSchema = z.object({
@@ -23,11 +25,10 @@ export const skillEffectRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillEffectListQuerySchema)
     .query(async ({ input }) => {
-      const { search, effectTypeId } = input;
+      const { search, effectTypeId, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-
       if (search) {
         conditions.push(
           or(
@@ -36,30 +37,34 @@ export const skillEffectRouter = createTRPCRouter({
           )
         );
       }
-
-      if (effectTypeId) {
-        conditions.push(eq(skillEffects.effectTypeId, effectTypeId));
-      }
-
+      if (effectTypeId) conditions.push(eq(skillEffects.effectTypeId, effectTypeId));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем эффекты навыков
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skillEffects)
+        .leftJoin(skillEffectsType, eq(skillEffects.effectTypeId, skillEffectsType.id))
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const results = await db
         .select({
           id: skillEffects.id,
           slug: skillEffects.slug,
           effectTypeId: skillEffects.effectTypeId,
-          effectType: {
-            id: skillEffectsType.id,
-            slug: skillEffectsType.slug,
-          },
+          effectType: { id: skillEffectsType.id, slug: skillEffectsType.slug },
         })
         .from(skillEffects)
         .leftJoin(skillEffectsType, eq(skillEffects.effectTypeId, skillEffectsType.id))
         .where(whereClause)
-        .orderBy(skillEffects.slug);
+        .orderBy(skillEffects.slug)
+        .limit(pageSize)
+        .offset(offset);
 
-      return results;
+      return {
+        data: results,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить эффект навыка по ID

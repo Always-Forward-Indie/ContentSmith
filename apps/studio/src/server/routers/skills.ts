@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skills, skillSchool, skillScaleType } from '@contentsmith/database';
-import { and, eq, like } from '@contentsmith/database';
+import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillListQuerySchema,
   skillIdSchema,
@@ -15,26 +15,21 @@ export const skillsRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillListQuerySchema)
     .query(async ({ input }) => {
-      const { search, schoolId, scaleStatId } = input;
+      const { search, schoolId, scaleStatId, page, limit } = input;
+      const offset = (page - 1) * limit;
 
-      // Создаем условия для WHERE
       const conditions = [];
-      
-      if (search) {
-        conditions.push(like(skills.name, `%${search}%`));
-      }
-      
-      if (schoolId) {
-        conditions.push(eq(skills.schoolId, schoolId));
-      }
-      
-      if (scaleStatId) {
-        conditions.push(eq(skills.scaleStatId, scaleStatId));
-      }
-
+      if (search) conditions.push(like(skills.name, `%${search}%`));
+      if (schoolId) conditions.push(eq(skills.schoolId, schoolId));
+      if (scaleStatId) conditions.push(eq(skills.scaleStatId, scaleStatId));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем скилы с связями
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skills)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const skillsList = await db
         .select({
           id: skills.id,
@@ -42,24 +37,21 @@ export const skillsRouter = createTRPCRouter({
           slug: skills.slug,
           scaleStatId: skills.scaleStatId,
           schoolId: skills.schoolId,
-          skillSchool: {
-            id: skillSchool.id,
-            name: skillSchool.name,
-            slug: skillSchool.slug,
-          },
-          skillScaleType: {
-            id: skillScaleType.id,
-            name: skillScaleType.name,
-            slug: skillScaleType.slug,
-          },
+          skillSchool: { id: skillSchool.id, name: skillSchool.name, slug: skillSchool.slug },
+          skillScaleType: { id: skillScaleType.id, name: skillScaleType.name, slug: skillScaleType.slug },
         })
         .from(skills)
         .leftJoin(skillSchool, eq(skills.schoolId, skillSchool.id))
         .leftJoin(skillScaleType, eq(skills.scaleStatId, skillScaleType.id))
         .where(whereClause)
-        .orderBy(skills.name);
+        .orderBy(skills.name)
+        .limit(limit)
+        .offset(offset);
 
-      return skillsList;
+      return {
+        data: skillsList,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      };
     }),
 
   // Получить скил по ID

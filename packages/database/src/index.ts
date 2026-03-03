@@ -30,4 +30,4 @@ export * from './schema';
 export { schema };
 
 // Export query builders and operators
-export { eq, desc, asc, like, ilike, or, and, inArray, sql, count } from 'drizzle-orm';
+export { eq, desc, asc, gte, lte, like, ilike, or, and, inArray, sql, count } from 'drizzle-orm';

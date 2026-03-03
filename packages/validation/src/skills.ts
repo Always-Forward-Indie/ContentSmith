@@ -55,7 +55,7 @@ export const createSkillPropertyMappingSchema = z.object({
   skillId: z.number().int().positive(),
   skillLevel: z.number().int().min(1, 'Skill level must be at least 1'),
   propertyId: z.number().int().positive(),
-  propertyValue: z.number().int(),
+  propertyValue: z.number(),
 });
 
 export const updateSkillPropertyMappingSchema = createSkillPropertyMappingSchema.partial();
@@ -103,6 +103,8 @@ export const skillListQuerySchema = z.object({
   search: z.string().optional(),
   schoolId: z.number().optional(),
   scaleStatId: z.number().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(20),
 });
 
 export const skillIdSchema = z.object({

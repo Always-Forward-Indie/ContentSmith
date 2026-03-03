@@ -30,7 +30,7 @@
     "questsNotFound": "Quests not found",
     "errorLoading": "Loading error",
     "page": "Page",
-    "showingResults": "Showing {current} items • Page {page}",
+    "showingResults": "Showing {from}–{to} of {total}",
     "deleteQuest": "Delete Quest",
     "deleteConfirm": "Are you sure you want to delete quest \"{slug}\"? This action cannot be undone.",
     "deleting": "Deleting...",
@@ -69,7 +69,9 @@
         "minLevel": "Min. Level",
         "repeatable": "Repeatable",
         "cooldown": "Cooldown (sec)",
-        "clientKey": "Client Key"
+        "clientKey": "Client Key",
+        "giver": "Giver",
+        "receiver": "Receiver"
     },
     "detail": {
         "title": "Quest Details and Steps",
@@ -190,10 +192,15 @@
             },
             "talk": {
                 "title": "Talk to NPC Parameters",
-                "npcLabel": "Target NPC"
+                "npcLabel": "Target NPC",
+                "dialogueId": "Dialogue ID (optional)",
+                "dialogueIdPlaceholder": "quest_intro_dialogue",
+                "dialogueIdDescription": "Specific dialogue to trigger. Leave empty for any dialogue with NPC."
             },
             "reach": {
                 "title": "Reach Location Parameters",
+                "mapId": "Map ID",
+                "mapIdPlaceholder": "forest_1",
                 "x": "X Coordinate",
                 "y": "Y Coordinate",
                 "z": "Z Coordinate",
@@ -202,8 +209,44 @@
             },
             "custom": {
                 "title": "Custom Step Parameters",
-                "description": "Configure custom parameters in the JSON field below"
+                "description": "Configure custom parameters in the JSON field below",
+                "script": "Script",
+                "scriptPlaceholder": "custom_quest_handler"
             }
+        }
+    },
+    "rewards": {
+        "title": "Rewards",
+        "description": "Items, currency and experience given upon quest completion",
+        "add": "Add Reward",
+        "addDescription": "Select a reward type and configure the reward",
+        "edit": "Edit Reward",
+        "editDescription": "Change the reward parameters",
+        "deleteTitle": "Delete Reward",
+        "deleteDescription": "Are you sure you want to delete reward \u201c{reward}\u201d?",
+        "noRewards": "No rewards configured",
+        "addFirst": "Click the button above to add the first reward",
+        "created": "Reward added successfully",
+        "updated": "Reward updated successfully",
+        "deleted": "Reward deleted successfully",
+        "gold": "Gold",
+        "exp": "XP",
+        "currency": "Currency",
+        "priorityLabel": "Priority",
+        "types": {
+            "item": "Item",
+            "gold": "Gold",
+            "exp": "Experience",
+            "currency": "Currency"
+        },
+        "fields": {
+            "rewardType": "Reward Type",
+            "item": "Item",
+            "selectItem": "Select an item...",
+            "itemSearch": "Search items",
+            "itemSearchPlaceholder": "Type to filter items...",
+            "quantity": "Quantity",
+            "amount": "Amount"
         }
     }
 }

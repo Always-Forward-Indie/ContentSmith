@@ -1,182 +1,196 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { toast } from '@/hooks/use-toast';
-import { Pencil, Trash2, Plus, Search } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Plus, Search, Edit, Trash2, GraduationCap, AlertCircle, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { trpc } from '@/lib/trpc'
 
 interface SkillSchool {
-    id: number;
-    name: string;
-    slug: string;
+    id: number
+    name: string
+    slug: string
+}
+
+function TableSkeleton() {
+    return (
+        <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 px-4">
+                    <div className="h-4 bg-muted rounded animate-pulse flex-1" />
+                    <div className="h-8 bg-muted rounded animate-pulse w-20" />
+                </div>
+            ))}
+        </div>
+    )
 }
 
 export default function SkillSchoolsPage() {
-    const t = useTranslations('skillSchools');
-    const commonT = useTranslations('common');
-    const router = useRouter();
+    const t = useTranslations('skillSchools')
+    const commonT = useTranslations('common')
+    const locale = useLocale()
+    const router = useRouter()
+    const [searchInput, setSearchInput] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [page, setPage] = useState(1)
+    const [itemToDelete, setItemToDelete] = useState<SkillSchool | null>(null)
 
-    const [search, setSearch] = useState('');
-    const [skillSchoolToDelete, setSkillSchoolToDelete] = useState<SkillSchool | null>(null);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    useEffect(() => {
+        const timer = setTimeout(() => { setSearchTerm(searchInput); setPage(1) }, 350)
+        return () => clearTimeout(timer)
+    }, [searchInput])
 
-    // Query для получения списка школ скилов
-    const { data: skillSchools, isLoading, refetch } = trpc.skillSchools.list.useQuery({
-        search: search || undefined,
-    });
+    const { data, isLoading, error, refetch } = trpc.skillSchools.list.useQuery({ search: searchTerm || undefined, page, pageSize: 20 })
+    const deleteItem = trpc.skillSchools.delete.useMutation({ onSuccess: () => { refetch(); setItemToDelete(null) } })
+    const list: SkillSchool[] = data?.data ?? []
 
-    // Mutation для удаления школы скилов
-    const deleteSkillSchoolMutation = trpc.skillSchools.delete.useMutation({
-        onSuccess: () => {
-            toast.success(t('skillSchoolDeleted'));
-            refetch();
-            closeDeleteDialog();
-        },
-        onError: (error) => {
-            toast.error(commonT('error'), error.message);
-        },
-    });
-
-    const openDeleteDialog = (skillSchool: SkillSchool) => {
-        setSkillSchoolToDelete(skillSchool);
-        setDeleteDialogOpen(true);
-    };
-
-    const closeDeleteDialog = () => {
-        setDeleteDialogOpen(false);
-        setSkillSchoolToDelete(null);
-    };
-
-    const handleDeleteSkillSchool = () => {
-        if (skillSchoolToDelete) {
-            deleteSkillSchoolMutation.mutate({ id: skillSchoolToDelete.id });
-        }
-    };
-
-    const handleCreateSkillSchool = () => {
-        router.push('/skill-schools/create');
-    };
-
-    const handleEditSkillSchool = (id: number) => {
-        router.push(`/skill-schools/${id}/edit`);
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <div className="text-lg">{commonT('loading')}</div>
-            </div>
-        );
-    }
+    if (error) return (
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <AlertCircle className="h-10 w-10 text-destructive/70" />
+            <p className="text-destructive font-medium">{commonT('error')}: {error.message}</p>
+        </div>
+    )
 
     return (
-        <div className="container mx-auto p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">{t('skillSchoolsManagement')}</h1>
-                    <p className="text-muted-foreground mt-2">
-                        Управление школами скилов в игре
-                    </p>
-                </div>
-                <Button onClick={handleCreateSkillSchool}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t('createSkillSchool')}
-                </Button>
-            </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('title')}</CardTitle>
-                    <CardDescription>
-                        Список всех школ скилов в системе
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center space-x-4 mb-6">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                            <Input
-                                placeholder={t('searchSkillSchools')}
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10"
-                            />
+        <TooltipProvider delayDuration={300}>
+            <div className="space-y-6">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                            <GraduationCap className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-2xl font-bold tracking-tight">{t('skillSchoolsManagement')}</h1>
+                                {!isLoading && <Badge variant="secondary" className="text-xs font-normal">{data?.pagination?.total ?? 0}</Badge>}
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-0.5">{t('description')}</p>
                         </div>
                     </div>
+                    <Link href={`/${locale}/skill-schools/create`}>
+                        <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t('createSkillSchool')}</Button>
+                    </Link>
+                </div>
 
-                    {!skillSchools || skillSchools.length === 0 ? (
-                        <div className="text-center py-8">
-                            <p className="text-muted-foreground">{t('noSkillSchoolsFound')}</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {skillSchools.map((skillSchool: SkillSchool) => (
-                                <Card key={skillSchool.id} className="hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3">
-                                        <div className="flex items-start justify-between">
-                                            <div className="space-y-1">
-                                                <CardTitle className="text-lg">{skillSchool.name}</CardTitle>
-                                                <p className="text-sm text-muted-foreground">{skillSchool.slug}</p>
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input placeholder={t('searchSkillSchools')} value={searchInput} onChange={(e) => setSearchInput(e.target.value)} className="pl-9 pr-8 max-w-sm" />
+                    {searchInput && (
+                        <button
+                            onClick={() => setSearchInput('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+                </div>
+
+                <div className="rounded-lg border bg-card">
+                    {isLoading ? <div className="p-6"><TableSkeleton /></div> : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow className="hover:bg-transparent">
+                                    <TableHead className="pl-4">{t('skillSchoolName')}</TableHead>
+                                    <TableHead className="text-right pr-4">{commonT('actions')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {list.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="py-16">
+                                            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                                                <GraduationCap className="h-10 w-10 opacity-30" />
+                                                <p className="text-sm font-medium">{t('noSkillSchoolsFound')}</p>
+                                                <Link href={`/${locale}/skill-schools/create`}>
+                                                    <Button variant="outline" size="sm" className="mt-1 gap-1.5"><Plus className="h-3.5 w-3.5" />{t('createSkillSchool')}</Button>
+                                                </Link>
                                             </div>
-                                            <div className="flex space-x-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => handleEditSkillSchool(skillSchool.id)}
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => openDeleteDialog(skillSchool)}
-                                                        >
+                                        </TableCell>
+                                    </TableRow>
+                                ) : list.map((item) => (
+                                    <TableRow key={item.id} className="group cursor-pointer" onClick={() => router.push(`/${locale}/skill-schools/${item.id}/edit`)}>
+                                        <TableCell className="pl-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{item.name}</span>
+                                                <span className="text-xs text-muted-foreground font-mono">{item.slug}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="pr-4" onClick={e => e.stopPropagation()}>
+                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Link href={`/${locale}/skill-schools/${item.id}/edit`}>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
+                                                        </Link>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>{commonT('edit')}</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setItemToDelete(item)} disabled={deleteItem.isLoading}>
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent>
-                                                        <DialogHeader>
-                                                            <DialogTitle>{t('deleteSkillSchoolTitle')}</DialogTitle>
-                                                            <DialogDescription>
-                                                                {t('deleteSkillSchoolDescription', { name: skillSchoolToDelete?.name || '' })}
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <DialogFooter>
-                                                            <Button variant="outline" onClick={closeDeleteDialog}>
-                                                                {commonT('cancel')}
-                                                            </Button>
-                                                            <Button variant="destructive" onClick={handleDeleteSkillSchool}>
-                                                                {commonT('delete')}
-                                                            </Button>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>{commonT('delete')}</TooltipContent>
+                                                </Tooltip>
                                             </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between text-sm">
-                                                <span className="text-muted-foreground">ID:</span>
-                                                <Badge variant="outline">{skillSchool.id}</Badge>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                    {!isLoading && list.length > 0 && data?.pagination && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t">
+                            <p className="text-sm text-muted-foreground">{t('showingResults', {
+                                from: (data.pagination.page - 1) * data.pagination.pageSize + 1,
+                                to: Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total),
+                                total: data.pagination.total,
+                            })}</p>
+                            {data.pagination.totalPages > 1 && (
+                                <div className="flex items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium px-2">{page}</span>
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => p + 1)} disabled={page >= data.pagination.totalPages}>
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
-                </CardContent>
-            </Card>
-        </div>
-    );
+                </div>
+            </div>
+
+            <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <div className="flex items-center gap-3 mb-1">
+                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-destructive/10 text-destructive shrink-0">
+                                <Trash2 className="h-5 w-5" />
+                            </div>
+                            <DialogTitle className="text-lg">{t('deleteSkillSchoolTitle')}</DialogTitle>
+                        </div>
+                        <DialogDescription className="pt-1">{t('deleteSkillSchoolDescription', { name: itemToDelete?.name || '' })}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button variant="outline" onClick={() => setItemToDelete(null)} disabled={deleteItem.isLoading}>{commonT('cancel')}</Button>
+                        <Button variant="destructive" onClick={() => itemToDelete && deleteItem.mutate({ id: itemToDelete.id })} disabled={deleteItem.isLoading}>
+                            {deleteItem.isLoading ? commonT('loading') : commonT('delete')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </TooltipProvider>
+    )
 }

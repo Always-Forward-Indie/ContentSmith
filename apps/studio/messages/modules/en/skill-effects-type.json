@@ -12,5 +12,7 @@
     "skillEffectsTypeNotFound": "Skill effects type not found",
     "searchSkillEffectsTypes": "Search skill effects types...",
     "noSkillEffectsTypesFound": "No skill effects types found",
-    "slugRequired": "Slug is required"
+    "slugRequired": "Slug is required",
+    "description": "Manage effect type identifiers used to categorize skill effects",
+    "showingResults": "Showing {from}–{to} of {total}"
 }

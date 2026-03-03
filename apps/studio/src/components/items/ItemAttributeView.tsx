@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Edit, Trash2, ChevronRight } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -26,6 +27,7 @@ export function ItemAttributeView({ id }: ItemAttributeViewProps) {
     const t = useTranslations('itemAttributes');
     const { toast } = useToast();
     const router = useRouter();
+    const locale = useLocale();
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -40,7 +42,7 @@ export function ItemAttributeView({ id }: ItemAttributeViewProps) {
                 title: t('success'),
                 description: t('deleteSuccess'),
             });
-            router.push('/item-attributes');
+            router.push(`/${locale}/item-attributes`);
         },
         onError: (error) => {
             toast({
@@ -79,10 +81,10 @@ export function ItemAttributeView({ id }: ItemAttributeViewProps) {
                 <h2 className="text-lg font-medium">{t('notFound')}</h2>
                 <p className="text-muted-foreground">{t('notFoundDescription')}</p>
                 <Button
-                    onClick={() => router.push('/item-attributes')}
+                    onClick={() => router.push(`/${locale}/item-attributes`)}
                     className="mt-4"
+                    variant="outline"
                 >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
                     {t('backToList')}
                 </Button>
             </div>
@@ -91,17 +93,18 @@ export function ItemAttributeView({ id }: ItemAttributeViewProps) {
 
     return (
         <div className="space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/item-attributes`} className="hover:text-foreground transition-colors">
+                    {t('title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{attribute.name}</span>
+            </nav>
+
+            {/* Header */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <Button
-                        variant="outline"
-                        onClick={() => router.push('/item-attributes')}
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        {t('backToList')}
-                    </Button>
-                    <h1 className="text-2xl font-bold">{attribute.name}</h1>
-                </div>
+                <h1 className="text-2xl font-bold">{attribute.name}</h1>
                 <div className="flex space-x-2">
                     <Button
                         variant="outline"

@@ -35,7 +35,7 @@
     "filters": "Фильтры",
     "noData": "Типы не найдены",
     "noSearchResults": "Типы не соответствуют поиску",
-    "showingResults": "Показано {from} до {to} из {total} результатов",
+    "showingResults": "Показано {from}–{to} из {total}",
     "previous": "Предыдущая",
     "next": "Следующая",
     "pageOf": "Страница {current} из {total}",

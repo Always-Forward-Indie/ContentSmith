@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { MessageSquare, GitBranch, Zap, CornerDownRight, CircleDot, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,12 +10,28 @@ import { Textarea } from '@/components/ui/textarea'
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
 import NPCSelect from '@/components/editors/NPCSelect'
+import { cn } from '@/lib/utils'
+
+const NODE_TYPE_CONFIG = [
+    { value: 'line', icon: MessageSquare, labelKey: 'fields.nodeTypeOptions.line', color: 'blue' },
+    { value: 'choice_hub', icon: GitBranch, labelKey: 'fields.nodeTypeOptions.choice', color: 'purple' },
+    { value: 'action', icon: Zap, labelKey: 'fields.nodeTypeOptions.action', color: 'amber' },
+    { value: 'jump', icon: CornerDownRight, labelKey: 'fields.nodeTypeOptions.jump', color: 'emerald' },
+    { value: 'end', icon: CircleDot, labelKey: 'fields.nodeTypeOptions.end', color: 'rose' },
+] as const
+
+const NODE_COLOR_CLASSES: Record<string, { selected: string; icon: string }> = {
+    blue: { selected: 'border-blue-500 bg-blue-50 dark:bg-blue-950/40', icon: 'text-blue-600 dark:text-blue-400' },
+    purple: { selected: 'border-purple-500 bg-purple-50 dark:bg-purple-950/40', icon: 'text-purple-600 dark:text-purple-400' },
+    amber: { selected: 'border-amber-500 bg-amber-50 dark:bg-amber-950/40', icon: 'text-amber-600 dark:text-amber-400' },
+    emerald: { selected: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40', icon: 'text-emerald-600 dark:text-emerald-400' },
+    rose: { selected: 'border-rose-500 bg-rose-50 dark:bg-rose-950/40', icon: 'text-rose-600 dark:text-rose-400' },
+}
 
 interface DialogueNodeCreateProps {
     open: boolean
@@ -23,6 +40,16 @@ interface DialogueNodeCreateProps {
     onSave: (newNode: any) => void
 }
 
+const EMPTY_FORM = (dialogueId: number) => ({
+    dialogueId,
+    type: 'line',
+    clientNodeKey: '',
+    speakerNpcId: null as number | null,
+    jumpTargetNodeId: null as number | null,
+    conditionGroup: null as any,
+    actionGroup: null as any,
+})
+
 export default function DialogueNodeCreate({
     open,
     onOpenChange,
@@ -30,15 +57,17 @@ export default function DialogueNodeCreate({
     onSave,
 }: DialogueNodeCreateProps) {
     const t = useTranslations('dialogues.components.nodeCreate')
-    const [formData, setFormData] = useState({
-        dialogueId: dialogueId,
-        type: 'line',
-        clientNodeKey: '',
-        speakerNpcId: null as number | null,
-        jumpTargetNodeId: null as number | null,
-        conditionGroup: null as any,
-        actionGroup: null as any,
-    })
+    const [formData, setFormData] = useState(EMPTY_FORM(dialogueId))
+    const [conditionsRaw, setConditionsRaw] = useState('')
+    const [actionsRaw, setActionsRaw] = useState('')
+    const [conditionsError, setConditionsError] = useState(false)
+    const [actionsError, setActionsError] = useState(false)
+    const [advancedOpen, setAdvancedOpen] = useState(false)
+
+    const activeConfig = NODE_TYPE_CONFIG.find(c => c.value === formData.type)
+    const ActiveIcon = activeConfig?.icon ?? MessageSquare
+    const activeColor = activeConfig?.color ?? 'blue'
+    const colorClasses = NODE_COLOR_CLASSES[activeColor]
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -48,147 +77,187 @@ export default function DialogueNodeCreate({
             jumpTargetNodeId: formData.jumpTargetNodeId || null,
         })
         onOpenChange(false)
-        // Reset form
-        setFormData({
-            dialogueId: dialogueId,
-            type: 'line',
-            clientNodeKey: '',
-            speakerNpcId: null as number | null,
-            jumpTargetNodeId: null as number | null,
-            conditionGroup: null as any,
-            actionGroup: null as any,
-        })
+        setFormData(EMPTY_FORM(dialogueId))
+        setConditionsRaw('')
+        setActionsRaw('')
+        setConditionsError(false)
+        setActionsError(false)
+        setAdvancedOpen(false)
     }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>{t('title')}</DialogTitle>
-                    <DialogDescription>
-                        {t('description')}
-                    </DialogDescription>
+            <DialogContent className="max-w-lg flex flex-col max-h-[88vh] p-0 gap-0">
+                {/* Header */}
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg border-2 transition-colors', colorClasses.selected)}>
+                            <ActiveIcon className={cn('h-4 w-4', colorClasses.icon)} />
+                        </div>
+                        <DialogTitle className="text-base">{t('title')}</DialogTitle>
+                    </div>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Node Type */}
-                    <div className="space-y-2">
-                        <Label htmlFor="type">{t('fields.nodeType')}</Label>
-                        <select
-                            id="type"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.type}
-                            onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                        >
-                            <option value="line">{t('fields.nodeTypeOptions.line')}</option>
-                            <option value="choice">{t('fields.nodeTypeOptions.choice')}</option>
-                            <option value="action">{t('fields.nodeTypeOptions.action')}</option>
-                            <option value="jump">{t('fields.nodeTypeOptions.jump')}</option>
-                            <option value="end">{t('fields.nodeTypeOptions.end')}</option>
-                        </select>
-                    </div>
+                {/* Scrollable body */}
+                <form id="nodeCreateForm" onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-                    {/* Client Node Key */}
-                    <div className="space-y-2">
-                        <Label htmlFor="clientNodeKey">{t('fields.nodeKey')}</Label>
-                        <Input
-                            id="clientNodeKey"
-                            value={formData.clientNodeKey}
-                            onChange={(e) => setFormData(prev => ({ ...prev, clientNodeKey: e.target.value }))}
-                            placeholder={t('fields.nodeKeyPlaceholder')}
-                            required
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.nodeKeyDescription')}
-                        </p>
-                    </div>
-
-                    {/* Speaker NPC (for line nodes) */}
-                    {formData.type === 'line' && (
+                        {/* Node Type selector */}
                         <div className="space-y-2">
-                            <NPCSelect
-                                value={formData.speakerNpcId}
-                                onChange={(npcId) => setFormData(prev => ({
-                                    ...prev,
-                                    speakerNpcId: npcId
-                                }))}
-                                label={t('fields.speakerNpc')}
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                {t('fields.speakerNpcDescription')}
-                            </p>
+                            <Label>{t('fields.nodeType')}</Label>
+                            <div className="grid grid-cols-5 gap-1.5">
+                                {NODE_TYPE_CONFIG.map((opt) => {
+                                    const Icon = opt.icon
+                                    const isSelected = formData.type === opt.value
+                                    const colors = NODE_COLOR_CLASSES[opt.color]
+                                    return (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => setFormData(prev => ({ ...prev, type: opt.value }))}
+                                            className={cn(
+                                                'flex flex-col items-center gap-1.5 rounded-lg border-2 px-1 py-2.5 text-xs font-medium transition-all cursor-pointer',
+                                                isSelected
+                                                    ? `${colors.selected} ${colors.icon}`
+                                                    : 'border-border bg-background text-muted-foreground hover:border-border/80 hover:text-foreground'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            <span className="leading-tight text-center">{t(opt.labelKey)}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
                         </div>
-                    )}
 
-                    {/* Jump Target (for jump nodes) */}
-                    {formData.type === 'jump' && (
+                        {/* Node Key */}
                         <div className="space-y-2">
-                            <Label htmlFor="jumpTargetNodeId">{t('fields.jumpTargetNodeId')}</Label>
+                            <Label htmlFor="clientNodeKey">{t('fields.nodeKey')}</Label>
                             <Input
-                                id="jumpTargetNodeId"
-                                type="number"
-                                value={formData.jumpTargetNodeId || ''}
-                                onChange={(e) => setFormData(prev => ({
-                                    ...prev,
-                                    jumpTargetNodeId: e.target.value ? parseInt(e.target.value) : null
-                                }))}
-                                placeholder={t('fields.jumpTargetPlaceholder')}
+                                id="clientNodeKey"
+                                value={formData.clientNodeKey}
+                                onChange={(e) => setFormData(prev => ({ ...prev, clientNodeKey: e.target.value }))}
+                                placeholder={t('fields.nodeKeyPlaceholder')}
+                                className="font-mono"
+                                required
                             />
-                            <p className="text-xs text-muted-foreground">
-                                {t('fields.jumpTargetDescription')}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{t('fields.nodeKeyDescription')}</p>
                         </div>
-                    )}
 
-                    {/* Conditions */}
-                    <div className="space-y-2">
-                        <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
-                        <Textarea
-                            id="conditionGroup"
-                            value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
-                            onChange={(e) => {
-                                try {
-                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                    setFormData(prev => ({ ...prev, conditionGroup: parsed }))
-                                } catch {
-                                    // Invalid JSON, keep the string for editing
+                        {/* Speaker NPC (line only) */}
+                        {formData.type === 'line' && (
+                            <div className="space-y-2">
+                                <NPCSelect
+                                    value={formData.speakerNpcId}
+                                    onChange={(npcId) => setFormData(prev => ({ ...prev, speakerNpcId: npcId }))}
+                                    label={t('fields.speakerNpc')}
+                                />
+                                <p className="text-xs text-muted-foreground">{t('fields.speakerNpcDescription')}</p>
+                            </div>
+                        )}
+
+                        {/* Jump Target (jump only) */}
+                        {formData.type === 'jump' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="jumpTargetNodeId">{t('fields.jumpTargetNodeId')}</Label>
+                                <Input
+                                    id="jumpTargetNodeId"
+                                    type="number"
+                                    value={formData.jumpTargetNodeId || ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        jumpTargetNodeId: e.target.value ? parseInt(e.target.value) : null,
+                                    }))}
+                                    placeholder={t('fields.jumpTargetPlaceholder')}
+                                />
+                                <p className="text-xs text-muted-foreground">{t('fields.jumpTargetDescription')}</p>
+                            </div>
+                        )}
+
+                        {/* Advanced toggle */}
+                        <div>
+                            <button
+                                type="button"
+                                onClick={() => setAdvancedOpen(v => !v)}
+                                className="flex w-full items-center gap-2 rounded-md px-0 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <span className="flex-1 border-t border-dashed border-border" />
+                                <span>{t('fields.advanced')}</span>
+                                {advancedOpen
+                                    ? <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+                                    : <ChevronDown className="h-3.5 w-3.5 shrink-0" />
                                 }
-                            }}
-                            placeholder={t('fields.conditionsPlaceholder')}
-                            rows={3}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.conditionsDescription')}
-                        </p>
+                                <span className="flex-1 border-t border-dashed border-border" />
+                            </button>
+
+                            {advancedOpen && (
+                                <div className="mt-4 space-y-4">
+                                    {/* Conditions */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
+                                            {conditionsError && (
+                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
+                                            )}
+                                        </div>
+                                        <Textarea
+                                            id="conditionGroup"
+                                            value={conditionsRaw}
+                                            onChange={(e) => {
+                                                setConditionsRaw(e.target.value)
+                                                try {
+                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
+                                                    setFormData(prev => ({ ...prev, conditionGroup: parsed }))
+                                                    setConditionsError(false)
+                                                } catch {
+                                                    setConditionsError(true)
+                                                }
+                                            }}
+                                            placeholder={t('fields.conditionsPlaceholder')}
+                                            rows={3}
+                                            className={cn('font-mono text-xs', conditionsError && 'border-destructive focus-visible:ring-destructive')}
+                                        />
+                                        <p className="text-xs text-muted-foreground">{t('fields.conditionsDescription')}</p>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
+                                            {actionsError && (
+                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
+                                            )}
+                                        </div>
+                                        <Textarea
+                                            id="actionGroup"
+                                            value={actionsRaw}
+                                            onChange={(e) => {
+                                                setActionsRaw(e.target.value)
+                                                try {
+                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
+                                                    setFormData(prev => ({ ...prev, actionGroup: parsed }))
+                                                    setActionsError(false)
+                                                } catch {
+                                                    setActionsError(true)
+                                                }
+                                            }}
+                                            placeholder={t('fields.actionsPlaceholder')}
+                                            rows={3}
+                                            className={cn('font-mono text-xs', actionsError && 'border-destructive focus-visible:ring-destructive')}
+                                        />
+                                        <p className="text-xs text-muted-foreground">{t('fields.actionsDescription')}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="space-y-2">
-                        <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
-                        <Textarea
-                            id="actionGroup"
-                            value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
-                            onChange={(e) => {
-                                try {
-                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                    setFormData(prev => ({ ...prev, actionGroup: parsed }))
-                                } catch {
-                                    // Invalid JSON, keep the string for editing
-                                }
-                            }}
-                            placeholder={t('fields.actionsPlaceholder')}
-                            rows={3}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.actionsDescription')}
-                        </p>
-                    </div>
-
-                    <DialogFooter>
+                    {/* Sticky footer */}
+                    <DialogFooter className="px-6 py-4 border-t border-border/60 shrink-0 bg-background">
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             {t('buttons.cancel')}
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" disabled={conditionsError || actionsError}>
                             {t('buttons.create')}
                         </Button>
                     </DialogFooter>

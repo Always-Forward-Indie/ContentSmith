@@ -32,7 +32,7 @@
     "actions": "Actions",
     "noData": "No rarities found",
     "noSearchResults": "No rarities match your search",
-    "showingResults": "Showing {from} to {to} of {total} results",
+    "showingResults": "Showing {from}–{to} of {total}",
     "previous": "Previous",
     "next": "Next",
     "pageOf": "Page {current} of {total}",

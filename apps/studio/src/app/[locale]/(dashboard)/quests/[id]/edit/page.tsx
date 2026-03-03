@@ -1,18 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronRight, ScrollText, AlertCircle } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import NPCSelect from '@/components/editors/NPCSelect'
 
 import { trpc } from '@/lib/trpc'
@@ -27,17 +28,13 @@ export default function EditQuestPage() {
     const params = useParams()
     const router = useRouter()
     const questId = parseInt(params.id as string, 10)
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // Fetch current quest data
-    const { data: quest, isLoading, error } = trpc.quest.byId.useQuery({
-        id: questId,
-    })
+    const { data: quest, isLoading, error } = trpc.quest.byId.useQuery({ id: questId })
 
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: { errors, isSubmitting },
         reset,
         watch,
         setValue,
@@ -45,7 +42,6 @@ export default function EditQuestPage() {
         resolver: zodResolver(UpdateQuestSchema),
     })
 
-    // Reset form when quest data loads
     useEffect(() => {
         if (quest) {
             reset({
@@ -65,186 +61,185 @@ export default function EditQuestPage() {
         onSuccess: () => {
             router.push(`/${locale}/quests/${questId}`)
         },
-        onError: (error) => {
-            console.error('Failed to update quest:', error)
-        },
     })
 
     const onSubmit = async (data: UpdateQuestForm) => {
-        setIsSubmitting(true)
-        try {
-            await updateQuest.mutateAsync(data)
-        } finally {
-            setIsSubmitting(false)
-        }
+        await updateQuest.mutateAsync(data)
     }
 
     const repeatable = watch('repeatable')
 
     if (isLoading) {
         return (
-            <div className="container mx-auto py-6">
-                <div className="mb-6">
-                    <Skeleton className="h-8 w-48 mb-2" />
-                    <Skeleton className="h-4 w-96" />
-                </div>
-                <Skeleton className="h-96 max-w-2xl" />
+            <div className="max-w-lg mx-auto space-y-6 animate-pulse">
+                <div className="h-5 bg-muted rounded w-48" />
+                <div className="h-9 bg-muted rounded w-56" />
+                <div className="h-96 bg-muted rounded-lg" />
             </div>
         )
     }
 
     if (error) {
         return (
-            <div className="container mx-auto py-6">
-                <div className="text-center py-8">
-                    <h1 className="text-2xl font-bold mb-2">{t('edit.errorLoading')}</h1>
-                    <p className="text-red-600 mb-4">{error.message}</p>
-                    <Button onClick={() => router.push(`/${locale}/quests/${questId}`)}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        {t('edit.back')}
-                    </Button>
-                </div>
+            <div className="flex flex-col items-center justify-center py-24 gap-3">
+                <AlertCircle className="h-10 w-10 text-destructive/70" />
+                <p className="text-destructive font-medium">{t('edit.errorLoading')}: {error.message}</p>
+                <Link href={`/${locale}/quests/${questId}`}>
+                    <Button variant="outline" size="sm">{tCommon('back')}</Button>
+                </Link>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto py-6">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" onClick={() => router.push(`/quests/${questId}`)}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    {t('edit.back')}
-                </Button>
+        <div className="max-w-lg mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/quests`} className="hover:text-foreground transition-colors">
+                    {t('title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <Link
+                    href={`/${locale}/quests/${questId}`}
+                    className="hover:text-foreground transition-colors font-mono"
+                >
+                    {quest?.slug ?? `#${questId}`}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('edit.title')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <ScrollText className="h-5 w-5" />
+                </div>
                 <div>
-                    <h1 className="text-3xl font-bold">{t('edit.title')}</h1>
-                    <p className="text-muted-foreground">
-                        {t('edit.description', { slug: quest?.slug })}
-                    </p>
+                    <h1 className="text-2xl font-bold tracking-tight">{t('edit.title')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('edit.description', { slug: quest?.slug ?? '' })}</p>
                 </div>
             </div>
 
-            <Card className="max-w-2xl">
+            {/* Form Card */}
+            <Card>
                 <CardHeader>
-                    <CardTitle>{t('edit.basicInfo')}</CardTitle>
-                    <CardDescription>
-                        {t('edit.basicInfoDescription')}
-                    </CardDescription>
+                    <CardTitle className="text-base">{t('edit.basicInfo')}</CardTitle>
+                    <CardDescription>{t('edit.basicInfoDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Slug */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="slug">{t('form.slug')}</Label>
                             <Input
                                 id="slug"
                                 {...register('slug')}
-                                disabled={isSubmitting}
+                                className="font-mono"
+                                disabled={isSubmitting || updateQuest.isPending}
                             />
-                            {errors.slug && (
-                                <p className="text-sm text-red-600">{errors.slug.message}</p>
-                            )}
+                            {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Min Level */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="minLevel">{t('form.minLevel')}</Label>
                             <Input
                                 id="minLevel"
                                 type="number"
                                 min="1"
                                 max="999"
+                                className="w-28"
                                 {...register('minLevel', { valueAsNumber: true })}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || updateQuest.isPending}
                             />
-                            {errors.minLevel && (
-                                <p className="text-sm text-red-600">{errors.minLevel.message}</p>
-                            )}
+                            {errors.minLevel && <p className="text-xs text-destructive">{errors.minLevel.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="repeatable" className="flex items-center gap-2">
-                                <input
-                                    id="repeatable"
-                                    type="checkbox"
-                                    {...register('repeatable')}
-                                    disabled={isSubmitting}
-                                />
-                                {t('form.repeatable')}
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                {t('form.repeatableDescription')}
-                            </p>
+                        {/* Repeatable toggle */}
+                        <div className="flex items-center justify-between rounded-lg border p-4">
+                            <div>
+                                <Label htmlFor="repeatable" className="text-sm font-medium cursor-pointer">
+                                    {t('form.repeatable')}
+                                </Label>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    {t('form.repeatableDescription')}
+                                </p>
+                            </div>
+                            <Switch
+                                id="repeatable"
+                                checked={!!repeatable}
+                                onCheckedChange={(v) => setValue('repeatable', v)}
+                                disabled={isSubmitting || updateQuest.isPending}
+                            />
                         </div>
 
+                        {/* Cooldown */}
                         {repeatable && (
-                            <div className="space-y-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="cooldownSec">{t('form.cooldown')}</Label>
                                 <Input
                                     id="cooldownSec"
                                     type="number"
                                     min="0"
+                                    className="w-36"
                                     {...register('cooldownSec', { valueAsNumber: true })}
-                                    disabled={isSubmitting}
+                                    disabled={isSubmitting || updateQuest.isPending}
                                 />
-                                <p className="text-sm text-muted-foreground">
-                                    {t('form.cooldownDescription')}
-                                </p>
-                                {errors.cooldownSec && (
-                                    <p className="text-sm text-red-600">{errors.cooldownSec.message}</p>
-                                )}
+                                <p className="text-xs text-muted-foreground">{t('form.cooldownDescription')}</p>
+                                {errors.cooldownSec && <p className="text-xs text-destructive">{errors.cooldownSec.message}</p>}
                             </div>
                         )}
 
-                        <div className="space-y-2">
+                        {/* Quest Giver */}
+                        <div className="space-y-1.5">
                             <NPCSelect
                                 label={t('form.questGiver')}
                                 value={watch('giverNpcId') ?? null}
                                 onChange={(npcId) => setValue('giverNpcId', npcId)}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('form.questGiverDescription')}
-                            </p>
-                            {errors.giverNpcId && (
-                                <p className="text-sm text-red-600">{errors.giverNpcId.message}</p>
-                            )}
+                            <p className="text-xs text-muted-foreground">{t('form.questGiverDescription')}</p>
+                            {errors.giverNpcId && <p className="text-xs text-destructive">{errors.giverNpcId.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Quest Receiver */}
+                        <div className="space-y-1.5">
                             <NPCSelect
                                 label={t('form.questReceiver')}
                                 value={watch('turninNpcId') ?? null}
                                 onChange={(npcId) => setValue('turninNpcId', npcId)}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('form.questReceiverDescription')}
-                            </p>
-                            {errors.turninNpcId && (
-                                <p className="text-sm text-red-600">{errors.turninNpcId.message}</p>
-                            )}
+                            <p className="text-xs text-muted-foreground">{t('form.questReceiverDescription')}</p>
+                            {errors.turninNpcId && <p className="text-xs text-destructive">{errors.turninNpcId.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Client Key */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="clientQuestKey">{t('form.clientKey')}</Label>
                             <Input
                                 id="clientQuestKey"
                                 {...register('clientQuestKey', {
-                                    setValueAs: (value) => value === '' ? null : value
+                                    setValueAs: (v) => v === '' ? null : v,
                                 })}
                                 placeholder="quest_wolf_hunt_intro_title"
-                                disabled={isSubmitting}
+                                className="font-mono"
+                                disabled={isSubmitting || updateQuest.isPending}
                             />
-                            <p className="text-sm text-muted-foreground">
-                                {t('form.clientKeyDescription')}
-                            </p>
-                            {errors.clientQuestKey && (
-                                <p className="text-sm text-red-600">{errors.clientQuestKey.message}</p>
-                            )}
+                            <p className="text-xs text-muted-foreground">{t('form.clientKeyDescription')}</p>
+                            {errors.clientQuestKey && <p className="text-xs text-destructive">{errors.clientQuestKey.message}</p>}
                         </div>
 
-                        <div className="flex gap-4">
+                        {updateQuest.error && (
+                            <p className="text-sm text-destructive">
+                                {t('edit.updateError', { error: updateQuest.error.message })}
+                            </p>
+                        )}
+
+                        <div className="flex gap-3 pt-2">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => router.push(`/${locale}/quests/${questId}`)}
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || updateQuest.isPending}
                             >
                                 {t('edit.cancel')}
                             </Button>
@@ -255,12 +250,6 @@ export default function EditQuestPage() {
                                 {isSubmitting || updateQuest.isPending ? t('edit.saving') : t('edit.saveChanges')}
                             </Button>
                         </div>
-
-                        {updateQuest.error && (
-                            <div className="text-sm text-red-600 mt-2">
-                                {t('edit.updateError', { error: updateQuest.error.message })}
-                            </div>
-                        )}
                     </form>
                 </CardContent>
             </Card>

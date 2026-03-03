@@ -54,6 +54,8 @@
     "levelRequirement": "Level Requirement",
     "durabilityMax": "Max Durability",
     "equipSlot": "Equipment Slot",
+    "selectEquipSlot": "Select slot",
+    "equipSlotNone": "— No slot —",
     "actions": "Actions",
     "quest": "Quest",
     "questItem": "Quest Item",

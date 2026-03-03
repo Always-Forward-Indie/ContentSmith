@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skillScaleType } from '@contentsmith/database';
-import { and, eq, like } from '@contentsmith/database';
+import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillScaleTypeListQuerySchema,
   skillScaleTypeIdSchema,
@@ -15,29 +15,31 @@ export const skillScaleTypesRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillScaleTypeListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-      
-      if (search) {
-        conditions.push(like(skillScaleType.name, `%${search}%`));
-      }
-
+      if (search) conditions.push(like(skillScaleType.name, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем типы масштабирования
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skillScaleType)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const skillScaleTypes = await db
-        .select({
-          id: skillScaleType.id,
-          name: skillScaleType.name,
-          slug: skillScaleType.slug,
-        })
+        .select({ id: skillScaleType.id, name: skillScaleType.name, slug: skillScaleType.slug })
         .from(skillScaleType)
         .where(whereClause)
-        .orderBy(skillScaleType.name);
+        .orderBy(skillScaleType.name)
+        .limit(pageSize)
+        .offset(offset);
 
-      return skillScaleTypes;
+      return {
+        data: skillScaleTypes,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить тип масштабирования по ID

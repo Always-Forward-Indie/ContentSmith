@@ -14,6 +14,7 @@
         "@contentsmith/database": "file:../../packages/database",
         "@contentsmith/ui": "file:../../packages/ui",
         "@contentsmith/validation": "file:../../packages/validation",
+        "@dagrejs/dagre": "^2.0.4",
         "@hookform/resolvers": "^3.3.2",
         "@monaco-editor/react": "^4.6.0",
         "@radix-ui/react-dialog": "^1.1.15",

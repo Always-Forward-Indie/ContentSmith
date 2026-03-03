@@ -14,6 +14,8 @@ import { itemsRouter } from './items';
 import { itemAttributesRouter } from './itemAttributes';
 import { itemsRarityRouter } from './itemsRarity';
 import { itemTypesRouter } from './itemTypes';
+import { equipSlotsRouter } from './equip-slots';
+import { mobsRouter } from './mobs';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -31,6 +33,8 @@ export const appRouter = createTRPCRouter({
   itemAttributes: itemAttributesRouter,
   itemsRarity: itemsRarityRouter,
   itemTypes: itemTypesRouter,
+  equipSlots: equipSlotsRouter,
+  mobs: mobsRouter,
 });
 
 export type AppRouter = typeof appRouter;

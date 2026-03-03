@@ -54,6 +54,19 @@ export const QuestSchema = z.object({
 export const CreateQuestSchema = QuestSchema.omit({ id: true });
 export const UpdateQuestSchema = QuestSchema.partial().required({ id: true });
 
+export const questListQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(100).default(10),
+  repeatable: z.boolean().optional(),
+  minLevel: z.number().int().min(1).optional(),
+  maxLevel: z.number().int().min(1).optional(),
+  giverNpcId: z.number().int().positive().optional(),
+  turninNpcId: z.number().int().positive().optional(),
+  sortBy: z.enum(['id', 'slug', 'minLevel']).default('id'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
 export const PlayerQuestSchema = z.object({
   playerId: z.number(),
   questId: z.number(),
@@ -62,9 +75,24 @@ export const PlayerQuestSchema = z.object({
   progress: z.record(z.unknown()).nullable().optional(),
 });
 
+export const QuestRewardSchema = z.object({
+  id: z.number().optional(),
+  questId: z.number(),
+  rewardType: z.enum(['item', 'gold', 'exp', 'currency']),
+  itemId: z.number().nullable().optional(),
+  quantity: z.number().min(1).default(1),
+  amount: z.number().min(0).default(0),
+});
+
+export const CreateQuestRewardSchema = QuestRewardSchema.omit({ id: true });
+export const UpdateQuestRewardSchema = QuestRewardSchema.partial().required({ id: true });
+
 export type QuestStepParams = z.infer<typeof QuestStepParamsSchema>;
 export type QuestStep = z.infer<typeof QuestStepSchema>;
 export type Quest = z.infer<typeof QuestSchema>;
 export type CreateQuest = z.infer<typeof CreateQuestSchema>;
 export type UpdateQuest = z.infer<typeof UpdateQuestSchema>;
 export type PlayerQuest = z.infer<typeof PlayerQuestSchema>;
+export type QuestReward = z.infer<typeof QuestRewardSchema>;
+export type CreateQuestReward = z.infer<typeof CreateQuestRewardSchema>;
+export type UpdateQuestReward = z.infer<typeof UpdateQuestRewardSchema>;

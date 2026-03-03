@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Save, Plus, X, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+import { Save, Plus, X, ChevronRight, Package } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { trpc } from '@/lib/trpc';
+import { getRarityStyle } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 interface ItemAttribute {
@@ -38,6 +40,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
     const t = useTranslations('items');
     const { toast } = useToast();
     const router = useRouter();
+    const locale = useLocale();
 
     const isEditing = !!itemId;
 
@@ -57,7 +60,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
         durabilityMax: 100,
         vendorPriceBuy: 1,
         vendorPriceSell: 1,
-        equipSlot: 0,
+        equipSlot: null as number | null,
         levelRequirement: 0,
         isEquippable: false,
         isHarvest: false,
@@ -75,6 +78,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
     const { data: itemTypes, isLoading: isLoadingTypes } = trpc.items.types.list.useQuery();
     const { data: rarities, isLoading: isLoadingRarities } = trpc.items.rarities.list.useQuery();
     const { data: availableAttributes, isLoading: isLoadingAttributes } = trpc.items.attributes.list.useQuery();
+    const { data: equipSlots, isLoading: isLoadingEquipSlots } = trpc.equipSlots.all.useQuery();
 
     // Mutations
     const createMutation = trpc.items.create.useMutation({
@@ -84,7 +88,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                 description: t('createSuccessDescription'),
             });
             onSave?.();
-            router.push('/items');
+            router.push(`/${locale}/items`);
         },
         onError: (error) => {
             toast({
@@ -114,7 +118,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
 
     // Load item data for editing
     useEffect(() => {
-        if (itemData && itemTypes && rarities) {
+        if (itemData && itemTypes && rarities && equipSlots) {
             setFormData({
                 name: itemData.name,
                 slug: itemData.slug,
@@ -130,7 +134,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                 durabilityMax: itemData.durabilityMax,
                 vendorPriceBuy: itemData.vendorPriceBuy,
                 vendorPriceSell: itemData.vendorPriceSell,
-                equipSlot: itemData.equipSlot || 0,
+                equipSlot: itemData.equipSlot ?? null,
                 levelRequirement: itemData.levelRequirement,
                 isEquippable: itemData.isEquippable,
                 isHarvest: itemData.isHarvest,
@@ -143,7 +147,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                 attributeSlug: attr.attributeSlug,
             })) || []);
         }
-    }, [itemData, itemTypes, rarities]);
+    }, [itemData, itemTypes, rarities, equipSlots]);
 
     // Auto-generate slug from name
     const generateSlug = (name: string) => {
@@ -187,6 +191,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
 
         const submitData = {
             ...formData,
+            equipSlot: formData.equipSlot as number | null | undefined,
             attributes: attributes.map(attr => ({
                 attributeId: attr.attributeId,
                 value: attr.value,
@@ -248,29 +253,53 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
 
     if (isEditing && isLoadingItem) {
         return (
-            <div className="flex items-center justify-center h-48">
-                <div className="text-muted-foreground">{t('loading')}</div>
+            <div className="space-y-4 animate-pulse">
+                <div className="flex items-center gap-4">
+                    <div className="h-9 w-20 bg-muted rounded-md" />
+                    <div className="h-8 w-56 bg-muted rounded" />
+                </div>
+                <div className="h-48 bg-muted rounded-lg" />
+                <div className="h-48 bg-muted rounded-lg" />
             </div>
         );
     }
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" onClick={() => router.back()}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        {t('back')}
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            {isEditing ? t('editItem') : t('createItem')}
-                        </h1>
-                        <p className="text-muted-foreground">
-                            {isEditing ? t('editItemDescription') : t('createItemDescription')}
-                        </p>
-                    </div>
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/items`} className="hover:text-foreground transition-colors">
+                    {t('title')}
+                </Link>
+                {isEditing && itemData && (
+                    <>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                        <Link
+                            href={`/${locale}/items/${itemId}`}
+                            className="hover:text-foreground transition-colors"
+                        >
+                            {itemData.name}
+                        </Link>
+                    </>
+                )}
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">
+                    {isEditing ? t('editItem') : t('createItem')}
+                </span>
+            </nav>
+
+            {/* Page Icon + Title */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <Package className="h-5 w-5" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        {isEditing ? t('editItem') : t('createItem')}
+                    </h1>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                        {isEditing ? t('editItemDescription') : t('createItemDescription')}
+                    </p>
                 </div>
             </div>
 
@@ -366,7 +395,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                                                 <div className="flex items-center gap-2">
                                                     <div
                                                         className="w-3 h-3 rounded-full"
-                                                        style={{ backgroundColor: getRarityColor(rarity) }}
+                                                        style={{ backgroundColor: getRarityColor(rarity), boxShadow: getRarityStyle(getRarityColor(rarity)).dotShadow }}
                                                     />
                                                     {rarity.name}
                                                 </div>
@@ -458,14 +487,25 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="equipSlot">{t('equipSlot')}</Label>
-                            <Input
-                                id="equipSlot"
-                                type="number"
-                                min="0"
-                                value={formData.equipSlot}
-                                onChange={(e) => setFormData(prev => ({ ...prev, equipSlot: parseInt(e.target.value) || 0 }))}
-                            />
+                            <Label>{t('equipSlot')}</Label>
+                            <Select
+                                key={`equipSlot-${formData.equipSlot ?? 'null'}-${itemData?.equipSlot ?? 'null'}`}
+                                value={formData.equipSlot !== null ? formData.equipSlot.toString() : '__none__'}
+                                onValueChange={(value) => setFormData(prev => ({ ...prev, equipSlot: value === '__none__' ? null : parseInt(value) }))}
+                                disabled={isLoadingEquipSlots}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder={isLoadingEquipSlots ? t('loading') : t('selectEquipSlot')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="__none__">{t('equipSlotNone')}</SelectItem>
+                                    {equipSlots?.map((slot) => (
+                                        <SelectItem key={slot.id} value={slot.id.toString()}>
+                                            {slot.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </CardContent>
                 </Card>
@@ -638,7 +678,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                         }
                     </Button>
 
-                    <Button type="button" variant="outline" onClick={onCancel || (() => router.back())}>
+                    <Button type="button" variant="outline" onClick={onCancel || (() => router.push(`/${locale}/items`))}>
                         {t('cancel')}
                     </Button>
                 </div>

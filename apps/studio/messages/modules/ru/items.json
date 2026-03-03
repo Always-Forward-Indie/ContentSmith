@@ -54,6 +54,8 @@
     "levelRequirement": "Требование уровня",
     "durabilityMax": "Макс. прочность",
     "equipSlot": "Слот экипировки",
+    "selectEquipSlot": "Выберите слот",
+    "equipSlotNone": "— Без слота —",
     "actions": "Действия",
     "quest": "Квест",
     "questItem": "Квестовый предмет",

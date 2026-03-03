@@ -7,6 +7,7 @@ import {
   itemsRarity,
   itemAttributes,
   itemAttributesMapping,
+  equipSlot,
 } from '@contentsmith/database';
 import { like, or, desc, asc, eq, and, sql } from '@contentsmith/database';
 import {
@@ -107,6 +108,7 @@ export const itemsRouter = createTRPCRouter({
           vendorPriceBuy: items.vendorPriceBuy,
           vendorPriceSell: items.vendorPriceSell,
           equipSlot: items.equipSlot,
+          equipSlotName: equipSlot.name,
           levelRequirement: items.levelRequirement,
           isEquippable: items.isEquippable,
           isHarvest: items.isHarvest,
@@ -119,6 +121,7 @@ export const itemsRouter = createTRPCRouter({
         .from(items)
         .leftJoin(itemTypes, eq(items.itemType, itemTypes.id))
         .leftJoin(itemsRarity, eq(items.rarityId, itemsRarity.id))
+        .leftJoin(equipSlot, eq(items.equipSlot, equipSlot.id))
         .where(whereClause)
         .orderBy(orderBy)
         .limit(limit)
@@ -174,6 +177,7 @@ export const itemsRouter = createTRPCRouter({
         .from(items)
         .leftJoin(itemTypes, eq(items.itemType, itemTypes.id))
         .leftJoin(itemsRarity, eq(items.rarityId, itemsRarity.id))
+        .leftJoin(equipSlot, eq(items.equipSlot, equipSlot.id))
         .where(eq(items.id, input.id))
         .limit(1);
 

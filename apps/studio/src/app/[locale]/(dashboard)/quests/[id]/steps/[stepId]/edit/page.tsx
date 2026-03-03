@@ -2,11 +2,11 @@
 
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
-import { ArrowLeft } from 'lucide-react'
+import { ChevronRight, ScrollText, AlertCircle } from 'lucide-react'
+import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
 import { QuestStepEditor } from '@/components/quest/QuestStepEditor'
-import { Skeleton } from '@/components/ui/skeleton'
 import { trpc } from '@/lib/trpc'
 
 export default function EditQuestStepPage() {
@@ -14,13 +14,11 @@ export default function EditQuestStepPage() {
     const router = useRouter()
     const locale = useLocale()
     const t = useTranslations('quests.stepPages.edit')
+    const tQuests = useTranslations('quests')
     const questId = parseInt(params.id as string, 10)
     const stepId = parseInt(params.stepId as string, 10)
 
-    // Fetch quest steps to find the specific step
-    const { data: questData, isLoading, error } = trpc.quest.getWithSteps.useQuery({
-        id: questId,
-    })
+    const { data: questData, isLoading, error } = trpc.quest.getWithSteps.useQuery({ id: questId })
 
     const updateStep = trpc.quest.updateStep.useMutation({
         onSuccess: () => {
@@ -32,10 +30,7 @@ export default function EditQuestStepPage() {
 
     const handleSave = async (data: any) => {
         const { id, ...updateData } = data
-        await updateStep.mutateAsync({
-            id: stepId,
-            ...updateData,
-        })
+        await updateStep.mutateAsync({ id: stepId, ...updateData })
     }
 
     const handleCancel = () => {
@@ -44,63 +39,72 @@ export default function EditQuestStepPage() {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto py-6">
-                <div className="mb-6">
-                    <Skeleton className="h-8 w-48 mb-2" />
-                    <Skeleton className="h-4 w-96" />
-                </div>
-                <Skeleton className="h-96 max-w-2xl" />
+            <div className="max-w-2xl mx-auto space-y-6 animate-pulse">
+                <div className="h-5 bg-muted rounded w-64" />
+                <div className="h-9 bg-muted rounded w-56" />
+                <div className="h-96 bg-muted rounded-lg" />
             </div>
         )
     }
 
     if (error || !currentStep) {
         return (
-            <div className="container mx-auto py-6">
-                <div className="text-center py-8">
-                    <h1 className="text-2xl font-bold mb-2">{t('errorLoading')}</h1>
-                    <p className="text-red-600 mb-4">
-                        {error?.message || t('stepNotFound')}
-                    </p>
-                    <Button onClick={() => router.push(`/${locale}/quests/${questId}`)}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        {t('back')}
-                    </Button>
-                </div>
+            <div className="flex flex-col items-center justify-center py-24 gap-3">
+                <AlertCircle className="h-10 w-10 text-destructive/70" />
+                <p className="text-destructive font-medium">
+                    {error?.message || t('stepNotFound')}
+                </p>
+                <Link href={`/${locale}/quests/${questId}`}>
+                    <Button variant="outline" size="sm">{t('back')}</Button>
+                </Link>
             </div>
         )
     }
 
     return (
-        <div className="container mx-auto py-6">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="outline" onClick={() => router.push(`/${locale}/quests/${questId}`)}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    {t('back')}
-                </Button>
+        <div className="max-w-2xl mx-auto space-y-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Link href={`/${locale}/quests`} className="hover:text-foreground transition-colors">
+                    {tQuests('title')}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <Link
+                    href={`/${locale}/quests/${questId}`}
+                    className="hover:text-foreground transition-colors font-mono"
+                >
+                    #{questId}
+                </Link>
+                <ChevronRight className="h-3.5 w-3.5" />
+                <span className="text-foreground font-medium">{t('title')}</span>
+            </nav>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <ScrollText className="h-5 w-5" />
+                </div>
                 <div>
-                    <h1 className="text-3xl font-bold">{t('title')}</h1>
-                    <p className="text-muted-foreground">
+                    <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
+                    <p className="text-sm text-muted-foreground">
                         {t('description', { stepIndex: currentStep.stepIndex, questId })}
                     </p>
                 </div>
             </div>
 
-            <div className="max-w-2xl">
-                <QuestStepEditor
-                    questId={questId}
-                    step={currentStep}
-                    onSave={handleSave}
-                    onCancel={handleCancel}
-                    isSubmitting={updateStep.isPending}
-                />
+            <QuestStepEditor
+                questId={questId}
+                step={currentStep}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                isSubmitting={updateStep.isPending}
+            />
 
-                {updateStep.error && (
-                    <div className="mt-4 text-sm text-red-600">
-                        {t('errorUpdating', { error: updateStep.error.message })}
-                    </div>
-                )}
-            </div>
+            {updateStep.error && (
+                <p className="text-sm text-destructive">
+                    {t('errorUpdating', { error: updateStep.error.message })}
+                </p>
+            )}
         </div>
     )
 }

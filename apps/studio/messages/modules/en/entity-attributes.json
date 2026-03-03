@@ -18,5 +18,8 @@
     "nameRequired": "Name is required",
     "slugRequired": "Slug is required",
     "search": "Search entity attributes...",
-    "actions": "Actions"
+    "actions": "Actions",
+    "description": "Manage entity attribute definitions used in the game world"
+,
+    "showingResults": "Showing {from}–{to} of {total}"
 }

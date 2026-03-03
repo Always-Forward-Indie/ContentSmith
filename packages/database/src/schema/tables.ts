@@ -33,6 +33,7 @@ export const npcDialogue = pgTable('npc_dialogue', {
   npcId: bigint('npc_id', { mode: 'number' }).notNull(),
   dialogueId: bigint('dialogue_id', { mode: 'number' }).notNull().references(() => dialogue.id, { onDelete: 'cascade' }),
   priority: integer('priority').notNull().default(0),
+  conditionGroup: jsonb('condition_group').$type<unknown>(),
 }, (table) => ({
   pk: primaryKey({ columns: [table.npcId, table.dialogueId] }),
 }));
@@ -43,8 +44,8 @@ export const dialogueNode = pgTable('dialogue_node', {
   type: nodeTypeEnum('type').notNull(),
   speakerNpcId: bigint('speaker_npc_id', { mode: 'number' }),
   clientNodeKey: text('client_node_key'),
-  conditionGroup: jsonb('condition_group'),
-  actionGroup: jsonb('action_group'),
+  conditionGroup: jsonb('condition_group').$type<unknown>(),
+  actionGroup: jsonb('action_group').$type<unknown>(),
   jumpTargetNodeId: bigint('jump_target_node_id', { mode: 'number' })
 }, (table) => ({
   dialogueIdx: index('ix_node_dialogue').on(table.dialogueId),
@@ -56,8 +57,8 @@ export const dialogueEdge = pgTable('dialogue_edge', {
   toNodeId: bigint('to_node_id', { mode: 'number' }).notNull().references(() => dialogueNode.id, { onDelete: 'cascade' }),
   orderIndex: integer('order_index').notNull().default(0),
   clientChoiceKey: text('client_choice_key'),
-  conditionGroup: jsonb('condition_group'),
-  actionGroup: jsonb('action_group'),
+  conditionGroup: jsonb('condition_group').$type<unknown>(),
+  actionGroup: jsonb('action_group').$type<unknown>(),
   hideIfLocked: boolean('hide_if_locked').notNull().default(false),
 }, (table) => ({
   fromIdx: index('ix_edge_from').on(table.fromNodeId),
@@ -83,11 +84,22 @@ export const questStep = pgTable('quest_step', {
   questId: bigint('quest_id', { mode: 'number' }).notNull().references(() => quest.id, { onDelete: 'cascade' }),
   stepIndex: integer('step_index').notNull(),
   stepType: questStepTypeEnum('step_type').notNull(),
-  params: jsonb('params').notNull(),
+  params: jsonb('params').$type<unknown>().notNull(),
   clientStepKey: text('client_step_key'),
 }, (table) => ({
   questStepIdx: index('ix_quest_step_q').on(table.questId, table.stepIndex),
   questStepUnique: unique().on(table.questId, table.stepIndex),
+}));
+
+export const questReward = pgTable('quest_reward', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  questId: bigint('quest_id', { mode: 'number' }).notNull().references(() => quest.id, { onDelete: 'cascade' }),
+  rewardType: text('reward_type').notNull(),
+  itemId: bigint('item_id', { mode: 'number' }),
+  quantity: integer('quantity').notNull().default(1),
+  amount: bigint('amount', { mode: 'number' }).notNull().default(0),
+}, (table) => ({
+  questRewardIdx: index('ix_quest_reward_quest').on(table.questId),
 }));
 
 // ===== PLAYER DATA =====
@@ -96,7 +108,7 @@ export const playerQuest = pgTable('player_quest', {
   questId: bigint('quest_id', { mode: 'number' }).notNull().references(() => quest.id, { onDelete: 'cascade' }),
   state: questStateEnum('state').notNull(),
   currentStep: integer('current_step').notNull().default(0),
-  progress: jsonb('progress'),
+  progress: jsonb('progress').$type<unknown>(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => ({
   pk: primaryKey({ columns: [table.playerId, table.questId] }),
@@ -105,19 +117,17 @@ export const playerQuest = pgTable('player_quest', {
 
 // ===== NPC =====
 export const npc = pgTable('npc', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
-  name: text('name').notNull(),
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
   raceId: integer('race_id').notNull().default(1),
   level: integer('level').notNull(),
   currentHealth: integer('current_health').notNull().default(1),
   currentMana: integer('current_mana').notNull().default(1),
   isDead: boolean('is_dead').notNull().default(false),
-  slug: text('slug'),
+  slug: varchar('slug', { length: 50 }),
   radius: integer('radius').notNull().default(100),
   isInteractable: boolean('is_interactable').notNull().default(true),
   npcType: integer('npc_type').notNull().default(1),
-  dialogueId: bigint('dialogue_id', { mode: 'number' }),
-  questId: bigint('quest_id', { mode: 'number' }),
 }, (table) => ({
   nameIdx: index('ix_npc_name').on(table.name),
   slugIdx: index('ix_npc_slug').on(table.slug),
@@ -155,10 +165,10 @@ export const npcType = pgTable('npc_type', {
 export const npcPosition = pgTable('npc_position', {
   id: bigint('id', { mode: 'number' }),
   npcId: bigint('npc_id', { mode: 'number' }).notNull().references(() => npc.id, { onDelete: 'cascade' }),
-  x: integer('x'),
-  y: integer('y'),
-  z: integer('z'),
-  rotZ: integer('rot_z').notNull().default(0),
+  x: doublePrecision('x').notNull(),
+  y: doublePrecision('y').notNull(),
+  z: doublePrecision('z').notNull(),
+  rotZ: doublePrecision('rot_z').notNull().default(0),
 }, (table) => ({
   npcIdx: index('ix_npc_position_npc').on(table.npcId),
 }));
@@ -230,7 +240,7 @@ export const skillPropertiesMapping = pgTable('skill_properties_mapping', {
   skillId: integer('skill_id').notNull().references(() => skills.id),
   skillLevel: integer('skill_level').notNull(),
   propertyId: integer('property_id').notNull().references(() => skillProperties.id),
-  propertyValue: integer('property_value').notNull(),
+  propertyValue: doublePrecision('property_value').notNull(),
 }, (table) => ({
   skillPropIdx: index('ix_skill_props_mapping').on(table.skillId, table.skillLevel),
   uniqueSkillProp: unique().on(table.skillId, table.skillLevel, table.propertyId),
@@ -261,7 +271,7 @@ export const skillEffects = pgTable('skill_effects', {
 export const skillEffectInstances = pgTable('skill_effect_instances', {
   id: serial('id').primaryKey(),
   skillId: integer('skill_id').notNull().references(() => skills.id),
-  orderIdx: integer('order_idx').notNull().default(1),
+  orderIdx: smallint('order_idx').notNull().default(1),
   targetTypeId: integer('target_type_id').notNull().references(() => targetType.id),
 }, (table) => ({
   skillEffectIdx: index('ix_skill_effect_instances_skill').on(table.skillId),
@@ -272,7 +282,7 @@ export const skillEffectsMapping = pgTable('skill_effects_mapping', {
   id: serial('id').primaryKey(),
   effectInstanceId: integer('effect_instance_id').notNull().references(() => skillEffectInstances.id),
   effectId: integer('effect_id').notNull().references(() => skillEffects.id),
-  value: integer('value').notNull(),
+  value: doublePrecision('value').notNull(),
   level: integer('level').notNull().default(1),
 }, (table) => ({
   effectMappingIdx: index('ix_skill_effects_mapping').on(table.effectInstanceId, table.level),
@@ -286,6 +296,14 @@ export const itemTypes = pgTable('item_types', {
   slug: varchar('slug', { length: 50 }).notNull(),
 }, (table) => ({
   slugIdx: index('ix_item_types_slug').on(table.slug),
+}));
+
+export const equipSlot = pgTable('equip_slot', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  slug: varchar('slug', { length: 50 }).notNull(),
+}, (table) => ({
+  slugIdx: index('ix_equip_slot_slug').on(table.slug),
 }));
 
 export const itemsRarity = pgTable('items_rarity', {
@@ -321,7 +339,7 @@ export const items = pgTable('items', {
   durabilityMax: bigint('durability_max', { mode: 'number' }).notNull().default(100),
   vendorPriceBuy: bigint('vendor_price_buy', { mode: 'number' }).notNull().default(1),
   vendorPriceSell: bigint('vendor_price_sell', { mode: 'number' }).notNull().default(1),
-  equipSlot: bigint('equip_slot', { mode: 'number' }).default(0),
+  equipSlot: integer('equip_slot').default(0).references(() => equipSlot.id),
   levelRequirement: bigint('level_requirement', { mode: 'number' }).notNull().default(0),
   isEquippable: boolean('is_equippable').notNull().default(false),
   isHarvest: boolean('is_harvest').notNull().default(false),
@@ -340,4 +358,89 @@ export const itemAttributesMapping = pgTable('item_attributes_mapping', {
 }, (table) => ({
   itemAttrIdx: index('ix_item_attributes_mapping_item').on(table.itemId),
   uniqueItemAttr: unique().on(table.itemId, table.attributeId),
+}));
+
+// ===== MOBS =====
+
+// Separate race table for mobs (independent of NPC races)
+export const mobRace = pgTable('mob_race', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+});
+
+// Rank system with stat multipliers: normal, pack, strong, elite, miniboss, boss
+export const mobRanks = pgTable('mob_ranks', {
+  rankId: smallint('rank_id').primaryKey(),
+  code: text('code').notNull().unique(),
+  mult: doublePrecision('mult').notNull().default(1.0),
+});
+
+export const mob = pgTable('mob', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  raceId: integer('race_id').notNull().default(1).references(() => mobRace.id),
+  level: integer('level').notNull(),
+  currentHealth: integer('current_health').notNull().default(1),
+  currentMana: integer('current_mana').notNull().default(1),
+  isAggressive: boolean('is_aggressive').notNull().default(false),
+  isDead: boolean('is_dead').notNull().default(false),
+  slug: varchar('slug', { length: 50 }).unique(),
+  radius: integer('radius').notNull().default(100),
+  baseXp: integer('base_xp').notNull().default(1),
+  rankId: integer('rank_id').notNull().default(1).references(() => mobRanks.rankId),
+}, (table) => ({
+  slugIdx: index('mob_slug_key').on(table.slug),
+}));
+
+export const mobPosition = pgTable('mob_position', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  mobId: bigint('mob_id', { mode: 'number' }).notNull().references(() => mob.id),
+  x: doublePrecision('x').notNull().default(0),
+  y: doublePrecision('y').notNull().default(0),
+  z: doublePrecision('z').notNull().default(0),
+}, (table) => ({
+  mobIdx: index('idx_mob_position_mob').on(table.mobId),
+}));
+
+export const mobAttributes = pgTable('mob_attributes', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  mobId: bigint('mob_id', { mode: 'number' }).notNull().references(() => mob.id),
+  attributeId: integer('attribute_id').notNull().references(() => entityAttributes.id),
+  value: doublePrecision('value').notNull(),
+}, (table) => ({
+  mobAttrIdx: index('ix_mob_attributes_mob').on(table.mobId),
+}));
+
+export const mobSkills = pgTable('mob_skills', {
+  id: serial('id').primaryKey(),
+  mobId: integer('mob_id').notNull().references(() => mob.id),
+  skillId: integer('skill_id').notNull().references(() => skills.id),
+  currentLevel: integer('current_level').notNull().default(1),
+}, (table) => ({
+  uniqueMobSkill: unique('uq_mob_skills').on(table.mobId, table.skillId),
+}));
+
+export const mobLootInfo = pgTable('mob_loot_info', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  mobId: integer('mob_id').notNull().references(() => mob.id),
+  itemId: bigint('item_id', { mode: 'number' }).notNull().references(() => items.id),
+  dropChance: doublePrecision('drop_chance').notNull().default(0),
+}, (table) => ({
+  mobLootIdx: index('idx_mob_loot_info_mob').on(table.mobId),
+}));
+
+export const spawnZones = pgTable('spawn_zones', {
+  zoneId: serial('zone_id').primaryKey(),
+  zoneName: varchar('zone_name', { length: 100 }).notNull(),
+  minSpawnX: doublePrecision('min_spawn_x').notNull(),
+  minSpawnY: doublePrecision('min_spawn_y').notNull(),
+  minSpawnZ: doublePrecision('min_spawn_z').notNull(),
+  maxSpawnX: doublePrecision('max_spawn_x').notNull(),
+  maxSpawnY: doublePrecision('max_spawn_y').notNull(),
+  maxSpawnZ: doublePrecision('max_spawn_z').notNull(),
+  mobId: integer('mob_id').notNull().references(() => mob.id),
+  spawnCount: integer('spawn_count').notNull().default(1),
+  respawnTime: text('respawn_time').notNull().default('00:01:00'),
+}, (table) => ({
+  mobIdx: index('idx_spawn_zones_mob').on(table.mobId),
 }));

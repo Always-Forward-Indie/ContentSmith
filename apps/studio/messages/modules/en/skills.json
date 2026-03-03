@@ -1,7 +1,15 @@
 {
     "title": "Skills",
+    "description": "Manage all skills, schools and scaling types in the game",
     "skillsManagement": "Skills Management",
     "createSkill": "Create Skill",
+    "table": {
+        "name": "Name",
+        "school": "School",
+        "scaleType": "Scale Type"
+    },
+    "showingResults": "Showing {from}–{to} of {total}",
+    "allFilters": "All",
     "editSkill": "Edit Skill",
     "skillName": "Skill Name",
     "skillSlug": "Skill Slug",

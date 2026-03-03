@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { skillProperties } from '@contentsmith/database';
-import { and, eq, like } from '@contentsmith/database';
+import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillPropertyTypeListQuerySchema,
   skillPropertyTypeIdSchema,
@@ -15,29 +15,31 @@ export const skillPropertiesRouter = createTRPCRouter({
   list: publicProcedure
     .input(skillPropertyTypeListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-      
-      if (search) {
-        conditions.push(like(skillProperties.name, `%${search}%`));
-      }
-
+      if (search) conditions.push(like(skillProperties.name, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем типы свойств навыков
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(skillProperties)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const skillPropertyTypes = await db
-        .select({
-          id: skillProperties.id,
-          name: skillProperties.name,
-          slug: skillProperties.slug,
-        })
+        .select({ id: skillProperties.id, name: skillProperties.name, slug: skillProperties.slug })
         .from(skillProperties)
         .where(whereClause)
-        .orderBy(skillProperties.name);
+        .orderBy(skillProperties.name)
+        .limit(pageSize)
+        .offset(offset);
 
-      return skillPropertyTypes;
+      return {
+        data: skillPropertyTypes,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить тип свойства по ID

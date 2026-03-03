@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
 import { race } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and } from '@contentsmith/database';
+import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
 import {
   raceSchema,
   createRaceSchema,
@@ -11,6 +11,8 @@ import {
 
 const raceListQuerySchema = z.object({
   search: z.string().optional(),
+  page: z.number().int().min(1).default(1),
+  pageSize: z.number().int().min(1).max(100).default(20),
 });
 
 const raceIdSchema = z.object({
@@ -22,34 +24,33 @@ export const raceRouter = createTRPCRouter({
   list: publicProcedure
     .input(raceListQuerySchema)
     .query(async ({ input }) => {
-      const { search } = input;
+      const { search, page, pageSize } = input;
+      const offset = (page - 1) * pageSize;
 
-      // Создаем условия для WHERE
       const conditions = [];
-
       if (search) {
-        conditions.push(
-          or(
-            like(race.name, `%${search}%`),
-            like(race.slug, `%${search}%`)
-          )
-        );
+        conditions.push(or(like(race.name, `%${search}%`), like(race.slug, `%${search}%`)));
       }
-
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-      // Получаем расы
+      const [totalResult] = await db
+        .select({ total: count() })
+        .from(race)
+        .where(whereClause);
+      const total = totalResult?.total ?? 0;
+
       const results = await db
-        .select({
-          id: race.id,
-          name: race.name,
-          slug: race.slug,
-        })
+        .select({ id: race.id, name: race.name, slug: race.slug })
         .from(race)
         .where(whereClause)
-        .orderBy(race.name);
+        .orderBy(race.name)
+        .limit(pageSize)
+        .offset(offset);
 
-      return results;
+      return {
+        data: results,
+        pagination: { page, pageSize, total, totalPages: Math.ceil(total / pageSize) },
+      };
     }),
 
   // Получить расу по ID

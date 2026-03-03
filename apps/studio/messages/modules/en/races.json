@@ -16,5 +16,10 @@
     "enterRaceName": "Enter race name",
     "raceSlugPlaceholder": "race-slug",
     "slugDescription": "Used for URLs and identification. Automatically created from name.",
-    "editRaceDescription": "Editing race"
+    "editRaceDescription": "Editing race",
+    "nameRequired": "Name is required",
+    "slugRequired": "Slug is required",
+    "noRaces": "No races found"
+,
+    "showingResults": "Showing {from}–{to} of {total}"
 }

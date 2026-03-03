@@ -2,18 +2,20 @@
 
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { ArrowRight, AlertCircle, ChevronDown, ChevronUp, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 interface DialogueEdgeCreateProps {
     open: boolean
@@ -23,6 +25,17 @@ interface DialogueEdgeCreateProps {
     onSave: (newEdge: any) => void
 }
 
+const EMPTY_FORM = (dialogueId: number) => ({
+    dialogueId,
+    fromNodeId: 0,
+    toNodeId: 0,
+    clientChoiceKey: '',
+    orderIndex: 0,
+    hideIfLocked: false,
+    conditionGroup: null as any,
+    actionGroup: null as any,
+})
+
 export default function DialogueEdgeCreate({
     open,
     onOpenChange,
@@ -31,191 +44,252 @@ export default function DialogueEdgeCreate({
     onSave,
 }: DialogueEdgeCreateProps) {
     const t = useTranslations('dialogues.components.edgeCreate')
-    const [formData, setFormData] = useState({
-        dialogueId: dialogueId,
-        fromNodeId: 0,
-        toNodeId: 0,
-        clientChoiceKey: '',
-        orderIndex: 0,
-        hideIfLocked: false,
-        conditionGroup: null as any,
-        actionGroup: null as any,
-    })
+    const [formData, setFormData] = useState(EMPTY_FORM(dialogueId))
+    const [validationError, setValidationError] = useState('')
+    const [conditionsRaw, setConditionsRaw] = useState('')
+    const [actionsRaw, setActionsRaw] = useState('')
+    const [conditionsError, setConditionsError] = useState(false)
+    const [actionsError, setActionsError] = useState(false)
+    const [advancedOpen, setAdvancedOpen] = useState(false)
+
+    const fromNode = nodes.find(n => n.id === formData.fromNodeId)
+    const toNode = nodes.find(n => n.id === formData.toNodeId)
+    const showPreview = formData.fromNodeId !== 0 || formData.toNodeId !== 0
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-
         if (formData.fromNodeId === 0 || formData.toNodeId === 0) {
-            alert(t('validation.selectBothNodes'))
+            setValidationError(t('validation.selectBothNodes'))
             return
         }
-
+        setValidationError('')
         onSave(formData)
         onOpenChange(false)
-        // Reset form
-        setFormData({
-            dialogueId: dialogueId,
-            fromNodeId: 0,
-            toNodeId: 0,
-            clientChoiceKey: '',
-            orderIndex: 0,
-            hideIfLocked: false,
-            conditionGroup: null as any,
-            actionGroup: null as any,
-        })
+        setFormData(EMPTY_FORM(dialogueId))
+        setConditionsRaw('')
+        setActionsRaw('')
+        setConditionsError(false)
+        setActionsError(false)
+        setAdvancedOpen(false)
     }
+
+    const nativeSelectClass = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>{t('title')}</DialogTitle>
-                    <DialogDescription>
-                        {t('description')}
-                    </DialogDescription>
+            <DialogContent className="max-w-lg flex flex-col max-h-[88vh] p-0 gap-0">
+                {/* Header */}
+                <DialogHeader className="px-6 pt-6 pb-4 border-b border-border/60 shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg border-2 border-sky-500 bg-sky-50 dark:bg-sky-950/40">
+                            <ArrowRight className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                        </div>
+                        <DialogTitle className="text-base">{t('title')}</DialogTitle>
+                    </div>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* From Node */}
-                    <div className="space-y-2">
-                        <Label htmlFor="fromNodeId">{t('fields.fromNode')}</Label>
-                        <select
-                            id="fromNodeId"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.fromNodeId}
-                            onChange={(e) => setFormData(prev => ({ ...prev, fromNodeId: parseInt(e.target.value) }))}
-                            required
-                        >
-                            <option value="0">{t('fields.selectSourceNode')}</option>
-                            {nodes.map(node => (
-                                <option key={node.id} value={node.id}>
-                                    #{node.id} ({node.type}) - {node.clientNodeKey || 'Untitled'}
-                                </option>
-                            ))}
-                        </select>
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.fromNodeDescription')}
-                        </p>
-                    </div>
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-                    {/* To Node */}
-                    <div className="space-y-2">
-                        <Label htmlFor="toNodeId">{t('fields.toNode')}</Label>
-                        <select
-                            id="toNodeId"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            value={formData.toNodeId}
-                            onChange={(e) => setFormData(prev => ({ ...prev, toNodeId: parseInt(e.target.value) }))}
-                            required
-                        >
-                            <option value="0">{t('fields.selectTargetNode')}</option>
-                            {nodes
-                                .filter(node => node.id !== formData.fromNodeId) // Don't allow self-loops
-                                .map(node => (
-                                    <option key={node.id} value={node.id}>
-                                        #{node.id} ({node.type}) - {node.clientNodeKey || 'Untitled'}
-                                    </option>
-                                ))
-                            }
-                        </select>
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.toNodeDescription')}
-                        </p>
-                    </div>
+                        {/* Validation error */}
+                        {validationError && (
+                            <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                <span>{validationError}</span>
+                            </div>
+                        )}
 
-                    {/* Choice Key */}
-                    <div className="space-y-2">
-                        <Label htmlFor="clientChoiceKey">{t('fields.choiceText')}</Label>
-                        <Input
-                            id="clientChoiceKey"
-                            value={formData.clientChoiceKey}
-                            onChange={(e) => setFormData(prev => ({ ...prev, clientChoiceKey: e.target.value }))}
-                            placeholder={t('fields.choiceTextPlaceholder')}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.choiceTextDescription')}
-                        </p>
-                    </div>
+                        {/* Connection setup */}
+                        <div className="space-y-3">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('fields.connectionSetup')}</p>
 
-                    {/* Order Index */}
-                    <div className="space-y-2">
-                        <Label htmlFor="orderIndex">{t('fields.orderIndex')}</Label>
-                        <Input
-                            id="orderIndex"
-                            type="number"
-                            min="0"
-                            value={formData.orderIndex}
-                            onChange={(e) => setFormData(prev => ({ ...prev, orderIndex: parseInt(e.target.value) || 0 }))}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.orderIndexDescription')}
-                        </p>
-                    </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="fromNodeId">{t('fields.fromNode')}</Label>
+                                <select
+                                    id="fromNodeId"
+                                    className={nativeSelectClass}
+                                    value={formData.fromNodeId}
+                                    onChange={(e) => {
+                                        setValidationError('')
+                                        setFormData(prev => ({ ...prev, fromNodeId: parseInt(e.target.value) }))
+                                    }}
+                                    required
+                                >
+                                    <option value="0">{t('fields.selectSourceNode')}</option>
+                                    {nodes.map(node => (
+                                        <option key={node.id} value={node.id}>
+                                            #{node.id} · {node.type} · {node.clientNodeKey || t('fields.nodesUntitled')}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    {/* Hide if Locked */}
-                    <div className="flex items-center space-x-2">
-                        <input
-                            type="checkbox"
-                            id="hideIfLocked"
-                            checked={formData.hideIfLocked}
-                            onChange={(e) => setFormData(prev => ({ ...prev, hideIfLocked: e.target.checked }))}
-                            className="h-4 w-4 rounded border border-input bg-background"
-                        />
-                        <Label htmlFor="hideIfLocked">{t('fields.hideIfLocked')}</Label>
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.hideIfLockedDescription')}
-                        </p>
-                    </div>
+                            {/* Connection preview */}
+                            {showPreview && (
+                                <div className="flex items-center gap-2 rounded-md bg-muted/60 px-3 py-2 overflow-hidden">
+                                    <span className={cn('font-mono text-xs min-w-0 truncate', fromNode ? 'text-foreground' : 'text-muted-foreground')}>
+                                        {fromNode ? `#${fromNode.id} ${fromNode.clientNodeKey || '—'}` : '—'}
+                                    </span>
+                                    <ArrowRight className="h-3 w-3 text-muted-foreground shrink-0" />
+                                    <span className={cn('font-mono text-xs min-w-0 truncate', toNode ? 'text-foreground' : 'text-muted-foreground')}>
+                                        {toNode ? `#${toNode.id} ${toNode.clientNodeKey || '—'}` : '—'}
+                                    </span>
+                                </div>
+                            )}
 
-                    {/* Condition Group */}
-                    <div className="space-y-2">
-                        <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
-                        <Textarea
-                            id="conditionGroup"
-                            value={formData.conditionGroup ? JSON.stringify(formData.conditionGroup, null, 2) : ''}
-                            onChange={(e) => {
-                                try {
-                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                    setFormData(prev => ({ ...prev, conditionGroup: parsed }))
-                                } catch {
-                                    // Invalid JSON, keep the string for editing
+                            <div className="space-y-2">
+                                <Label htmlFor="toNodeId">{t('fields.toNode')}</Label>
+                                <select
+                                    id="toNodeId"
+                                    className={nativeSelectClass}
+                                    value={formData.toNodeId}
+                                    onChange={(e) => {
+                                        setValidationError('')
+                                        setFormData(prev => ({ ...prev, toNodeId: parseInt(e.target.value) }))
+                                    }}
+                                    required
+                                >
+                                    <option value="0">{t('fields.selectTargetNode')}</option>
+                                    {nodes
+                                        .filter(node => node.id !== formData.fromNodeId)
+                                        .map(node => (
+                                            <option key={node.id} value={node.id}>
+                                                #{node.id} · {node.type} · {node.clientNodeKey || t('fields.nodesUntitled')}
+                                            </option>
+                                        ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Edge settings */}
+                        <div className="space-y-4">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('fields.edgeSettings')}</p>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="clientChoiceKey">{t('fields.choiceText')}</Label>
+                                <Input
+                                    id="clientChoiceKey"
+                                    value={formData.clientChoiceKey}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, clientChoiceKey: e.target.value }))}
+                                    placeholder={t('fields.choiceTextPlaceholder')}
+                                    className="font-mono"
+                                />
+                                <p className="text-xs text-muted-foreground">{t('fields.choiceTextDescription')}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="orderIndex">{t('fields.orderIndex')}</Label>
+                                <Input
+                                    id="orderIndex"
+                                    type="number"
+                                    min="0"
+                                    value={formData.orderIndex}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, orderIndex: parseInt(e.target.value) || 0 }))}
+                                    className="w-28"
+                                />
+                                <p className="text-xs text-muted-foreground">{t('fields.orderIndexDescription')}</p>
+                            </div>
+
+                            {/* Hide if Locked with Switch */}
+                            <div className="flex items-start justify-between gap-4 rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
+                                <div className="flex items-center gap-2.5">
+                                    <Lock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="text-sm font-medium leading-none">{t('fields.hideIfLocked')}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{t('fields.hideIfLockedDescription')}</p>
+                                    </div>
+                                </div>
+                                <Switch
+                                    id="hideIfLocked"
+                                    checked={formData.hideIfLocked}
+                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hideIfLocked: checked }))}
+                                    className="shrink-0 mt-0.5"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Advanced toggle */}
+                        <div>
+                            <button
+                                type="button"
+                                onClick={() => setAdvancedOpen(v => !v)}
+                                className="flex w-full items-center gap-2 rounded-md px-0 py-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <span className="flex-1 border-t border-dashed border-border" />
+                                <span>{t('fields.advanced')}</span>
+                                {advancedOpen
+                                    ? <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+                                    : <ChevronDown className="h-3.5 w-3.5 shrink-0" />
                                 }
-                            }}
-                            placeholder={t('fields.conditionsPlaceholder')}
-                            rows={3}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.conditionsDescription')}
-                        </p>
+                                <span className="flex-1 border-t border-dashed border-border" />
+                            </button>
+
+                            {advancedOpen && (
+                                <div className="mt-4 space-y-4">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
+                                            {conditionsError && (
+                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
+                                            )}
+                                        </div>
+                                        <Textarea
+                                            id="conditionGroup"
+                                            value={conditionsRaw}
+                                            onChange={(e) => {
+                                                setConditionsRaw(e.target.value)
+                                                try {
+                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
+                                                    setFormData(prev => ({ ...prev, conditionGroup: parsed }))
+                                                    setConditionsError(false)
+                                                } catch {
+                                                    setConditionsError(true)
+                                                }
+                                            }}
+                                            placeholder={t('fields.conditionsPlaceholder')}
+                                            rows={3}
+                                            className={cn('font-mono text-xs', conditionsError && 'border-destructive focus-visible:ring-destructive')}
+                                        />
+                                        <p className="text-xs text-muted-foreground">{t('fields.conditionsDescription')}</p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
+                                            {actionsError && (
+                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
+                                            )}
+                                        </div>
+                                        <Textarea
+                                            id="actionGroup"
+                                            value={actionsRaw}
+                                            onChange={(e) => {
+                                                setActionsRaw(e.target.value)
+                                                try {
+                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
+                                                    setFormData(prev => ({ ...prev, actionGroup: parsed }))
+                                                    setActionsError(false)
+                                                } catch {
+                                                    setActionsError(true)
+                                                }
+                                            }}
+                                            placeholder={t('fields.actionsPlaceholder')}
+                                            rows={3}
+                                            className={cn('font-mono text-xs', actionsError && 'border-destructive focus-visible:ring-destructive')}
+                                        />
+                                        <p className="text-xs text-muted-foreground">{t('fields.actionsDescription')}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {/* Action Group */}
-                    <div className="space-y-2">
-                        <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
-                        <Textarea
-                            id="actionGroup"
-                            value={formData.actionGroup ? JSON.stringify(formData.actionGroup, null, 2) : ''}
-                            onChange={(e) => {
-                                try {
-                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                    setFormData(prev => ({ ...prev, actionGroup: parsed }))
-                                } catch {
-                                    // Invalid JSON, keep the string for editing
-                                }
-                            }}
-                            placeholder={t('fields.actionsPlaceholder')}
-                            rows={3}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            {t('fields.actionsDescription')}
-                        </p>
-                    </div>
-
-                    <DialogFooter>
+                    {/* Sticky footer */}
+                    <DialogFooter className="px-6 py-4 border-t border-border/60 shrink-0 bg-background">
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             {t('buttons.cancel')}
                         </Button>
-                        <Button type="submit">
+                        <Button type="submit" disabled={conditionsError || actionsError}>
                             {t('buttons.create')}
                         </Button>
                     </DialogFooter>

@@ -5,10 +5,11 @@ import {
   QuestSchema, 
   CreateQuestSchema, 
   UpdateQuestSchema,
-  QuestStepSchema
+  QuestStepSchema,
+  questListQuerySchema,
 } from '@contentsmith/validation';
-import { quest, questStep, npc } from '@contentsmith/database';
-import { eq, desc, like, or, inArray } from '@contentsmith/database';
+import { quest, questStep, questReward, npc, items } from '@contentsmith/database';
+import { eq, desc, like, or, inArray, count, and, gte, lte, asc, sql } from '@contentsmith/database';
 
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development';
@@ -18,33 +19,69 @@ const requirePerm = (permission: string) =>
 export const questRouter = createTRPCRouter({
   // Get all quests with pagination
   list: requirePerm(permissions.QUEST_READ)
-    .input(z.object({
-      page: z.number().min(1).default(1),
-      limit: z.number().min(1).max(100).default(10),
-      search: z.string().optional(),
-    }))
+    .input(questListQuerySchema)
     .query(async ({ input, ctx }) => {
-      const offset = (input.page - 1) * input.limit;
-      
-      const whereClause = input.search 
-        ? like(quest.slug, `%${input.search}%`)
-        : undefined;
-      
-      const quests = await ctx.db.select()
+      const { search, page, limit, repeatable, minLevel, maxLevel, giverNpcId, turninNpcId, sortBy, sortOrder } = input;
+      const offset = (page - 1) * limit;
+
+      const conditions = [];
+      if (search) conditions.push(like(quest.slug, `%${search}%`));
+      if (repeatable !== undefined) conditions.push(eq(quest.repeatable, repeatable));
+      if (minLevel) conditions.push(gte(quest.minLevel, minLevel));
+      if (maxLevel) conditions.push(lte(quest.minLevel, maxLevel));
+      if (giverNpcId) conditions.push(eq(quest.giverNpcId, giverNpcId));
+      if (turninNpcId) conditions.push(eq(quest.turninNpcId, turninNpcId));
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [totalResult] = await ctx.db
+        .select({ count: count() })
+        .from(quest)
+        .where(whereClause);
+      const total = totalResult?.count ?? 0;
+
+      const dir = sortOrder === 'asc' ? asc : desc;
+      const orderByClause = (
+        sortBy === 'slug'     ? dir(quest.slug) :
+        sortBy === 'minLevel' ? dir(quest.minLevel) :
+        dir(quest.id)
+      );
+
+      const quests = await ctx.db.select({
+        id: quest.id,
+        slug: quest.slug,
+        minLevel: quest.minLevel,
+        repeatable: quest.repeatable,
+        cooldownSec: quest.cooldownSec,
+        giverNpcId: quest.giverNpcId,
+        turninNpcId: quest.turninNpcId,
+        clientQuestKey: quest.clientQuestKey,
+        giverNpcName: sql<string | null>`(select name from npc where id = ${quest.giverNpcId})`,
+        turninNpcName: sql<string | null>`(select name from npc where id = ${quest.turninNpcId})`,
+      })
         .from(quest)
         .where(whereClause)
-        .limit(input.limit)
-        .offset(offset)
-        .orderBy(desc(quest.id));
-      
+        .orderBy(orderByClause)
+        .limit(limit)
+        .offset(offset);
+
       return {
         data: quests,
-        pagination: {
-          page: input.page,
-          limit: input.limit,
-          total: quests.length, // TODO: Get actual count
-        },
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       };
+    }),
+
+  // Get NPCs that are linked to quests as giver or turnin
+  getQuestNpcs: requirePerm(permissions.QUEST_READ)
+    .query(async ({ ctx }) => {
+      const npcs = await ctx.db
+        .selectDistinct({ id: npc.id, name: npc.name })
+        .from(npc)
+        .innerJoin(
+          quest,
+          or(eq(quest.giverNpcId, npc.id), eq(quest.turninNpcId, npc.id)),
+        )
+        .orderBy(asc(npc.name));
+      return npcs;
     }),
 
   // Get single quest by ID
@@ -116,9 +153,26 @@ export const questRouter = createTRPCRouter({
         turninNpc = turninResult[0] || null;
       }
 
+      // Get rewards for this quest
+      const rewards = await ctx.db
+        .select({
+          id: questReward.id,
+          questId: questReward.questId,
+          rewardType: questReward.rewardType,
+          itemId: questReward.itemId,
+          quantity: questReward.quantity,
+          amount: questReward.amount,
+          itemName: items.name,
+          itemSlug: items.slug,
+        })
+        .from(questReward)
+        .leftJoin(items, eq(questReward.itemId, items.id))
+        .where(eq(questReward.questId, input.id));
+
       return {
         quest: questData,
         steps,
+        rewards,
         giverNpc,
         turninNpc,
       };
@@ -253,5 +307,88 @@ export const questRouter = createTRPCRouter({
         .orderBy(questStep.stepIndex);
       
       return steps;
+    }),
+
+  // ===== QUEST REWARDS =====
+
+  // List rewards for a quest
+  listRewards: requirePerm(permissions.QUEST_READ)
+    .input(z.object({ questId: z.number() }))
+    .query(async ({ input, ctx }) => {
+      const rewards = await ctx.db
+        .select({
+          id: questReward.id,
+          questId: questReward.questId,
+          rewardType: questReward.rewardType,
+          itemId: questReward.itemId,
+          quantity: questReward.quantity,
+          amount: questReward.amount,
+          itemName: items.name,
+          itemSlug: items.slug,
+        })
+        .from(questReward)
+        .leftJoin(items, eq(questReward.itemId, items.id))
+        .where(eq(questReward.questId, input.questId));
+
+      return rewards;
+    }),
+
+  // Create reward
+  createReward: requirePerm(permissions.QUEST_WRITE)
+    .input(z.object({
+      questId: z.number(),
+      rewardType: z.enum(['item', 'gold', 'exp', 'currency']),
+      itemId: z.number().nullable().optional(),
+      quantity: z.number().min(1).default(1),
+      amount: z.number().min(0).default(0),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const result = await ctx.db
+        .insert(questReward)
+        .values(input)
+        .returning();
+
+      return result[0];
+    }),
+
+  // Update reward
+  updateReward: requirePerm(permissions.QUEST_WRITE)
+    .input(z.object({
+      id: z.number(),
+      rewardType: z.enum(['item', 'gold', 'exp', 'currency']).optional(),
+      itemId: z.number().nullable().optional(),
+      quantity: z.number().min(1).optional(),
+      amount: z.number().min(0).optional(),
+    }))
+    .mutation(async ({ input, ctx }) => {
+      const { id, ...updateData } = input;
+
+      const result = await ctx.db
+        .update(questReward)
+        .set(updateData)
+        .where(eq(questReward.id, id))
+        .returning();
+
+      if (!result[0]) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Quest reward not found' });
+      }
+
+      return result[0];
+    }),
+
+  // Delete reward
+  deleteReward: requirePerm(permissions.QUEST_WRITE)
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input, ctx }) => {
+      const result = await ctx.db
+        .delete(questReward)
+        .where(eq(questReward.id, input.id))
+        .returning();
+
+      if (!result[0]) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Quest reward not found' });
+      }
+
+      return { success: true };
     }),
 });
