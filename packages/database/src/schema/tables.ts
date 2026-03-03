@@ -398,6 +398,7 @@ export const mobPosition = pgTable('mob_position', {
   x: doublePrecision('x').notNull().default(0),
   y: doublePrecision('y').notNull().default(0),
   z: doublePrecision('z').notNull().default(0),
+  rotZ: doublePrecision('rot_z').notNull().default(0),
 }, (table) => ({
   mobIdx: index('idx_mob_position_mob').on(table.mobId),
 }));
@@ -440,7 +441,8 @@ export const spawnZones = pgTable('spawn_zones', {
   maxSpawnZ: doublePrecision('max_spawn_z').notNull(),
   mobId: integer('mob_id').notNull().references(() => mob.id),
   spawnCount: integer('spawn_count').notNull().default(1),
-  respawnTime: text('respawn_time').notNull().default('00:01:00'),
+  respawnTime: text('respawn_time').notNull().default('00:01:00'),  // legacy, заменено на respawnTimeSec
+  respawnTimeSec: integer('respawn_time_sec').notNull().default(60),
 }, (table) => ({
   mobIdx: index('idx_spawn_zones_mob').on(table.mobId),
 }));

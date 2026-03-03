@@ -47,6 +47,18 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  # GM Panel
+  gm-panel:
+    build:
+      context: .
+      dockerfile: Dockerfile.gm
+    ports:
+      - "${GM_PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - GAME_DATABASE_URL=${GAME_DATABASE_URL}
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
