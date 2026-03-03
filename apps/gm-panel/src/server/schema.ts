@@ -15,6 +15,7 @@ import {
   smallint,
   doublePrecision,
   pgEnum,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 // ─── Enums ───────────────────────────────────────────────
@@ -157,9 +158,6 @@ export const characters = pgTable('characters', {
   raceId: integer('race_id').notNull().references(() => race.id),
   experiencePoints: bigint('experience_points', { mode: 'number' }).notNull().default(0),
   level: integer('level').notNull().default(1),
-  currentHealth: integer('current_health').notNull().default(1),
-  currentMana: integer('current_mana').notNull().default(1),
-  isDead: boolean('is_dead').notNull().default(false),
   radius: integer('radius').notNull().default(100),
   freeSkillPoints: smallint('free_skill_points').notNull().default(0),
   gender: smallint('gender').notNull().default(0).references(() => characterGenders.id),
@@ -179,12 +177,16 @@ export const characters = pgTable('characters', {
 }));
 
 // ─── Character detail tables ──────────────────────────────
-export const characterAttributes = pgTable('character_attributes', {
+export const characterPermanentModifiers = pgTable('character_permanent_modifiers', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   characterId: bigint('character_id', { mode: 'number' }).notNull().references(() => characters.id),
   attributeId: integer('attribute_id').notNull().references(() => entityAttributes.id),
   value: numeric('value').notNull(),
-});
+  sourceType: varchar('source_type', { length: 30 }).notNull().default('gm'),
+  sourceId: integer('source_id'),
+}, (t) => ({
+  charIdx: index('ix_char_perm_mod_character').on(t.characterId),
+}));
 
 export const characterPosition = pgTable('character_position', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -194,6 +196,14 @@ export const characterPosition = pgTable('character_position', {
   y: numeric('y').notNull(),
   z: numeric('z').notNull(),
   rotZ: doublePrecision('rot_z').notNull().default(0),
+});
+
+export const characterCurrentState = pgTable('character_current_state', {
+  characterId: bigint('character_id', { mode: 'number' }).primaryKey().references(() => characters.id, { onDelete: 'cascade' }),
+  currentHealth: integer('current_health').notNull(),
+  currentMana: integer('current_mana').notNull(),
+  isDead: boolean('is_dead').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const characterSkills = pgTable('character_skills', {
@@ -248,14 +258,15 @@ export const playerFlag = pgTable('player_flag', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const classBaseStats = pgTable('class_base_stats', {
-  id: serial('id').primaryKey(),
+export const classStatFormula = pgTable('class_stat_formula', {
   classId: integer('class_id').notNull().references(() => characterClass.id, { onDelete: 'cascade' }),
   attributeId: integer('attribute_id').notNull().references(() => entityAttributes.id),
-  baseValue: integer('base_value').notNull().default(0),
+  baseValue: numeric('base_value').notNull().default('0'),
+  multiplier: numeric('multiplier').notNull().default('0'),
+  exponent: numeric('exponent').notNull().default('1.0000'),
 }, (t) => ({
-  classIdx: index('ix_class_base_stats_class').on(t.classId),
-  uniqueClassAttr: unique('uq_class_base_stat').on(t.classId, t.attributeId),
+  pk: primaryKey({ columns: [t.classId, t.attributeId] }),
+  classIdx: index('ix_class_stat_formula_class').on(t.classId),
 }));
 
 export const classSkillTree = pgTable('class_skill_tree', {

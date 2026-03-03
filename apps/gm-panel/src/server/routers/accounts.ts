@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { eq, ilike, or, and, isNotNull, count, gt, SQL } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { users, characters, characterClass, race, userRoles, characterGenders } from '../schema';
+import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 const PAGE_SIZE = 20;
@@ -105,8 +105,8 @@ export const accountsRouter = createTRPCRouter({
       )!);
       if (classId !== undefined) conditions.push(eq(characters.classId, classId));
       if (raceId !== undefined) conditions.push(eq(characters.raceId, raceId));
-      if (status === 'alive') conditions.push(eq(characters.isDead, false));
-      if (status === 'dead') conditions.push(eq(characters.isDead, true));
+      if (status === 'alive') conditions.push(eq(characterCurrentState.isDead, false));
+      if (status === 'dead') conditions.push(eq(characterCurrentState.isDead, true));
 
       const where = and(...conditions);
 
@@ -116,6 +116,7 @@ export const accountsRouter = createTRPCRouter({
         .leftJoin(characters, eq(characters.ownerId, users.id))
         .leftJoin(characterClass, eq(characterClass.id, characters.classId))
         .leftJoin(race, eq(race.id, characters.raceId))
+        .leftJoin(characterCurrentState, eq(characterCurrentState.characterId, characters.id))
         .where(where);
       const total = totalRow?.total ?? 0;
 
@@ -130,7 +131,7 @@ export const accountsRouter = createTRPCRouter({
           className: characterClass.name,
           raceId: characters.raceId,
           raceName: race.name,
-          isDead: characters.isDead,
+          isDead: characterCurrentState.isDead,
           createdAt: characters.createdAt,
           lastOnlineAt: characters.lastOnlineAt,
         })
@@ -138,6 +139,7 @@ export const accountsRouter = createTRPCRouter({
         .leftJoin(characters, eq(characters.ownerId, users.id))
         .leftJoin(characterClass, eq(characterClass.id, characters.classId))
         .leftJoin(race, eq(race.id, characters.raceId))
+        .leftJoin(characterCurrentState, eq(characterCurrentState.characterId, characters.id))
         .where(where)
         .orderBy(characters.id)
         .limit(pageSize)
@@ -168,15 +170,16 @@ export const accountsRouter = createTRPCRouter({
           level: characters.level,
           className: characterClass.name,
           raceName: race.name,
-          isDead: characters.isDead,
+          isDead: characterCurrentState.isDead,
           experiencePoints: characters.experiencePoints,
-          currentHealth: characters.currentHealth,
-          currentMana: characters.currentMana,
+          currentHealth: characterCurrentState.currentHealth,
+          currentMana: characterCurrentState.currentMana,
         })
         .from(users)
         .leftJoin(characters, eq(characters.ownerId, users.id))
         .leftJoin(characterClass, eq(characterClass.id, characters.classId))
         .leftJoin(race, eq(race.id, characters.raceId))
+        .leftJoin(characterCurrentState, eq(characterCurrentState.characterId, characters.id))
         .where(eq(users.id, input.userId));
       return rows[0] ?? null;
     }),

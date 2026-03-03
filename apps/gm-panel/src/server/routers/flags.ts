@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { playerFlag } from '../schema';
+import { logGmAction } from '../utils/gmLog';
 
 export const flagsRouter = createTRPCRouter({
   list: publicProcedure
@@ -50,6 +51,7 @@ export const flagsRouter = createTRPCRouter({
           boolValue: input.boolValue ?? null,
         });
       }
+      await logGmAction({ actionType: 'set_flag', targetType: 'character', targetId: input.characterId, newValue: { flagKey: input.flagKey, intValue: input.intValue, boolValue: input.boolValue }, gmUserId: null });
       return { success: true };
     }),
 
@@ -62,6 +64,7 @@ export const flagsRouter = createTRPCRouter({
           eq(playerFlag.playerId, input.characterId),
           eq(playerFlag.flagKey, input.flagKey),
         ));
+      await logGmAction({ actionType: 'delete_flag', targetType: 'character', targetId: input.characterId, oldValue: { flagKey: input.flagKey }, gmUserId: null });
       return { success: true };
     }),
 });

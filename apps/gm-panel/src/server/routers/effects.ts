@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { playerActiveEffect, skillEffects } from '../schema';
+import { logGmAction } from '../utils/gmLog';
 
 export const effectsRouter = createTRPCRouter({
   list: publicProcedure
@@ -27,9 +28,11 @@ export const effectsRouter = createTRPCRouter({
   removeEffect: publicProcedure
     .input(z.object({ effectInstanceId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      const old = await ctx.db.select({ playerId: playerActiveEffect.playerId, effectId: playerActiveEffect.effectId }).from(playerActiveEffect).where(eq(playerActiveEffect.id, input.effectInstanceId)).then(r => r[0]);
       await ctx.db
         .delete(playerActiveEffect)
         .where(eq(playerActiveEffect.id, input.effectInstanceId));
+      await logGmAction({ actionType: 'remove_effect', targetType: 'character', targetId: old?.playerId ?? 0, oldValue: { effectId: old?.effectId }, gmUserId: null });
       return { success: true };
     }),
 
@@ -39,6 +42,7 @@ export const effectsRouter = createTRPCRouter({
       await ctx.db
         .delete(playerActiveEffect)
         .where(eq(playerActiveEffect.playerId, input.characterId));
+      await logGmAction({ actionType: 'clear_effects', targetType: 'character', targetId: input.characterId, gmUserId: null });
       return { success: true };
     }),
 
@@ -69,6 +73,7 @@ export const effectsRouter = createTRPCRouter({
         appliedAt: now,
         expiresAt,
       });
+      await logGmAction({ actionType: 'add_effect', targetType: 'character', targetId: input.characterId, newValue: { effectId: input.effectId, sourceType: input.sourceType, value: input.value, expiresInSeconds: input.expiresInSeconds }, gmUserId: null });
       return { success: true };
     }),
 });

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { playerInventory, items } from '../schema';
+import { logGmAction } from '../utils/gmLog';
 
 export const inventoryRouter = createTRPCRouter({
   list: publicProcedure
@@ -48,15 +49,18 @@ export const inventoryRouter = createTRPCRouter({
           quantity: input.quantity,
         });
       }
+      await logGmAction({ actionType: 'give_item', targetType: 'character', targetId: input.characterId, newValue: { itemId: input.itemId, quantity: input.quantity }, gmUserId: null });
       return { success: true };
     }),
 
   removeItem: publicProcedure
     .input(z.object({ inventoryId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      const old = await ctx.db.select({ characterId: playerInventory.characterId, itemId: playerInventory.itemId, quantity: playerInventory.quantity }).from(playerInventory).where(eq(playerInventory.id, input.inventoryId)).then(r => r[0]);
       await ctx.db
         .delete(playerInventory)
         .where(eq(playerInventory.id, input.inventoryId));
+      await logGmAction({ actionType: 'remove_item', targetType: 'character', targetId: old?.characterId ?? 0, oldValue: { itemId: old?.itemId, quantity: old?.quantity }, gmUserId: null });
       return { success: true };
     }),
 
@@ -64,10 +68,12 @@ export const inventoryRouter = createTRPCRouter({
   updateQuantity: publicProcedure
     .input(z.object({ inventoryId: z.number(), quantity: z.number().min(1) }))
     .mutation(async ({ ctx, input }) => {
+      const old = await ctx.db.select({ characterId: playerInventory.characterId, itemId: playerInventory.itemId, quantity: playerInventory.quantity }).from(playerInventory).where(eq(playerInventory.id, input.inventoryId)).then(r => r[0]);
       await ctx.db
         .update(playerInventory)
         .set({ quantity: input.quantity })
         .where(eq(playerInventory.id, input.inventoryId));
+      await logGmAction({ actionType: 'update_item_quantity', targetType: 'character', targetId: old?.characterId ?? 0, oldValue: { itemId: old?.itemId, quantity: old?.quantity }, newValue: { quantity: input.quantity }, gmUserId: null });
       return { success: true };
     }),
 

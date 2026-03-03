@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { playerQuest, quest } from '../schema';
+import { logGmAction } from '../utils/gmLog';
 
 export const questsRouter = createTRPCRouter({
   list: publicProcedure
@@ -59,6 +60,7 @@ export const questsRouter = createTRPCRouter({
           updatedAt: new Date(),
         });
       }
+      await logGmAction({ actionType: 'assign_quest', targetType: 'character', targetId: input.characterId, newValue: { questId: input.questId, state: input.state }, gmUserId: null });
       return { success: true };
     }),
 
@@ -74,6 +76,7 @@ export const questsRouter = createTRPCRouter({
         .update(playerQuest)
         .set({ state: input.state, updatedAt: new Date() })
         .where(and(eq(playerQuest.playerId, input.characterId), eq(playerQuest.questId, input.questId)));
+      await logGmAction({ actionType: 'set_quest_state', targetType: 'character', targetId: input.characterId, newValue: { questId: input.questId, state: input.state }, gmUserId: null });
       return { success: true };
     }),
 
@@ -89,6 +92,7 @@ export const questsRouter = createTRPCRouter({
         .update(playerQuest)
         .set({ currentStep: input.step, updatedAt: new Date() })
         .where(and(eq(playerQuest.playerId, input.characterId), eq(playerQuest.questId, input.questId)));
+      await logGmAction({ actionType: 'set_quest_step', targetType: 'character', targetId: input.characterId, newValue: { questId: input.questId, step: input.step }, gmUserId: null });
       return { success: true };
     }),
 
@@ -99,6 +103,7 @@ export const questsRouter = createTRPCRouter({
       await ctx.db
         .delete(playerQuest)
         .where(and(eq(playerQuest.playerId, input.characterId), eq(playerQuest.questId, input.questId)));
+      await logGmAction({ actionType: 'reset_quest', targetType: 'character', targetId: input.characterId, oldValue: { questId: input.questId }, gmUserId: null });
       return { success: true };
     }),
 
@@ -110,6 +115,7 @@ export const questsRouter = createTRPCRouter({
         .update(playerQuest)
         .set({ state: 'completed', updatedAt: new Date() })
         .where(and(eq(playerQuest.playerId, input.characterId), eq(playerQuest.questId, input.questId)));
+      await logGmAction({ actionType: 'complete_quest', targetType: 'character', targetId: input.characterId, newValue: { questId: input.questId, state: 'completed' }, gmUserId: null });
       return { success: true };
     }),
 });

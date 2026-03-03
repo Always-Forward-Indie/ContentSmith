@@ -29,22 +29,34 @@ import {
 } from '@/components/ui/alert-dialog';
 
 // ─── Вспомогательный компонент для редактирования атрибутов ──────────────────
+const SOURCE_TYPE_LABELS: Record<string, string> = {
+    gm: 'GM',
+    quest: 'Квест',
+    achievement: 'Достижение',
+    event: 'Ивент',
+    admin: 'Admin',
+};
+const SOURCE_TYPES = Object.keys(SOURCE_TYPE_LABELS);
+
 type AttrRowData = {
     id?: number | null;
     attributeId?: number | null;
     attributeName?: string | null;
     attributeSlug?: string | null;
     value?: string | null;
+    sourceType?: string | null;
+    sourceId?: number | null;
 };
 
 function AttrRow({ attr, onSave, onDelete, isSaving }: {
     attr: AttrRowData;
-    onSave: (val: number) => void;
+    onSave: (val: number, sourceType: string) => void;
     onDelete: () => void;
     isSaving: boolean;
 }) {
     const [val, setVal] = useState(attr.value ?? '0');
-    const dirty = val !== (attr.value ?? '0');
+    const [srcType, setSrcType] = useState(attr.sourceType ?? 'gm');
+    const dirty = val !== (attr.value ?? '0') || srcType !== (attr.sourceType ?? 'gm');
 
     return (
         <TableRow>
@@ -55,9 +67,19 @@ function AttrRow({ attr, onSave, onDelete, isSaving }: {
                     type="number"
                     value={val}
                     onChange={e => setVal(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && dirty && !isSaving) onSave(Number(val)); }}
+                    onKeyDown={e => { if (e.key === 'Enter' && dirty && !isSaving) onSave(Number(val), srcType); }}
                     className="h-7 w-28 text-sm font-mono"
                 />
+            </TableCell>
+            <TableCell>
+                <Select value={srcType} onValueChange={setSrcType}>
+                    <SelectTrigger className="h-7 w-32 text-xs">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {SOURCE_TYPES.map(s => <SelectItem key={s} value={s}>{SOURCE_TYPE_LABELS[s]}</SelectItem>)}
+                    </SelectContent>
+                </Select>
             </TableCell>
             <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1">
@@ -66,7 +88,7 @@ function AttrRow({ attr, onSave, onDelete, isSaving }: {
                         variant={dirty ? 'default' : 'outline'}
                         className="h-7 text-xs"
                         disabled={!dirty || isSaving}
-                        onClick={() => onSave(Number(val))}
+                        onClick={() => onSave(Number(val), srcType)}
                     >
                         Сохранить
                     </Button>
@@ -78,8 +100,8 @@ function AttrRow({ attr, onSave, onDelete, isSaving }: {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Удалить атрибут «{attr.attributeName}»?</AlertDialogTitle>
-                                <AlertDialogDescription>Значение атрибута будет удалено у персонажа.</AlertDialogDescription>
+                                <AlertDialogTitle>Удалить модификатор «{attr.attributeName}»?</AlertDialogTitle>
+                                <AlertDialogDescription>Постоянный модификатор будет удалён у персонажа.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Отмена</AlertDialogCancel>
@@ -283,13 +305,16 @@ export default function CharacterPage() {
     const { data: balanceData, refetch: refetchBalance } = trpc.transactions.balance.useQuery({ characterId });
     const { data: genders } = trpc.accounts.allGenders.useQuery();
 
+    const { data: classStats } = trpc.characters.classStatFormula.useQuery({ classId: char?.classId ?? 0 }, { enabled: !!char?.classId });
+    const { data: classTree } = trpc.characters.classSkillTree.useQuery({ classId: char?.classId ?? 0 }, { enabled: !!char?.classId });
+
     // ── Mutations ──
     const revive = trpc.characters.revive.useMutation({ onSuccess: () => { refetchChar(); toast.success('Персонаж воскрешён'); }, onError: (e) => toast.error(e.message) });
     const delChar = trpc.characters.delete.useMutation({ onSuccess: () => { toast.success('Персонаж удалён'); router.push('/characters'); }, onError: (e) => toast.error(e.message) });
 
-    const setValue = trpc.attributes.setValue.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Атрибут сохранён'); }, onError: (e) => toast.error(e.message) });
-    const delAttr = trpc.attributes.deleteAttribute.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Атрибут удалён'); }, onError: (e) => toast.error(e.message) });
-    const addAttr = trpc.attributes.addAttribute.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Атрибут добавлен'); }, onError: (e) => toast.error(e.message) });
+    const setValue = trpc.attributes.setValue.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Модификатор сохранён'); }, onError: (e) => toast.error(e.message) });
+    const delAttr = trpc.attributes.deleteAttribute.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Модификатор удалён'); }, onError: (e) => toast.error(e.message) });
+    const addAttr = trpc.attributes.addAttribute.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Модификатор добавлен'); }, onError: (e) => toast.error(e.message) });
 
     const giveItem = trpc.inventory.giveItem.useMutation({ onSuccess: () => { refetchInv(); toast.success('Предмет выдан'); }, onError: (e) => toast.error(e.message) });
     const removeItem = trpc.inventory.removeItem.useMutation({ onSuccess: () => { refetchInv(); toast.success('Предмет удалён'); }, onError: (e) => toast.error(e.message) });
@@ -353,6 +378,7 @@ export default function CharacterPage() {
     // Attr add form
     const [addAttrId, setAddAttrId] = useState('');
     const [addAttrVal, setAddAttrVal] = useState('0');
+    const [addAttrSource, setAddAttrSource] = useState('gm');
 
     if (charLoading) {
         return (
@@ -449,11 +475,25 @@ export default function CharacterPage() {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 text-sm">
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5"><HeartPulse className="inline h-3 w-3 mr-0.5" />HP</p>
-                            <p className="font-semibold">{char.currentHealth}</p>
+                            <p className="font-semibold font-mono">
+                                <span className={char.currentHealth != null && char.maxHealth != null && char.currentHealth < char.maxHealth * 0.25 ? 'text-destructive' : ''}>
+                                    {char.currentHealth ?? '—'}
+                                </span>
+                                {char.maxHealth != null && (
+                                    <span className="text-muted-foreground font-normal"> / {char.maxHealth}</span>
+                                )}
+                            </p>
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5"><Zap className="inline h-3 w-3 mr-0.5" />MP</p>
-                            <p className="font-semibold">{char.currentMana}</p>
+                            <p className="font-semibold font-mono">
+                                <span className={char.currentMana != null && char.maxMana != null && char.currentMana < char.maxMana * 0.25 ? 'text-blue-400' : ''}>
+                                    {char.currentMana ?? '—'}
+                                </span>
+                                {char.maxMana != null && (
+                                    <span className="text-muted-foreground font-normal"> / {char.maxMana}</span>
+                                )}
+                            </p>
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5">Опыт</p>
@@ -490,6 +530,27 @@ export default function CharacterPage() {
                             <p className="text-muted-foreground text-xs mb-0.5">Последняя активность</p>
                             <p className="font-medium text-sm">{formatDate(char.lastOnlineAt) ?? <span className="italic text-muted-foreground">никогда</span>}</p>
                         </div>
+                        {(char.posX != null || char.liveUpdatedAt != null) && (
+                            <>
+                                <div className="col-span-2 border-t pt-2">
+                                    <p className="text-muted-foreground text-xs mb-0.5">Позиция</p>
+                                    {char.posX != null ? (
+                                        <p className="font-mono text-xs">
+                                            X: {Number(char.posX).toFixed(1)}&nbsp;
+                                            Y: {Number(char.posY).toFixed(1)}&nbsp;
+                                            Z: {Number(char.posZ).toFixed(1)}
+                                            {char.posZoneId != null && <span className="ml-2 text-muted-foreground">зона {char.posZoneId}</span>}
+                                        </p>
+                                    ) : <p className="text-xs text-muted-foreground italic">нет данных</p>}
+                                </div>
+                                {char.liveUpdatedAt != null && (
+                                    <div className="col-span-2 border-t pt-2">
+                                        <p className="text-muted-foreground text-xs mb-0.5">Состояние обновлено</p>
+                                        <p className="font-mono text-xs">{formatDate(char.liveUpdatedAt)}</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -497,7 +558,7 @@ export default function CharacterPage() {
             {/* Tabs */}
             <Tabs defaultValue="attributes">
                 <TabsList>
-                    <TabsTrigger value="attributes">Атрибуты {(attrs ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(attrs ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="attributes">Бонусы {(attrs ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(attrs ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="inventory">Инвентарь {(inventory ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(inventory ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="quests">Квесты {(quests ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(quests ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="flags">Флаги {(flags ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(flags ?? []).length})</span>}</TabsTrigger>
@@ -505,13 +566,14 @@ export default function CharacterPage() {
                     <TabsTrigger value="skills">Скилы {(skills ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(skills ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="equipment">Экипировка {(equipment ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(equipment ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="transactions">Транзакции</TabsTrigger>
+                    <TabsTrigger value="class">Класс</TabsTrigger>
                 </TabsList>
 
-                {/* ══ Атрибуты ══ */}
+                {/* ══ Бонусные модификаторы ══ */}
                 <TabsContent value="attributes">
                     <Card>
                         <div className="px-4 pt-4 pb-3 border-b">
-                            <p className="text-xs font-medium text-muted-foreground mb-2">Добавить атрибут</p>
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Добавить постоянный модификатор</p>
                             {unassignedAttrs.length > 0 ? (
                                 <div className="flex items-center gap-2">
                                     <Select value={addAttrId} onValueChange={setAddAttrId}>
@@ -521,8 +583,14 @@ export default function CharacterPage() {
                                         </SelectContent>
                                     </Select>
                                     <Input type="number" placeholder="Значение" className="w-24 h-8 text-sm" value={addAttrVal} onChange={e => setAddAttrVal(e.target.value)} />
+                                    <Select value={addAttrSource} onValueChange={setAddAttrSource}>
+                                        <SelectTrigger className="w-32 h-8 text-sm"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {SOURCE_TYPES.map(s => <SelectItem key={s} value={s}>{SOURCE_TYPE_LABELS[s]}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
                                     <Button size="sm" className="h-8 gap-1.5" disabled={!addAttrId || addAttr.isLoading}
-                                        onClick={() => { addAttr.mutate({ characterId, attributeId: Number(addAttrId), value: Number(addAttrVal) }); setAddAttrId(''); setAddAttrVal('0'); }}>
+                                        onClick={() => { addAttr.mutate({ characterId, attributeId: Number(addAttrId), value: Number(addAttrVal), sourceType: addAttrSource }); setAddAttrId(''); setAddAttrVal('0'); }}>
                                         <Plus className="h-3.5 w-3.5" />Добавить
                                     </Button>
                                 </div>
@@ -539,19 +607,20 @@ export default function CharacterPage() {
                                         <TableHead>Атрибут</TableHead>
                                         <TableHead>Slug</TableHead>
                                         <TableHead className="w-32">Значение</TableHead>
+                                        <TableHead className="w-36">Источник</TableHead>
                                         <TableHead className="text-right w-36">Действия</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {attrsLoading ? (
                                         Array.from({ length: 5 }).map((_, i) => (
-                                            <TableRow key={i}>{Array.from({ length: 4 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
+                                            <TableRow key={i}>{Array.from({ length: 5 }).map((_, j) => <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>)}</TableRow>
                                         ))
                                     ) : (attrs ?? []).map(attr => (
                                         <AttrRow
                                             key={attr.attributeId}
                                             attr={attr}
-                                            onSave={val => setValue.mutate({ characterId, attributeId: attr.attributeId!, value: val })}
+                                            onSave={(val, sourceType) => setValue.mutate({ characterId, attributeId: attr.attributeId!, value: val, sourceType })}
                                             onDelete={() => delAttr.mutate({ id: attr.id! })}
                                             isSaving={setValue.isLoading}
                                         />
@@ -1092,6 +1161,78 @@ export default function CharacterPage() {
                                                 </TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">{tx.reasonType ?? '—'}</TableCell>
                                                 <TableCell className="text-xs text-muted-foreground">{formatDate(tx.createdAt)}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* ══ Класс: базовые статы + дерево скиллов ══ */}
+                <TabsContent value="class">
+                    <div className="space-y-4">
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base">Базовые характеристики класса {char.className}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Атрибут</TableHead>
+                                            <TableHead className="text-right w-28">base (lvl 1)</TableHead>
+                                            <TableHead className="text-right w-24">mult</TableHead>
+                                            <TableHead className="text-right w-20">exp</TableHead>
+                                            <TableHead className="text-right w-32">≈ lvl {char.level}</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {(classStats ?? []).length === 0 ? (
+                                            <TableRow><TableCell colSpan={5} className="text-center py-6 text-muted-foreground">Нет данных</TableCell></TableRow>
+                                        ) : (classStats ?? []).map(s => {
+                                            const lvl = char.level ?? 1;
+                                            const calc = Math.round(Number(s.baseValue) + Number(s.multiplier) * Math.pow(lvl, Number(s.exponent)));
+                                            return (
+                                                <TableRow key={s.attributeId}>
+                                                    <TableCell className="font-medium">{s.attributeName}</TableCell>
+                                                    <TableCell className="text-right font-mono text-muted-foreground">{Number(s.baseValue).toFixed(0)}</TableCell>
+                                                    <TableCell className="text-right font-mono text-muted-foreground">{Number(s.multiplier).toFixed(2)}</TableCell>
+                                                    <TableCell className="text-right font-mono text-muted-foreground">{Number(s.exponent).toFixed(2)}</TableCell>
+                                                    <TableCell className="text-right font-mono font-semibold">{calc}</TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base">Дерево скиллов класса {char.className}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Скилл</TableHead>
+                                            <TableHead>Slug</TableHead>
+                                            <TableHead className="text-center w-32">Мин. уровень</TableHead>
+                                            <TableHead className="text-center w-32">По умолчанию</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {(classTree ?? []).length === 0 ? (
+                                            <TableRow><TableCell colSpan={4} className="text-center py-6 text-muted-foreground">Нет данных</TableCell></TableRow>
+                                        ) : (classTree ?? []).map(t => (
+                                            <TableRow key={t.id}>
+                                                <TableCell className="font-medium">{t.skillName}</TableCell>
+                                                <TableCell className="font-mono text-xs text-muted-foreground">{t.skillSlug}</TableCell>
+                                                <TableCell className="text-center font-mono">{t.requiredLevel}</TableCell>
+                                                <TableCell className="text-center">
+                                                    {t.isDefault ? <span className="text-green-600 font-medium">✓</span> : <span className="text-muted-foreground">—</span>}
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
