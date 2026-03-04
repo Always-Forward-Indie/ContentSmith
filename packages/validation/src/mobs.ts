@@ -96,19 +96,9 @@ export const removeMobLootSchema = z.object({
 });
 
 // ===== SPAWN ZONES =====
-export const spawnZoneSchema = z.object({
-  zoneId: z.number().int().positive(),
-  zoneName: z.string().min(1).max(100),
-  minSpawnX: z.number(),
-  minSpawnY: z.number(),
-  minSpawnZ: z.number(),
-  maxSpawnX: z.number(),
-  maxSpawnY: z.number(),
-  maxSpawnZ: z.number(),
-  mobId: z.number().int().positive(),
-  spawnCount: z.number().int().positive().default(1),
-  respawnTime: z.string().regex(/^\d{2}:\d{2}:\d{2}$/).default('00:01:00'),
-});
-
-export const createSpawnZoneSchema = spawnZoneSchema.omit({ zoneId: true });
-export const updateSpawnZoneSchema = spawnZoneSchema.partial().required({ zoneId: true });
+// Schemas moved to zones.ts — re-exported here for backwards compat
+export {
+  createSpawnZoneSchema,
+  updateSpawnZoneSchema,
+  spawnZoneIdSchema,
+} from './zones';

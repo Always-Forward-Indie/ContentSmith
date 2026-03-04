@@ -40,6 +40,15 @@ const itemAttributes = loadJson('item-attributes.json');
 const itemsRarity = loadJson('items-rarity.json');
 const itemTypes = loadJson('item-types.json');
 const mobs = loadJson('mobs.json');
+const classes = loadJson('classes.json');
+const expForLevel = loadJson('exp-for-level.json');
+const vendors = loadJson('vendors.json');
+const zones = loadJson('zones.json');
+const mobRaces = loadJson('mob-races.json');
+const mobRanks = loadJson('mob-ranks.json');
+const targetTypes = loadJson('target-types.json');
+const characterGenders = loadJson('character-genders.json');
+const spawnZones = loadJson('spawn-zones.json');
 
 export default {
   common,
@@ -63,4 +72,13 @@ export default {
   itemsRarity,
   itemTypes,
   mobs,
+  classes,
+  expForLevel,
+  vendors,
+  zones,
+  mobRaces,
+  mobRanks,
+  targetTypes,
+  characterGenders,
+  spawnZones,
 };

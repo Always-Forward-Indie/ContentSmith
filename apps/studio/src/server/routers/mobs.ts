@@ -9,7 +9,6 @@ import {
   mobAttributes,
   mobSkills,
   mobLootInfo,
-  spawnZones,
   entityAttributes,
   skills,
   items,
@@ -28,8 +27,6 @@ import {
   addMobLootSchema,
   updateMobLootSchema,
   removeMobLootSchema,
-  createSpawnZoneSchema,
-  updateSpawnZoneSchema,
 } from '@contentsmith/validation'
 
 const requirePerm = (permission: string) => devRequirePermission(permission)
@@ -85,7 +82,7 @@ export const mobsRouter = createTRPCRouter({
           raceName: mobRace.name,
           rankCode: mobRanks.code,
           rankMult: mobRanks.mult,
-          spawnZoneName: sql<string | null>`(SELECT sz.zone_name FROM spawn_zones sz WHERE sz.mob_id = mob.id ORDER BY sz.zone_id LIMIT 1)`,
+          spawnZoneName: sql<string | null>`(SELECT sz.zone_name FROM spawn_zones sz JOIN spawn_zone_mobs szm ON szm.spawn_zone_id = sz.zone_id WHERE szm.mob_id = mob.id ORDER BY sz.zone_id LIMIT 1)`,
         })
         .from(mob)
         .leftJoin(mobRace, eq(mob.raceId, mobRace.id))
@@ -171,17 +168,11 @@ export const mobsRouter = createTRPCRouter({
         .leftJoin(items, eq(mobLootInfo.itemId, items.id))
         .where(eq(mobLootInfo.mobId, input))
 
-      const spawnData = await db
-        .select()
-        .from(spawnZones)
-        .where(eq(spawnZones.mobId, input))
-
       return {
         ...mobData,
         attributes,
         skills: mobSkillsData,
         loot: lootData,
-        spawns: spawnData,
       }
     }),
 
@@ -409,37 +400,5 @@ export const mobsRouter = createTRPCRouter({
         .select({ id: items.id, name: items.name, slug: items.slug })
         .from(items)
         .orderBy(items.name)
-    }),
-
-  // ===== SPAWN ZONES =====
-
-  getSpawnZones: requirePerm('mob:read')
-    .input(z.number())
-    .query(async ({ input }) => {
-      return await db.select().from(spawnZones).where(eq(spawnZones.mobId, input))
-    }),
-
-  createSpawnZone: requirePerm('mob:write')
-    .input(createSpawnZoneSchema)
-    .mutation(async ({ input }) => {
-      const result = await db.insert(spawnZones).values(input).returning()
-      return result[0]
-    }),
-
-  updateSpawnZone: requirePerm('mob:write')
-    .input(updateSpawnZoneSchema)
-    .mutation(async ({ input }) => {
-      const { zoneId, ...updateData } = input
-      const result = await db.update(spawnZones).set(updateData).where(eq(spawnZones.zoneId, zoneId)).returning()
-      if (result.length === 0) throw new Error(`Spawn Zone with id ${zoneId} not found`)
-      return result[0]
-    }),
-
-  deleteSpawnZone: requirePerm('mob:delete')
-    .input(z.number())
-    .mutation(async ({ input }) => {
-      const result = await db.delete(spawnZones).where(eq(spawnZones.zoneId, input)).returning()
-      if (result.length === 0) throw new Error(`Spawn Zone with id ${input} not found`)
-      return result[0]
     }),
 })

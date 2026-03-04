@@ -173,6 +173,19 @@ export const npcPosition = pgTable('npc_position', {
   npcIdx: index('ix_npc_position_npc').on(table.npcId),
 }));
 
+export const npcPlacements = pgTable('npc_placements', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  npcId: bigint('npc_id', { mode: 'number' }).notNull().references(() => npc.id, { onDelete: 'cascade' }),
+  zoneId: integer('zone_id').references(() => zones.id, { onDelete: 'set null' }),
+  x: doublePrecision('x').notNull().default(0),
+  y: doublePrecision('y').notNull().default(0),
+  z: doublePrecision('z').notNull().default(0),
+  rotZ: doublePrecision('rot_z').notNull().default(0),
+}, (table) => ({
+  npcIdx: index('idx_npc_placements_npc').on(table.npcId),
+  zoneIdx: index('idx_npc_placements_zone').on(table.zoneId),
+}));
+
 export const entityAttributes = pgTable('entity_attributes', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
@@ -433,16 +446,101 @@ export const mobLootInfo = pgTable('mob_loot_info', {
 export const spawnZones = pgTable('spawn_zones', {
   zoneId: serial('zone_id').primaryKey(),
   zoneName: varchar('zone_name', { length: 100 }).notNull(),
-  minSpawnX: doublePrecision('min_spawn_x').notNull(),
-  minSpawnY: doublePrecision('min_spawn_y').notNull(),
-  minSpawnZ: doublePrecision('min_spawn_z').notNull(),
-  maxSpawnX: doublePrecision('max_spawn_x').notNull(),
-  maxSpawnY: doublePrecision('max_spawn_y').notNull(),
-  maxSpawnZ: doublePrecision('max_spawn_z').notNull(),
-  mobId: integer('mob_id').notNull().references(() => mob.id),
-  spawnCount: integer('spawn_count').notNull().default(1),
-  respawnTime: text('respawn_time').notNull().default('00:01:00'),  // legacy, заменено на respawnTimeSec
-  respawnTimeSec: integer('respawn_time_sec').notNull().default(60),
+  minSpawnX: doublePrecision('min_spawn_x').notNull().default(0),
+  minSpawnY: doublePrecision('min_spawn_y').notNull().default(0),
+  minSpawnZ: doublePrecision('min_spawn_z').notNull().default(0),
+  maxSpawnX: doublePrecision('max_spawn_x').notNull().default(0),
+  maxSpawnY: doublePrecision('max_spawn_y').notNull().default(0),
+  maxSpawnZ: doublePrecision('max_spawn_z').notNull().default(0),
+  gameZoneId: integer('game_zone_id').references(() => zones.id, { onDelete: 'set null' }),
 }, (table) => ({
-  mobIdx: index('idx_spawn_zones_mob').on(table.mobId),
+  gameZoneIdx: index('idx_spawn_zones_game_zone').on(table.gameZoneId),
 }));
+
+export const spawnZoneMobs = pgTable('spawn_zone_mobs', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  spawnZoneId: integer('spawn_zone_id').notNull().references(() => spawnZones.zoneId, { onDelete: 'cascade' }),
+  mobId: integer('mob_id').notNull().references(() => mob.id, { onDelete: 'cascade' }),
+  spawnCount: integer('spawn_count').notNull().default(1),
+  respawnTime: text('respawn_time').notNull().default('00:05:00'),
+}, (table) => ({
+  zoneIdx: index('idx_spawn_zone_mobs_zone').on(table.spawnZoneId),
+  mobIdx: index('idx_spawn_zone_mobs_mob').on(table.mobId),
+  uniqueZoneMob: unique('uq_spawn_zone_mobs').on(table.spawnZoneId, table.mobId),
+}));
+
+// ─── Classes ───────────────────────────────────────────────────────────────────
+
+export const characterClass = pgTable('character_class', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull(),
+  slug: varchar('slug', { length: 100 }),
+  description: text('description'),
+});
+
+export const classStatFormula = pgTable('class_stat_formula', {
+  classId: integer('class_id').notNull().references(() => characterClass.id),
+  attributeId: integer('attribute_id').notNull().references(() => entityAttributes.id),
+  baseValue: doublePrecision('base_value').notNull().default(0),
+  multiplier: doublePrecision('multiplier').notNull().default(0),
+  exponent: doublePrecision('exponent').notNull().default(1),
+}, (table) => ({
+  pk: primaryKey({ columns: [table.classId, table.attributeId] }),
+  classIdx: index('ix_class_stat_formula_class').on(table.classId),
+}));
+
+export const classSkillTree = pgTable('class_skill_tree', {
+  id: serial('id').primaryKey(),
+  classId: integer('class_id').notNull().references(() => characterClass.id),
+  skillId: integer('skill_id').notNull().references(() => skills.id),
+  requiredLevel: integer('required_level').notNull().default(1),
+  isDefault: boolean('is_default').notNull().default(false),
+}, (table) => ({
+  classIdx: index('ix_class_skill_tree_class').on(table.classId),
+}));
+
+// ─── XP Curve ──────────────────────────────────────────────────────────────────
+
+export const expForLevel = pgTable('exp_for_level', {
+  id: serial('id').primaryKey(),
+  level: integer('level').notNull().unique(),
+  experiencePoints: bigint('experience_points', { mode: 'number' }).notNull(),
+});
+
+// ─── Vendors ───────────────────────────────────────────────────────────────────
+
+export const vendorNpc = pgTable('vendor_npc', {
+  id: serial('id').primaryKey(),
+  npcId: integer('npc_id').notNull().references(() => npc.id),
+  markupPct: smallint('markup_pct').notNull().default(0),
+});
+
+export const vendorInventory = pgTable('vendor_inventory', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  vendorNpcId: integer('vendor_npc_id').notNull().references(() => vendorNpc.id),
+  itemId: bigint('item_id', { mode: 'number' }).notNull().references(() => items.id),
+  stockCount: integer('stock_count').notNull().default(-1),
+  priceOverride: bigint('price_override', { mode: 'number' }),
+}, (table) => ({
+  vendorIdx: index('idx_vendor_inventory_vendor').on(table.vendorNpcId),
+}));
+
+// ─── Zones ─────────────────────────────────────────────────────────────────────
+
+export const zones = pgTable('zones', {
+  id: serial('id').primaryKey(),
+  slug: varchar('slug', { length: 100 }).notNull().unique(),
+  name: varchar('name', { length: 100 }).notNull(),
+  minLevel: integer('min_level').notNull().default(1),
+  maxLevel: integer('max_level').notNull().default(999),
+  isPvp: boolean('is_pvp').notNull().default(false),
+  isSafeZone: boolean('is_safe_zone').notNull().default(false),
+});
+
+// ─── Reference Data ────────────────────────────────────────────────────────────
+
+export const characterGenders = pgTable('character_genders', {
+  id: smallint('id').primaryKey(),
+  name: varchar('name', { length: 50 }).notNull(),
+  label: varchar('label', { length: 50 }).notNull(),
+});

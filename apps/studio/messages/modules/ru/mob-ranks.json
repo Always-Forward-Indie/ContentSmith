@@ -1,0 +1,21 @@
+{
+    "title": "Ранги мобов",
+    "description": "Множители рангов мобов (обычный, элита, босс…)",
+    "noRanks": "Рангов мобов пока нет.",
+    "fields": {
+        "rankId": "ID ранга",
+        "code": "Код",
+        "multiplier": "Множитель"
+    },
+    "table": {
+        "id": "ID",
+        "code": "Код",
+        "multiplier": "Множитель",
+        "actions": "Действия"
+    },
+    "deleteTitle": "Удалить ранг «{code}»?",
+    "deleteDescription": "Может не сработать, если мобы используют этот ранг.",
+    "rankCreated": "Ранг создан",
+    "rankUpdated": "Ранг обновлён",
+    "rankDeleted": "Ранг удалён"
+}

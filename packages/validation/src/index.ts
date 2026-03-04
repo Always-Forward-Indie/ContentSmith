@@ -12,6 +12,10 @@ export * from './items';
 export * from './item-types';
 export * from './equip-slots';
 export * from './mobs';
+export * from './classes';
+export * from './exp-for-level';
+export * from './vendors';
+export * from './zones';
 
 // Common validation utilities
 export { z } from 'zod';

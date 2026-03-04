@@ -1,0 +1,45 @@
+{
+    "title": "Торговцы",
+    "description": "NPC-торговцы и их инвентарь",
+    "addVendor": "Добавить торговца",
+    "noVendors": "Торговцев пока нет. Назначьте NPC торговцем.",
+    "vendorNotFound": "Торговец не найден",
+    "table": {
+        "npc": "NPC",
+        "slug": "Слаг",
+        "markup": "Наценка %",
+        "actions": "Действия"
+    },
+    "addVendorTitle": "Добавить торговца",
+    "addVendorDescription": "Назначьте NPC торговцем с опциональной наценкой.",
+    "fields": {
+        "npc": "NPC",
+        "markup": "Наценка %"
+    },
+    "selectNpc": "Выберите NPC…",
+    "deleteTitle": "Удалить торговца «{name}»?",
+    "deleteDescription": "Также будут удалены все записи инвентаря этого торговца.",
+    "vendorSettings": "Настройки торговца",
+    "inventory": "Инвентарь",
+    "noInventory": "В инвентаре пока нет предметов.",
+    "stockBlankInfinity": "Кол-во (пусто=∞)",
+    "priceOverride": "Переопред. цена",
+    "selectItem": "Выберите предмет…",
+    "unlimited": "Неограничено",
+    "defaultPrice": "По умолчанию",
+    "inventoryTable": {
+        "item": "Предмет",
+        "stock": "Кол-во",
+        "price": "Переопред. цена",
+        "actions": "Действия"
+    },
+    "removeTitle": "Убрать «{name}» из инвентаря?",
+    "removeDescription": "Это удалит предмет из инвентаря этого торговца.",
+    "npcVendorLabel": "NPC-торговец",
+    "vendorCreated": "Торговец создан",
+    "vendorDeleted": "Торговец удалён",
+    "markupUpdated": "Наценка обновлена",
+    "itemAdded": "Предмет добавлен",
+    "itemUpdated": "Предмет обновлён",
+    "itemRemoved": "Предмет удалён"
+}

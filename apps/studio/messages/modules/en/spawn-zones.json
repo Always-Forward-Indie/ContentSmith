@@ -1,0 +1,54 @@
+{
+    "title": "Spawn Zones",
+    "description": "Manage mob spawn locations and respawn settings",
+    "newSpawnZone": "New Spawn Zone",
+    "createFirstSpawnZone": "Create first spawn zone",
+    "noSpawnZones": "No spawn zones yet.",
+    "spawnZoneNotFound": "Spawn zone not found",
+    "createTitle": "Create Spawn Zone",
+    "createSubtitle": "Define a new spawn area",
+    "editTitle": "Edit Spawn Zone",
+    "editSubtitle": "Update spawn zone settings",
+    "deleteTitle": "Delete spawn zone «{name}»?",
+    "deleteDescription": "This action cannot be undone.",
+    "table": {
+        "zoneName": "Zone Name",
+        "gameZone": "Game Region",
+        "mobCount": "Mobs",
+        "actions": "Actions"
+    },
+    "fields": {
+        "zoneName": "Zone Name",
+        "gameZone": "Game Region (optional)",
+        "selectGameZone": "Select a game region...",
+        "coordinates": "Spawn Area Coordinates",
+        "minCoords": "Min Coords (X / Y / Z)",
+        "maxCoords": "Max Coords (X / Y / Z)"
+    },
+    "mobs": {
+        "title": "Mobs in this zone",
+        "description": "Configure which mobs spawn here and in what quantities",
+        "addMob": "Add Mob",
+        "noMobs": "No mobs assigned yet.",
+        "mobAdded": "Mob added to spawn zone",
+        "mobUpdated": "Mob entry updated",
+        "mobRemoved": "Mob removed from spawn zone",
+        "fields": {
+            "mob": "Mob",
+            "selectMob": "Select a mob...",
+            "spawnCount": "Spawn Count",
+            "respawnTime": "Respawn Time",
+            "respawnTimeHint": "Format: HH:MM:SS (e.g. 00:05:00)"
+        },
+        "table": {
+            "mob": "Mob",
+            "level": "Level",
+            "spawnCount": "Count",
+            "respawnTime": "Respawn",
+            "actions": "Actions"
+        }
+    },
+    "spawnZoneCreated": "Spawn zone created",
+    "spawnZoneUpdated": "Spawn zone updated",
+    "spawnZoneDeleted": "Spawn zone deleted"
+}

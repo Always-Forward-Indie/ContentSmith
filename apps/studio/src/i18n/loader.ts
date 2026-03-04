@@ -42,7 +42,16 @@ async function loadIndividualModules(locale: Locale): Promise<Messages> {
     'items',
     'item-attributes',
     'items-rarity',
-    'item-types'
+    'item-types',
+    'classes',
+    'exp-for-level',
+    'vendors',
+    'zones',
+    'mob-races',
+    'mob-ranks',
+    'target-types',
+    'character-genders',
+    'spawn-zones'
   ] as const;
 
   const messages: Messages = {};

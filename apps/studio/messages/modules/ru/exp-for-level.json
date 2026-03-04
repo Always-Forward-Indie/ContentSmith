@@ -1,0 +1,23 @@
+{
+    "title": "Кривая опыта",
+    "description": "Опыт, необходимый для каждого уровня",
+    "levelsCount": "{count} уровней",
+    "generateCurve": "Сгенерировать кривую",
+    "generateFormula": "Формула: XP = база + множ × уровень^степень. Перезаписывает существующие уровни.",
+    "generate": "Сгенерировать",
+    "generating": "Генерация…",
+    "addSingleLevel": "Добавить один уровень",
+    "levelPlaceholder": "Уровень",
+    "xpPlaceholder": "Требуемый XP",
+    "noEntries": "Записей пока нет.",
+    "table": {
+        "level": "Уровень",
+        "xp": "XP",
+        "formatted": "Форматировано",
+        "actions": "Действия"
+    },
+    "savedLevel": "Уровень {level} сохранён",
+    "deletedLevel": "Уровень {level} удалён",
+    "levelAdded": "Уровень добавлен",
+    "generated": "{count} уровней сгенерировано"
+}

@@ -1,0 +1,71 @@
+{
+    "title": "Zones",
+    "description": "Game world zones and areas",
+    "newZone": "New Zone",
+    "createFirstZone": "Create first zone",
+    "noZones": "No zones yet.",
+    "zoneNotFound": "Zone not found",
+    "createTitle": "Create Zone",
+    "createSubtitle": "Define a new game world zone",
+    "zoneInfo": "Zone Info",
+    "zoneSettings": "Zone Settings",
+    "slugHint": "Unique identifier, auto-generated from name",
+    "deleteTitle": "Delete zone «{name}»?",
+    "deleteDescription": "This action cannot be undone.",
+    "table": {
+        "name": "Name",
+        "slug": "Slug",
+        "levels": "Levels",
+        "pvp": "PvP",
+        "safeZone": "Safe Zone",
+        "actions": "Actions"
+    },
+    "fields": {
+        "name": "Name",
+        "slug": "Slug",
+        "minLevel": "Min Level",
+        "maxLevel": "Max Level",
+        "pvpZone": "PvP Zone",
+        "safeZone": "Safe Zone",
+        "pvp": "PvP",
+        "safe": "Safe Zone"
+    },
+    "badges": {
+        "pvp": "PvP",
+        "safe": "Safe",
+        "safeZone": "Safe Zone",
+        "normalZone": "Normal zone"
+    },
+    "levelRange": "Level range:",
+    "slugLabel": "Slug:",
+    "nameLabel": "Name:",
+    "createZone": "Create Zone",
+    "creating": "Creating…",
+    "spawnZones": "Spawn Zones",
+    "addSpawnZone": "Add Spawn Zone",
+    "noSpawnZones": "No spawn zones defined for this zone yet.",
+    "addSpawn": "Add Spawn",
+    "spawnTable": {
+        "name": "Zone Name",
+        "mob": "Mob",
+        "count": "Count",
+        "respawn": "Respawn",
+        "minCoords": "Min Coords",
+        "maxCoords": "Max Coords",
+        "del": "Del"
+    },
+    "spawnFields": {
+        "name": "Zone Name",
+        "mob": "Mob",
+        "count": "Count",
+        "respawnSec": "Respawn (sec)"
+    },
+    "deleteSpawnTitle": "Delete spawn zone for «{name}»?",
+    "deleteSpawnDescription": "This will remove this spawn zone entry.",
+    "zoneCreated": "Zone created",
+    "zoneUpdated": "Zone updated",
+    "zoneDeleted": "Zone deleted",
+    "spawnAdded": "Spawn zone added",
+    "spawnDeleted": "Spawn zone deleted",
+    "selectMob": "Select mob…"
+}

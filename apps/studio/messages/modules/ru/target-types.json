@@ -1,0 +1,16 @@
+{
+    "title": "Типы целей",
+    "description": "Слаги типов целей для умений",
+    "noTypes": "Типов целей пока нет.",
+    "newSlugPlaceholder": "напр. single_enemy",
+    "table": {
+        "id": "ID",
+        "slug": "Слаг",
+        "actions": "Действия"
+    },
+    "deleteTitle": "Удалить тип «{slug}»?",
+    "deleteDescription": "Может не сработать, если умения ссылаются на этот тип цели.",
+    "typeCreated": "Тип цели создан",
+    "typeUpdated": "Тип цели обновлён",
+    "typeDeleted": "Тип цели удалён"
+}

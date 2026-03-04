@@ -15,5 +15,17 @@
     "itemAttributes": "Item Attributes",
     "itemsRarity": "Items Rarity",
     "itemTypes": "Item Types",
-    "mobs": "Mobs"
+    "mobs": "Mobs",
+    "content": "Content",
+    "classes": "Classes",
+    "characters": "Characters",
+    "xpCurve": "XP Curve",
+    "vendors": "Vendors",
+    "zones": "Zones",
+    "references": "References",
+    "mobRaces": "Mob Races",
+    "mobRanks": "Mob Ranks",
+    "targetTypes": "Target Types",
+    "characterGenders": "Character Genders",
+    "spawnZones": "Spawn Zones"
 }

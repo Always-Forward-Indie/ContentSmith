@@ -30,5 +30,7 @@
     "remove": "Удалить",
     "removing": "Удаление...",
     "reset": "Сбросить фильтры",
-    "filters": "Фильтры"
+    "filters": "Фильтры",
+    "showing": "Показано {from}–{to} из {total}",
+    "searchPlaceholder": "Поиск..."
 }

@@ -1,0 +1,21 @@
+{
+    "title": "Mob Ranks",
+    "description": "Mob rank multipliers (normal, elite, boss…)",
+    "noRanks": "No mob ranks yet.",
+    "fields": {
+        "rankId": "Rank ID",
+        "code": "Code",
+        "multiplier": "Multiplier"
+    },
+    "table": {
+        "id": "ID",
+        "code": "Code",
+        "multiplier": "Multiplier",
+        "actions": "Actions"
+    },
+    "deleteTitle": "Delete rank «{code}»?",
+    "deleteDescription": "This may fail if mobs are using this rank.",
+    "rankCreated": "Rank created",
+    "rankUpdated": "Rank updated",
+    "rankDeleted": "Rank deleted"
+}

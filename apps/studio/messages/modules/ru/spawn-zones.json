@@ -1,0 +1,54 @@
+{
+    "title": "Спавн зоны",
+    "description": "Управление местами спавна мобов и настройками респавна",
+    "newSpawnZone": "Новая спавн зона",
+    "createFirstSpawnZone": "Создать первую спавн зону",
+    "noSpawnZones": "Спавн зон пока нет.",
+    "spawnZoneNotFound": "Спавн зона не найдена",
+    "createTitle": "Создать спавн зону",
+    "createSubtitle": "Определить новую область спавна",
+    "editTitle": "Редактировать спавн зону",
+    "editSubtitle": "Обновить настройки спавн зоны",
+    "deleteTitle": "Удалить спавн зону «{name}»?",
+    "deleteDescription": "Это действие необратимо.",
+    "table": {
+        "zoneName": "Название зоны",
+        "gameZone": "Игровой регион",
+        "mobCount": "Мобы",
+        "actions": "Действия"
+    },
+    "fields": {
+        "zoneName": "Название зоны",
+        "gameZone": "Игровой регион (необязательно)",
+        "selectGameZone": "Выберите регион...",
+        "coordinates": "Координаты зоны спавна",
+        "minCoords": "Мин. координаты (X / Y / Z)",
+        "maxCoords": "Макс. координаты (X / Y / Z)"
+    },
+    "mobs": {
+        "title": "Мобы в этой зоне",
+        "description": "Настройте, какие мобы спавнятся здесь и в каком количестве",
+        "addMob": "Добавить моба",
+        "noMobs": "Мобы ещё не назначены.",
+        "mobAdded": "Моб добавлен в спавн зону",
+        "mobUpdated": "Запись моба обновлена",
+        "mobRemoved": "Моб удалён из спавн зоны",
+        "fields": {
+            "mob": "Моб",
+            "selectMob": "Выберите моба...",
+            "spawnCount": "Количество спавна",
+            "respawnTime": "Время респавна",
+            "respawnTimeHint": "Формат: ЧЧ:ММ:СС (например 00:05:00)"
+        },
+        "table": {
+            "mob": "Моб",
+            "level": "Уровень",
+            "spawnCount": "Кол-во",
+            "respawnTime": "Респавн",
+            "actions": "Действия"
+        }
+    },
+    "spawnZoneCreated": "Спавн зона создана",
+    "spawnZoneUpdated": "Спавн зона обновлена",
+    "spawnZoneDeleted": "Спавн зона удалена"
+}

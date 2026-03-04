@@ -16,6 +16,14 @@ import { itemsRarityRouter } from './itemsRarity';
 import { itemTypesRouter } from './itemTypes';
 import { equipSlotsRouter } from './equip-slots';
 import { mobsRouter } from './mobs';
+import { classesRouter } from './classes';
+import { expForLevelRouter } from './exp-for-level';
+import { vendorsRouter } from './vendors';
+import { zonesRouter } from './zones';
+import { mobRaceRouter } from './mob-race';
+import { mobRanksRouter } from './mob-ranks';
+import { targetTypeRouter } from './target-type';
+import { characterGendersRouter } from './character-genders';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -35,6 +43,14 @@ export const appRouter = createTRPCRouter({
   itemTypes: itemTypesRouter,
   equipSlots: equipSlotsRouter,
   mobs: mobsRouter,
+  classes: classesRouter,
+  expForLevel: expForLevelRouter,
+  vendors: vendorsRouter,
+  zones: zonesRouter,
+  mobRace: mobRaceRouter,
+  mobRanks: mobRanksRouter,
+  targetType: targetTypeRouter,
+  characterGenders: characterGendersRouter,
 });
 
 export type AppRouter = typeof appRouter;

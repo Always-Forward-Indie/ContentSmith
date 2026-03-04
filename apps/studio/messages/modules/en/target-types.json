@@ -1,0 +1,16 @@
+{
+    "title": "Target Types",
+    "description": "Skill target type slugs",
+    "noTypes": "No target types yet.",
+    "newSlugPlaceholder": "e.g. single_enemy",
+    "table": {
+        "id": "ID",
+        "slug": "Slug",
+        "actions": "Actions"
+    },
+    "deleteTitle": "Delete type «{slug}»?",
+    "deleteDescription": "This may fail if skills reference this target type.",
+    "typeCreated": "Target type created",
+    "typeUpdated": "Target type updated",
+    "typeDeleted": "Target type deleted"
+}

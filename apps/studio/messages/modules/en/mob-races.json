@@ -1,0 +1,16 @@
+{
+    "title": "Mob Races",
+    "description": "Mob race reference values",
+    "noRaces": "No mob races yet.",
+    "newRacePlaceholder": "New race name…",
+    "table": {
+        "id": "ID",
+        "name": "Name",
+        "actions": "Actions"
+    },
+    "deleteTitle": "Delete race «{name}»?",
+    "deleteDescription": "This may fail if mobs are using this race.",
+    "raceCreated": "Race created",
+    "raceUpdated": "Race updated",
+    "raceDeleted": "Race deleted"
+}

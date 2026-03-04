@@ -2,11 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Wand2 } from 'lucide-react'
+import { Menu, Wand2, Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { useTranslations, useLocale } from 'next-intl'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { NavigationSkillsDropdown } from '@/components/navigation/SkillsDropdown'
 import { NavigationItemsDropdown } from '@/components/navigation/ItemsDropdown'
+import { NavigationNpcsDropdown } from '@/components/navigation/NpcsDropdown'
+import { NavigationMobsDropdown } from '@/components/navigation/MobsDropdown'
+import { NavigationCharactersDropdown } from '@/components/navigation/CharactersDropdown'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -52,6 +56,7 @@ function MobileNavLink({ href, children }: { href: string; children: React.React
 export function AppHeader() {
     const t = useTranslations()
     const locale = useLocale()
+    const { theme, setTheme } = useTheme()
 
     return (
         <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -72,15 +77,25 @@ export function AppHeader() {
                 <nav className="hidden md:flex items-center gap-5 flex-1">
                     <NavLink href={`/${locale}/dialogues`}>{t('navigation.dialogues')}</NavLink>
                     <NavLink href={`/${locale}/quests`}>{t('navigation.quests')}</NavLink>
-                    <NavLink href={`/${locale}/npcs`}>{t('navigation.npcs')}</NavLink>
-                    <NavLink href={`/${locale}/mobs`}>{t('navigation.mobs')}</NavLink>
+                    <NavigationNpcsDropdown />
+                    <NavigationMobsDropdown />
+                    <NavigationCharactersDropdown />
                     <NavigationSkillsDropdown />
-                    <NavLink href={`/${locale}/entity-attributes`}>{t('navigation.entityAttributes')}</NavLink>
-                    <NavLink href={`/${locale}/races`}>{t('navigation.races')}</NavLink>
                     <NavigationItemsDropdown />
+                    <NavLink href={`/${locale}/zones`}>{t('navigation.zones')}</NavLink>
                 </nav>
 
                 <div className="ml-auto flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        aria-label="Toggle theme"
+                    >
+                        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    </Button>
                     <LanguageSwitcher />
 
                     {/* Mobile hamburger */}
@@ -109,11 +124,33 @@ export function AppHeader() {
                                 </p>
                                 <MobileNavLink href={`/${locale}/dialogues`}>{t('navigation.dialogues')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/quests`}>{t('navigation.quests')}</MobileNavLink>
-                                <MobileNavLink href={`/${locale}/npcs`}>{t('navigation.npcs')}</MobileNavLink>
-                                <MobileNavLink href={`/${locale}/mobs`}>{t('navigation.mobs')}</MobileNavLink>
 
                                 <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                    {t('home.categories.world')}
+                                    {t('navigation.npcs')}
+                                </p>
+                                <MobileNavLink href={`/${locale}/npcs`}>{t('navigation.npcs')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/vendors`}>{t('navigation.vendors')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('navigation.mobs')}
+                                </p>
+                                <MobileNavLink href={`/${locale}/mobs`}>{t('navigation.mobs')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/mob-races`}>{t('navigation.mobRaces')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/mob-ranks`}>{t('navigation.mobRanks')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/target-types`}>{t('navigation.targetTypes')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/spawn-zones`}>{t('navigation.spawnZones')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('navigation.characters')}
+                                </p>
+                                <MobileNavLink href={`/${locale}/classes`}>{t('navigation.classes')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/exp-for-level`}>{t('navigation.xpCurve')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/races`}>{t('navigation.races')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/character-genders`}>{t('navigation.characterGenders')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/entity-attributes`}>{t('navigation.entityAttributes')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('navigation.skills')}
                                 </p>
                                 <MobileNavLink href={`/${locale}/skills`}>{t('navigation.skills')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/skill-schools`}>{t('navigation.skillSchools')}</MobileNavLink>
@@ -121,12 +158,19 @@ export function AppHeader() {
                                 <MobileNavLink href={`/${locale}/skill-properties`}>{t('navigation.skillProperties')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/skill-effects-type`}>{t('navigation.skillEffectsType')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/skill-effects`}>{t('navigation.skillEffects')}</MobileNavLink>
-                                <MobileNavLink href={`/${locale}/entity-attributes`}>{t('navigation.entityAttributes')}</MobileNavLink>
-                                <MobileNavLink href={`/${locale}/races`}>{t('navigation.races')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('navigation.items')}
+                                </p>
                                 <MobileNavLink href={`/${locale}/items`}>{t('navigation.items')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/item-types`}>{t('navigation.itemTypes')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/items-rarity`}>{t('navigation.itemsRarity')}</MobileNavLink>
                                 <MobileNavLink href={`/${locale}/item-attributes`}>{t('navigation.itemAttributes')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('home.categories.world')}
+                                </p>
+                                <MobileNavLink href={`/${locale}/zones`}>{t('navigation.zones')}</MobileNavLink>
                             </nav>
                         </SheetContent>
                     </Sheet>

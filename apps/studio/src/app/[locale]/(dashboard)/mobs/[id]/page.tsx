@@ -268,7 +268,7 @@ export default function MobDetailPage() {
             <MobLootManager mobId={mob.id} loot={mob.loot} onUpdate={handleUpdate} />
 
             {/* Spawn Zones */}
-            <SpawnZonesManager mobId={mob.id} zones={mob.spawns} onUpdate={handleUpdate} />
+            <SpawnZonesManager mobId={mob.id} />
         </div>
     )
 }

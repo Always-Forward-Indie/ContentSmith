@@ -17,6 +17,7 @@ import { trpc } from '@/lib/trpc'
 import { NpcAttributesManager } from '@/components/npc/NpcAttributesManager'
 import { NpcSkillsManager } from '@/components/npc/NpcSkillsManager'
 import { NpcDialoguesManager } from '@/components/npc/NpcDialoguesManager'
+import { NpcPlacementsManager } from '@/components/npc/NpcPlacementsManager'
 
 function DetailSkeleton() {
     return (
@@ -271,6 +272,9 @@ export default function NPCDetailPage() {
                 }))}
                 onUpdate={handleUpdate}
             />
+
+            {/* Placements */}
+            <NpcPlacementsManager npcId={npc.id} />
         </div>
     )
 }

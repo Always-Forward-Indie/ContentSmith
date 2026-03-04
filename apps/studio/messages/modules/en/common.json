@@ -30,5 +30,7 @@
     "remove": "Remove",
     "removing": "Removing...",
     "reset": "Reset filters",
-    "filters": "Filters"
+    "filters": "Filters",
+    "showing": "Showing {from}–{to} of {total}",
+    "searchPlaceholder": "Search..."
 }

@@ -41,6 +41,26 @@
         "description": "Create and manage monsters, their stats, spawn zones and loot",
         "open": "Open Mob Editor"
     },
+    "spawnZones": {
+        "title": "Spawn Zones",
+        "description": "Define spawn locations with coordinates, respawn timers and mob assignments",
+        "open": "Open Spawn Zones"
+    },
+    "vendors": {
+        "title": "Vendors",
+        "description": "Configure merchant NPCs with their inventories and pricing",
+        "open": "Open Vendors"
+    },
+    "classes": {
+        "title": "Classes",
+        "description": "Design character classes with progression, available skills and attributes",
+        "open": "Open Classes"
+    },
+    "zones": {
+        "title": "Zones",
+        "description": "Manage game world zones, regions and their properties",
+        "open": "Open Zones"
+    },
     "localization": {
         "title": "Localization Tools",
         "description": "Manage translations and localized content for multiple languages",
@@ -48,8 +68,25 @@
     },
     "categories": {
         "narrative": "Narrative & Story",
-        "world": "World Building",
-        "tools": "Tools"
+        "npcsGroup": "NPCs",
+        "monsters": "Monsters",
+        "characters": "Characters",
+        "skillsGroup": "Skills",
+        "itemsGroup": "Items",
+        "world": "World",
+        "tools": "Tools",
+        "core": "Core Content",
+        "references": "References & Configuration"
+    },
+    "heroTitle": "ContentSmith",
+    "heroSubtitle": "Your professional toolkit for building MMORPG game content",
+    "quickAdd": {
+        "label": "Quick add:",
+        "dialogue": "Dialogue",
+        "quest": "Quest",
+        "npc": "NPC",
+        "mob": "Mob",
+        "item": "Item"
     },
     "welcome": {
         "title": "Welcome to ContentSmith",

@@ -1,0 +1,21 @@
+{
+    "title": "Character Genders",
+    "description": "Character gender reference values",
+    "noGenders": "No character genders yet.",
+    "fields": {
+        "id": "ID",
+        "nameCode": "Name (code)",
+        "labelDisplay": "Label (display)"
+    },
+    "table": {
+        "id": "ID",
+        "nameCode": "Name (code)",
+        "labelDisplay": "Label (display)",
+        "actions": "Actions"
+    },
+    "deleteTitle": "Delete gender «{name}»?",
+    "deleteDescription": "This may fail if characters reference this gender.",
+    "genderCreated": "Gender created",
+    "genderUpdated": "Gender updated",
+    "genderDeleted": "Gender deleted"
+}

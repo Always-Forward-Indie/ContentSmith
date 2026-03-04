@@ -1,0 +1,67 @@
+{
+    "title": "Character Classes",
+    "description": "Manage playable classes, stat growth formulas and skill trees",
+    "newClass": "New Class",
+    "noClasses": "No classes yet. Create your first class.",
+    "classNotFound": "Class not found.",
+    "deleteTitle": "Delete class «{name}»?",
+    "deleteDescription": "This will also delete all stat formulas and skill tree entries for this class.",
+    "createTitle": "New Class",
+    "createSubtitle": "Create a new playable character class",
+    "classDetails": "Class Details",
+    "editClass": "Edit Class",
+    "breadcrumb": "Classes",
+    "table": {
+        "id": "ID",
+        "name": "Name",
+        "slug": "Slug",
+        "description": "Description",
+        "actions": "Actions"
+    },
+    "fields": {
+        "name": "Name",
+        "slug": "Slug",
+        "description": "Description"
+    },
+    "tabs": {
+        "formulas": "Stat Formulas",
+        "skills": "Skill Tree"
+    },
+    "statFormulas": {
+        "previewAt": "Preview at level:",
+        "addPlaceholder": "Add attribute…",
+        "noMore": "All attributes added",
+        "noFormulas": "No stat formulas. Add attributes above.",
+        "atLevel": "≈ lvl {level}",
+        "table": {
+            "attribute": "Attribute",
+            "base": "Base",
+            "mult": "Mult",
+            "exp": "Exp",
+            "actions": "Actions"
+        }
+    },
+    "skillTree": {
+        "addPlaceholder": "Add skill…",
+        "noMore": "All skills added",
+        "requiredLvl": "Required lvl:",
+        "default": "Default:",
+        "noSkills": "No skills in tree. Add skills above.",
+        "table": {
+            "skill": "Skill",
+            "slug": "Slug",
+            "requiredLevel": "Required Level",
+            "default": "Default",
+            "actions": "Actions"
+        }
+    },
+    "saved": "Saved",
+    "removed": "Removed",
+    "classUpdated": "Class updated",
+    "skillAdded": "Skill added",
+    "formulaAdded": "Formula added",
+    "slugHint": "Unique identifier, auto-generated from name",
+    "namePlaceholder": "e.g. Mage",
+    "slugPlaceholder": "e.g. mage",
+    "descPlaceholder": "Class description…"
+}

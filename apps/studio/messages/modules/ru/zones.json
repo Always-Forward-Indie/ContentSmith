@@ -1,0 +1,71 @@
+{
+    "title": "Зоны",
+    "description": "Игровые зоны и территории",
+    "newZone": "Новая зона",
+    "createFirstZone": "Создать первую зону",
+    "noZones": "Зон пока нет.",
+    "zoneNotFound": "Зона не найдена",
+    "createTitle": "Создать зону",
+    "createSubtitle": "Определить новую игровую зону",
+    "zoneInfo": "Информация о зоне",
+    "zoneSettings": "Настройки зоны",
+    "slugHint": "Уникальный идентификатор, генерируется из названия",
+    "deleteTitle": "Удалить зону «{name}»?",
+    "deleteDescription": "Это действие необратимо.",
+    "table": {
+        "name": "Название",
+        "slug": "Слаг",
+        "levels": "Уровни",
+        "pvp": "PvP",
+        "safeZone": "Безопасная зона",
+        "actions": "Действия"
+    },
+    "fields": {
+        "name": "Название",
+        "slug": "Слаг",
+        "minLevel": "Мин. уровень",
+        "maxLevel": "Макс. уровень",
+        "pvpZone": "PvP-зона",
+        "safeZone": "Безопасная зона",
+        "pvp": "PvP",
+        "safe": "Безопасная зона"
+    },
+    "badges": {
+        "pvp": "PvP",
+        "safe": "Безопасно",
+        "safeZone": "Безопасная зона",
+        "normalZone": "Обычная зона"
+    },
+    "levelRange": "Диапазон уровней:",
+    "slugLabel": "Слаг:",
+    "nameLabel": "Название:",
+    "createZone": "Создать зону",
+    "creating": "Создание…",
+    "spawnZones": "Зоны спавна",
+    "addSpawnZone": "Добавить зону спавна",
+    "noSpawnZones": "Зоны спавна для этой зоны ещё не заданы.",
+    "addSpawn": "Добавить спавн",
+    "spawnTable": {
+        "name": "Название зоны",
+        "mob": "Моб",
+        "count": "Кол-во",
+        "respawn": "Респаун",
+        "minCoords": "Мин. коорд.",
+        "maxCoords": "Макс. коорд.",
+        "del": "Удал."
+    },
+    "spawnFields": {
+        "name": "Название зоны",
+        "mob": "Моб",
+        "count": "Кол-во",
+        "respawnSec": "Респаун (сек)"
+    },
+    "deleteSpawnTitle": "Удалить зону спавна для «{name}»?",
+    "deleteSpawnDescription": "Это удалит запись зоны спавна.",
+    "zoneCreated": "Зона создана",
+    "zoneUpdated": "Зона обновлена",
+    "zoneDeleted": "Зона удалена",
+    "spawnAdded": "Зона спавна добавлена",
+    "spawnDeleted": "Зона спавна удалена",
+    "selectMob": "Выберите моба…"
+}

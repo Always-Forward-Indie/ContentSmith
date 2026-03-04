@@ -94,5 +94,21 @@
     },
     "positionNotSet": "No position set — assign coordinates in the edit form",
     "positionDescription": "Location and orientation in the game world",
-    "showingResults": "Showing {from}–{to} of {total}"
+    "showingResults": "Showing {from}–{to} of {total}",
+    "placements": {
+        "title": "World Placements",
+        "description": "Locations where this NPC is placed in the game world",
+        "add": "Add Placement",
+        "addTitle": "Add Placement",
+        "addDescription": "Define a new location for this NPC in the world",
+        "noplacements": "No placements defined",
+        "zone": "Zone",
+        "noZone": "No zone",
+        "rotZ": "Rot Z",
+        "added": "Placement added",
+        "updated": "Placement updated",
+        "removed": "Placement removed",
+        "removeTitle": "Remove Placement",
+        "removeDescription": "Are you sure you want to remove this placement? This action cannot be undone."
+    }
 }

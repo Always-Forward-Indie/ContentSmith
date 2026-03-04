@@ -1,0 +1,45 @@
+{
+    "title": "Vendors",
+    "description": "NPC vendors and their inventory",
+    "addVendor": "Add Vendor",
+    "noVendors": "No vendors yet. Assign an NPC as vendor.",
+    "vendorNotFound": "Vendor not found",
+    "table": {
+        "npc": "NPC",
+        "slug": "Slug",
+        "markup": "Markup %",
+        "actions": "Actions"
+    },
+    "addVendorTitle": "Add Vendor",
+    "addVendorDescription": "Assign an NPC as a vendor with an optional markup percentage.",
+    "fields": {
+        "npc": "NPC",
+        "markup": "Markup %"
+    },
+    "selectNpc": "Select NPC…",
+    "deleteTitle": "Delete vendor «{name}»?",
+    "deleteDescription": "This will also delete all inventory entries for this vendor.",
+    "vendorSettings": "Vendor Settings",
+    "inventory": "Inventory",
+    "noInventory": "No items in inventory yet.",
+    "stockBlankInfinity": "Stock (blank=∞)",
+    "priceOverride": "Price override",
+    "selectItem": "Select item…",
+    "unlimited": "Unlimited",
+    "defaultPrice": "Default",
+    "inventoryTable": {
+        "item": "Item",
+        "stock": "Stock",
+        "price": "Price override",
+        "actions": "Actions"
+    },
+    "removeTitle": "Remove «{name}» from inventory?",
+    "removeDescription": "This will remove the item from this vendor's inventory.",
+    "npcVendorLabel": "NPC Vendor",
+    "vendorCreated": "Vendor created",
+    "vendorDeleted": "Vendor deleted",
+    "markupUpdated": "Markup updated",
+    "itemAdded": "Item added",
+    "itemUpdated": "Item updated",
+    "itemRemoved": "Item removed"
+}

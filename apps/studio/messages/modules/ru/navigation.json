@@ -15,5 +15,17 @@
     "itemAttributes": "Атрибуты предметов",
     "itemsRarity": "Редкость предметов",
     "itemTypes": "Типы предметов",
-    "mobs": "Мобы"
+    "mobs": "Мобы",
+    "content": "Контент",
+    "classes": "Классы",
+    "characters": "Персонажи",
+    "xpCurve": "Кривая опыта",
+    "vendors": "Торговцы",
+    "zones": "Зоны",
+    "references": "Справочники",
+    "mobRaces": "Расы мобов",
+    "mobRanks": "Ранги мобов",
+    "targetTypes": "Типы целей",
+    "characterGenders": "Гендерыперсонажей",
+    "spawnZones": "Спавн зоны"
 }

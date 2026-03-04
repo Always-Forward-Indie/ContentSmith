@@ -1,0 +1,16 @@
+{
+    "title": "Расы мобов",
+    "description": "Справочные значения рас мобов",
+    "noRaces": "Рас мобов пока нет.",
+    "newRacePlaceholder": "Название новой расы…",
+    "table": {
+        "id": "ID",
+        "name": "Название",
+        "actions": "Действия"
+    },
+    "deleteTitle": "Удалить расу «{name}»?",
+    "deleteDescription": "Может не сработать, если мобы используют эту расу.",
+    "raceCreated": "Раса создана",
+    "raceUpdated": "Раса обновлена",
+    "raceDeleted": "Раса удалена"
+}

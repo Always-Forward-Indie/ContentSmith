@@ -1,0 +1,23 @@
+{
+    "title": "XP Curve",
+    "description": "Experience required per level",
+    "levelsCount": "{count} levels",
+    "generateCurve": "Generate Curve",
+    "generateFormula": "Formula: XP = base + mult × level^exp. Overwrites existing levels.",
+    "generate": "Generate",
+    "generating": "Generating…",
+    "addSingleLevel": "Add single level",
+    "levelPlaceholder": "Level",
+    "xpPlaceholder": "XP required",
+    "noEntries": "No entries yet.",
+    "table": {
+        "level": "Level",
+        "xp": "XP",
+        "formatted": "Formatted",
+        "actions": "Actions"
+    },
+    "savedLevel": "Level {level} saved",
+    "deletedLevel": "Level {level} deleted",
+    "levelAdded": "Level added",
+    "generated": "{count} levels generated"
+}
