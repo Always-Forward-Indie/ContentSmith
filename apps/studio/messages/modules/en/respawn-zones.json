@@ -1,0 +1,19 @@
+{
+    "title": "Respawn Zones",
+    "description": "Manage player respawn zones",
+    "createNew": "Create Respawn Zone",
+    "editZone": "Edit Respawn Zone",
+    "name": "Name",
+    "zone": "Game Zone",
+    "positionX": "X",
+    "positionY": "Y",
+    "positionZ": "Z",
+    "isDefault": "Default",
+    "noZones": "No respawn zones found",
+    "searchPlaceholder": "Search respawn zones...",
+    "deleteConfirmTitle": "Delete Respawn Zone",
+    "deleteConfirmDescription": "Delete respawn zone {name}?",
+    "createSuccess": "Respawn zone created",
+    "updateSuccess": "Respawn zone updated",
+    "deleteSuccess": "Respawn zone deleted"
+}

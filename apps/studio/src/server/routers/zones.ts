@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { eq, like, or, count, asc, and } from '@contentsmith/database';
 import { db } from '../db';
-import { zones, spawnZones, spawnZoneMobs, npcPlacements, mob, npc } from '@contentsmith/database';
+import { zones, spawnZones, spawnZoneMobs, npcPlacements, mobPosition, worldObjects, respawnZones, mob, npc } from '@contentsmith/database';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import {
   createZoneSchema, updateZoneSchema, zoneIdSchema,
@@ -239,5 +239,91 @@ export const zonesRouter = createTRPCRouter({
   deleteNpcPlacement: publicProcedure.input(npcPlacementIdSchema).mutation(async ({ input }) => {
     await db.delete(npcPlacements).where(eq(npcPlacements.id, input.id));
     return { success: true };
+  }),
+
+  // ─── World Map Data (ALL zones + ALL entities) ──────────────────────────────
+
+  getAllMapData: publicProcedure.query(async () => {
+    const [
+      allZones,
+      npcRows,
+      spawnZoneRows,
+      worldObjectRows,
+      respawnZoneRows,
+      mobPositionRows,
+    ] = await Promise.all([
+      db.select().from(zones).orderBy(asc(zones.name)),
+
+      db.select({
+        id: npcPlacements.id,
+        npcId: npcPlacements.npcId,
+        npcName: npc.name,
+        zoneId: npcPlacements.zoneId,
+        x: npcPlacements.x,
+        y: npcPlacements.y,
+        z: npcPlacements.z,
+        rotZ: npcPlacements.rotZ,
+      })
+        .from(npcPlacements)
+        .leftJoin(npc, eq(npcPlacements.npcId, npc.id)),
+
+      db.select({
+        spawnZoneId: spawnZones.zoneId,
+        zoneName: spawnZones.zoneName,
+        gameZoneId: spawnZones.gameZoneId,
+        minSpawnX: spawnZones.minSpawnX,
+        minSpawnY: spawnZones.minSpawnY,
+        maxSpawnX: spawnZones.maxSpawnX,
+        maxSpawnY: spawnZones.maxSpawnY,
+      })
+        .from(spawnZones),
+
+      db.select({
+        id: worldObjects.id,
+        slug: worldObjects.slug,
+        nameKey: worldObjects.nameKey,
+        objectType: worldObjects.objectType,
+        zoneId: worldObjects.zoneId,
+        posX: worldObjects.posX,
+        posY: worldObjects.posY,
+        posZ: worldObjects.posZ,
+        rotZ: worldObjects.rotZ,
+      })
+        .from(worldObjects),
+
+      db.select({
+        id: respawnZones.id,
+        name: respawnZones.name,
+        zoneId: respawnZones.zoneId,
+        x: respawnZones.x,
+        y: respawnZones.y,
+        z: respawnZones.z,
+        isDefault: respawnZones.isDefault,
+      })
+        .from(respawnZones),
+
+      db.select({
+        id: mobPosition.id,
+        mobId: mobPosition.mobId,
+        mobName: mob.name,
+        mobLevel: mob.level,
+        zoneId: mobPosition.zoneId,
+        x: mobPosition.x,
+        y: mobPosition.y,
+        z: mobPosition.z,
+        rotZ: mobPosition.rotZ,
+      })
+        .from(mobPosition)
+        .leftJoin(mob, eq(mobPosition.mobId, mob.id)),
+    ]);
+
+    return {
+      zones: allZones,
+      npcPlacements: npcRows,
+      spawnZones: spawnZoneRows,
+      worldObjects: worldObjectRows,
+      respawnZones: respawnZoneRows,
+      mobPositions: mobPositionRows,
+    };
   }),
 });

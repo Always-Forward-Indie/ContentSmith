@@ -230,5 +230,145 @@
                 "dialogueExit": "Выход из диалога"
             }
         }
+    },
+    "conditionGroupEditor": {
+        "switchToJson": "JSON",
+        "switchToVisual": "Визуально",
+        "complexStructure": "Сложная структура",
+        "noConditions": "Нет условий — всегда выполняется",
+        "addCondition": "Добавить условие",
+        "operator": "Оператор",
+        "operatorAll": "Все (AND)",
+        "operatorAny": "Любое (OR)",
+        "invalidJson": "Некорректный JSON",
+        "searchPlaceholder": "Поиск...",
+        "selectPlaceholder": "Выбрать...",
+        "notFound": "Не найдено",
+        "loading": "Загрузка...",
+        "groups": {
+            "quests": "Квесты",
+            "character": "Персонаж",
+            "skills": "Навыки",
+            "world": "Мир"
+        },
+        "types": {
+            "flag": "Флаг игрока",
+            "quest": "Статус квеста",
+            "quest_step": "Шаг квеста",
+            "level": "Уровень",
+            "item": "Предмет в инвентаре",
+            "reputation": "Репутация фракции",
+            "mastery": "Мастерство",
+            "has_skill_points": "Очки навыков",
+            "skill_learned": "Навык изучен",
+            "skill_not_learned": "Навык НЕ изучен",
+            "class": "Класс персонажа",
+            "object_state": "Состояние объекта"
+        },
+        "ops": {
+            "eq": "= равно",
+            "gte": "≥ не менее",
+            "lte": "≤ не более",
+            "gt": "> больше",
+            "lt": "< меньше",
+            "step": "шаг ="
+        },
+        "questStates": {
+            "not_started": "Не начат",
+            "active": "Активен",
+            "completed": "Завершён",
+            "turned_in": "Сдан",
+            "failed": "Провален"
+        },
+        "repTiers": {
+            "enemy": "Враг",
+            "stranger": "Чужак",
+            "neutral": "Нейтральный",
+            "friendly": "Дружелюбный",
+            "ally": "Союзник"
+        },
+        "objectStates": {
+            "active": "Активен",
+            "depleted": "Истощён",
+            "disabled": "Отключён"
+        },
+        "fields": {
+            "quantity": "кол-во",
+            "value": "значение",
+            "repValue": "репутация",
+            "repMode": "режим",
+            "repModeValue": "значение",
+            "repModeTier": "ранг",
+            "classMode": "режим",
+            "classModeSingle": "один класс",
+            "classModeMultiple": "несколько",
+            "classIdsPlaceholder": "1,2,3",
+            "boolTrue": "true",
+            "boolFalse": "false",
+            "eq": "eq:",
+            "flagKey": "flag_key"
+        }
+    },
+    "actionListEditor": {
+        "label": "Действия",
+        "addAction": "Добавить действие",
+        "noActions": "Нет действий",
+        "editJson": "JSON",
+        "editVisual": "Визуально",
+        "jsonError": "Некорректный JSON",
+        "searchAction": "Поиск действия...",
+        "nothingFound": "Ничего не найдено",
+        "selectQuest": "Выбрать квест...",
+        "selectItem": "Выбрать предмет...",
+        "selectSkill": "Выбрать навык...",
+        "selectFaction": "Выбрать фракцию...",
+        "selectObject": "Выбрать объект...",
+        "noParams": "нет параметров",
+        "types": {
+            "set_flag": "Установить флаг",
+            "offer_quest": "Предложить квест",
+            "turn_in_quest": "Сдать квест",
+            "fail_quest": "Провалить квест",
+            "advance_quest_step": "Следующий шаг квеста",
+            "give_item": "Дать предмет",
+            "give_exp": "Дать опыт",
+            "give_gold": "Дать золото",
+            "open_vendor_shop": "Открыть магазин",
+            "open_repair_shop": "Открыть ремонт",
+            "open_skill_shop": "Открыть тренера",
+            "change_reputation": "Изменить репутацию",
+            "learn_skill": "Обучить навыку",
+            "set_object_state": "Состояние объекта"
+        },
+        "groups": {
+            "quests": "Квесты",
+            "rewards": "Награды",
+            "tradingTraining": "Торговля / Обучение",
+            "progression": "Прогрессия",
+            "world": "Мир"
+        },
+        "fields": {
+            "flagKey": "ключ флага",
+            "flagModeBool": "bool",
+            "flagModeInt": "int значение",
+            "flagModeInc": "int += дельта",
+            "incPrefix": "+=",
+            "quantity": "кол-во",
+            "amountXp": "XP",
+            "amountGold": "золото",
+            "vendorModeShop": "shop (все)",
+            "vendorModeBuy": "buy (купить)",
+            "vendorModeSell": "sell (продать)",
+            "factionDelta": "дельта",
+            "skillSP": "SP",
+            "skillGold": "Золото",
+            "skillBook": "Книга",
+            "skillBookItem": "книга предмет"
+        },
+        "objectStates": {
+            "active": "активный",
+            "depleted": "истощён",
+            "disabled": "отключён"
+        }
     }
 }

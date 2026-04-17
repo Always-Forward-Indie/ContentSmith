@@ -35,6 +35,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { trpc } from '@/lib/trpc'
 import { useToast } from '@/hooks/use-toast'
+import ConditionGroupEditor from '@/components/editors/ConditionGroupEditor'
 
 interface NpcDialogue {
     npcId: number
@@ -58,7 +59,7 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
 
     const [selectedDialogueId, setSelectedDialogueId] = useState<string>('')
     const [priority, setPriority] = useState<number>(0)
-    const [conditionJson, setConditionJson] = useState<string>('')
+    const [conditionGroup, setConditionGroup] = useState<unknown>(null)
 
     const t = useTranslations('npcs.dialogues')
     const commonT = useTranslations('common')
@@ -99,16 +100,7 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
     const resetForm = () => {
         setSelectedDialogueId('')
         setPriority(0)
-        setConditionJson('')
-    }
-
-    const parseCondition = () => {
-        if (!conditionJson.trim()) return null
-        try {
-            return JSON.parse(conditionJson)
-        } catch {
-            return null
-        }
+        setConditionGroup(null)
     }
 
     const handleAdd = () => {
@@ -117,7 +109,7 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
             npcId,
             dialogueId: parseInt(selectedDialogueId),
             priority,
-            conditionGroup: parseCondition(),
+            conditionGroup: conditionGroup ?? null,
         })
     }
 
@@ -127,13 +119,13 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
             npcId,
             dialogueId: editingDialogue.dialogueId,
             priority,
-            conditionGroup: parseCondition(),
+            conditionGroup: conditionGroup ?? null,
         })
     }
 
     const openEdit = (d: NpcDialogue) => {
         setPriority(d.priority)
-        setConditionJson(d.conditionGroup ? JSON.stringify(d.conditionGroup, null, 2) : '')
+        setConditionGroup(d.conditionGroup ?? null)
         setEditingDialogue(d)
     }
 
@@ -191,16 +183,11 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
                                     />
                                     <p className="text-xs text-muted-foreground">{t('fields.priorityDescription')}</p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>{t('fields.condition')}</Label>
-                                    <Textarea
-                                        placeholder={t('fields.conditionPlaceholder')}
-                                        value={conditionJson}
-                                        onChange={(e) => setConditionJson(e.target.value)}
-                                        rows={3}
-                                    />
-                                    <p className="text-xs text-muted-foreground">{t('fields.conditionDescription')}</p>
-                                </div>
+                                <ConditionGroupEditor
+                                    label={t('fields.condition')}
+                                    value={conditionGroup}
+                                    onChange={setConditionGroup}
+                                />
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => { setIsAddOpen(false); resetForm() }}>
@@ -320,15 +307,11 @@ export function NpcDialoguesManager({ npcId, dialogues, onUpdate }: NpcDialogues
                             />
                             <p className="text-xs text-muted-foreground">{t('fields.priorityDescription')}</p>
                         </div>
-                        <div className="space-y-2">
-                            <Label>{t('fields.condition')}</Label>
-                            <Textarea
-                                placeholder={t('fields.conditionPlaceholder')}
-                                value={conditionJson}
-                                onChange={(e) => setConditionJson(e.target.value)}
-                                rows={3}
-                            />
-                        </div>
+                        <ConditionGroupEditor
+                            label={t('fields.condition')}
+                            value={conditionGroup}
+                            onChange={setConditionGroup}
+                        />
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => { setEditingDialogue(null); resetForm() }}>

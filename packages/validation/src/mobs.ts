@@ -16,13 +16,30 @@ export const mobSchema = z.object({
   slug: z.string().max(50).nullable().optional(),
   raceId: z.number().int().positive().default(1),
   level: z.number().int().positive(),
-  currentHealth: z.number().int().positive().default(1),
-  currentMana: z.number().int().min(0).default(1),
+  spawnHealth: z.number().int().positive().default(1),
+  spawnMana: z.number().int().min(0).default(1),
   isAggressive: z.boolean().default(false),
   isDead: z.boolean().default(false),
   radius: z.number().int().positive().default(100),
   baseXp: z.number().int().min(0).default(1),
   rankId: z.number().int().positive().default(1),
+  aggroRange: z.number().min(0).default(400.0),
+  attackRange: z.number().min(0).default(150.0),
+  attackCooldown: z.number().min(0).default(2.0),
+  chaseMultiplier: z.number().min(0).default(2.0),
+  patrolSpeed: z.number().min(0).default(1.0),
+  isSocial: z.boolean().default(false),
+  chaseDuration: z.number().min(0).default(30.0),
+  fleeHpThreshold: z.number().min(0).max(1).default(0.0),
+  aiArchetype: z.enum(['melee', 'ranged', 'caster', 'support', 'flee']).default('melee'),
+  canEvolve: z.boolean().default(false),
+  isRare: z.boolean().default(false),
+  rareSpawnChance: z.number().min(0).max(1).default(0.0),
+  rareSpawnCondition: z.string().max(30).nullable().optional(),
+  factionSlug: z.string().max(60).nullable().optional(),
+  repDeltaPerKill: z.number().int().default(0),
+  biomeSlug: z.string().max(64).default(''),
+  mobTypeSlug: z.string().max(64).default('beast'),
 });
 
 export const createMobSchema = mobSchema.omit({ id: true });
@@ -55,16 +72,23 @@ export const mobPositionSchema = z.object({
 export const createMobPositionSchema = mobPositionSchema.omit({ id: true });
 export const updateMobPositionSchema = mobPositionSchema.partial().required({ mobId: true });
 
-// ===== MOB ATTRIBUTES =====
-export const mobAttributesSchema = z.object({
+// ===== MOB STAT =====
+export const mobStatSchema = z.object({
   id: z.number().int().positive(),
   mobId: z.number().int().positive(),
   attributeId: z.number().int().positive(),
-  value: z.number(),
+  flatValue: z.number(),
+  multiplier: z.number().nullable().optional(),
+  exponent: z.number().nullable().optional(),
 });
 
-export const createMobAttributesSchema = mobAttributesSchema.omit({ id: true });
-export const updateMobAttributesSchema = mobAttributesSchema.partial().required({ id: true });
+export const createMobStatSchema = mobStatSchema.omit({ id: true });
+export const updateMobStatSchema = mobStatSchema.partial().required({ id: true });
+
+// Backwards-compat aliases
+export const mobAttributesSchema = mobStatSchema;
+export const createMobAttributesSchema = createMobStatSchema;
+export const updateMobAttributesSchema = updateMobStatSchema;
 
 // ===== MOB SKILLS =====
 export const mobSkillSchema = z.object({
@@ -86,6 +110,10 @@ export const mobLootInfoSchema = z.object({
   mobId: z.number().int().positive(),
   itemId: z.number().int().positive(),
   dropChance: z.number().min(0).max(100).default(0),
+  isHarvestOnly: z.boolean().default(false),
+  minQuantity: z.number().int().min(1).default(1),
+  maxQuantity: z.number().int().min(1).default(1),
+  lootTier: z.enum(['common', 'uncommon', 'rare', 'epic', 'legendary']).default('common'),
 });
 
 export const addMobLootSchema = mobLootInfoSchema.omit({ id: true });

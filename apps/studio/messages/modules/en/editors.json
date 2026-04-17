@@ -230,5 +230,145 @@
                 "dialogueExit": "Dialogue Exit"
             }
         }
+    },
+    "conditionGroupEditor": {
+        "switchToJson": "JSON",
+        "switchToVisual": "Visual",
+        "complexStructure": "Complex structure",
+        "noConditions": "No conditions — always passes",
+        "addCondition": "Add condition",
+        "operator": "Operator",
+        "operatorAll": "All (AND)",
+        "operatorAny": "Any (OR)",
+        "invalidJson": "Invalid JSON",
+        "searchPlaceholder": "Search...",
+        "selectPlaceholder": "Select...",
+        "notFound": "Not found",
+        "loading": "Loading...",
+        "groups": {
+            "quests": "Quests",
+            "character": "Character",
+            "skills": "Skills",
+            "world": "World"
+        },
+        "types": {
+            "flag": "Player Flag",
+            "quest": "Quest Status",
+            "quest_step": "Quest Step",
+            "level": "Level",
+            "item": "Item in Inventory",
+            "reputation": "Faction Reputation",
+            "mastery": "Mastery",
+            "has_skill_points": "Skill Points",
+            "skill_learned": "Skill Learned",
+            "skill_not_learned": "Skill NOT Learned",
+            "class": "Character Class",
+            "object_state": "Object State"
+        },
+        "ops": {
+            "eq": "= equal",
+            "gte": "≥ at least",
+            "lte": "≤ at most",
+            "gt": "> greater",
+            "lt": "< less",
+            "step": "step ="
+        },
+        "questStates": {
+            "not_started": "Not started",
+            "active": "Active",
+            "completed": "Completed",
+            "turned_in": "Turned in",
+            "failed": "Failed"
+        },
+        "repTiers": {
+            "enemy": "Enemy",
+            "stranger": "Stranger",
+            "neutral": "Neutral",
+            "friendly": "Friendly",
+            "ally": "Ally"
+        },
+        "objectStates": {
+            "active": "Active",
+            "depleted": "Depleted",
+            "disabled": "Disabled"
+        },
+        "fields": {
+            "quantity": "qty",
+            "value": "value",
+            "repValue": "reputation",
+            "repMode": "mode",
+            "repModeValue": "value",
+            "repModeTier": "tier",
+            "classMode": "mode",
+            "classModeSingle": "single class",
+            "classModeMultiple": "multiple",
+            "classIdsPlaceholder": "1,2,3",
+            "boolTrue": "true",
+            "boolFalse": "false",
+            "eq": "eq:",
+            "flagKey": "flag_key"
+        }
+    },
+    "actionListEditor": {
+        "label": "Actions",
+        "addAction": "Add action",
+        "noActions": "No actions",
+        "editJson": "JSON",
+        "editVisual": "Visual",
+        "jsonError": "Invalid JSON",
+        "searchAction": "Search action...",
+        "nothingFound": "Nothing found",
+        "selectQuest": "Select quest...",
+        "selectItem": "Select item...",
+        "selectSkill": "Select skill...",
+        "selectFaction": "Select faction...",
+        "selectObject": "Select object...",
+        "noParams": "no parameters",
+        "types": {
+            "set_flag": "Set Flag",
+            "offer_quest": "Offer Quest",
+            "turn_in_quest": "Turn In Quest",
+            "fail_quest": "Fail Quest",
+            "advance_quest_step": "Advance Quest Step",
+            "give_item": "Give Item",
+            "give_exp": "Give EXP",
+            "give_gold": "Give Gold",
+            "open_vendor_shop": "Open Vendor Shop",
+            "open_repair_shop": "Open Repair Shop",
+            "open_skill_shop": "Open Trainer",
+            "change_reputation": "Change Reputation",
+            "learn_skill": "Teach Skill",
+            "set_object_state": "Set Object State"
+        },
+        "groups": {
+            "quests": "Quests",
+            "rewards": "Rewards",
+            "tradingTraining": "Trading / Training",
+            "progression": "Progression",
+            "world": "World"
+        },
+        "fields": {
+            "flagKey": "flag key",
+            "flagModeBool": "bool",
+            "flagModeInt": "int value",
+            "flagModeInc": "int += delta",
+            "incPrefix": "+=",
+            "quantity": "qty",
+            "amountXp": "XP",
+            "amountGold": "gold",
+            "vendorModeShop": "shop (all)",
+            "vendorModeBuy": "buy",
+            "vendorModeSell": "sell",
+            "factionDelta": "delta",
+            "skillSP": "SP",
+            "skillGold": "Gold",
+            "skillBook": "Book",
+            "skillBookItem": "book item"
+        },
+        "objectStates": {
+            "active": "active",
+            "depleted": "depleted",
+            "disabled": "disabled"
+        }
     }
 }

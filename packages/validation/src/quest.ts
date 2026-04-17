@@ -36,8 +36,9 @@ export const QuestStepSchema = z.object({
   questId: z.number(),
   stepIndex: z.number().min(0),
   stepType: z.enum(['collect', 'kill', 'talk', 'reach', 'custom']),
-  params: z.record(z.unknown()), // Will be validated by QuestStepParamsSchema based on type
+  params: z.record(z.unknown()),
   clientStepKey: z.string().nullable().optional(),
+  completionMode: z.enum(['auto', 'manual']).default('auto'),
 });
 
 export const QuestSchema = z.object({
@@ -49,6 +50,9 @@ export const QuestSchema = z.object({
   giverNpcId: z.number().nullable().optional(),
   turninNpcId: z.number().nullable().optional(),
   clientQuestKey: z.string().nullable().optional(),
+  reputationFactionSlug: z.string().max(64).nullable().optional(),
+  reputationOnComplete: z.number().int().default(0),
+  reputationOnFail: z.number().int().default(0),
 });
 
 export const CreateQuestSchema = QuestSchema.omit({ id: true });
@@ -82,6 +86,7 @@ export const QuestRewardSchema = z.object({
   itemId: z.number().nullable().optional(),
   quantity: z.number().min(1).default(1),
   amount: z.number().min(0).default(0),
+  isHidden: z.boolean().default(false),
 });
 
 export const CreateQuestRewardSchema = QuestRewardSchema.omit({ id: true });

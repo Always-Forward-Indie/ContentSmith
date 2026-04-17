@@ -276,33 +276,46 @@ export default function DialogueGraphEditor({
 
         const g = new Dagre.graphlib.Graph()
         g.setDefaultEdgeLabel(() => ({}))
-        g.setGraph({ rankdir: 'TB', nodesep: 80, ranksep: 120, marginx: 40, marginy: 40 })
+        g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 80, marginx: 50, marginy: 50 })
 
-        const NODE_WIDTHS: Record<string, number> = {
-            choice_hub: 220,
-            line: 200,
-            action: 200,
-            jump: 200,
-            end: 180,
+        // Fallback dimensions per node type (used when ReactFlow hasn't measured yet)
+        const FALLBACK_WIDTHS: Record<string, number> = {
+            choice_hub: 240,
+            line: 220,
+            action: 220,
+            jump: 220,
+            end: 200,
         }
-        const NODE_HEIGHT = 120
+        const FALLBACK_HEIGHTS: Record<string, number> = {
+            choice_hub: 160,
+            line: 100,
+            action: 100,
+            jump: 100,
+            end: 90,
+        }
+        // Extra breathing room added on top of each node's actual size
+        const PADDING = 32
 
         nodes.forEach((node) => {
-            const width = NODE_WIDTHS[node.type ?? ''] ?? 200
-            g.setNode(node.id, { width, height: NODE_HEIGHT })
+            const w = (node.width ?? FALLBACK_WIDTHS[node.type ?? ''] ?? 220) + PADDING
+            const h = (node.height ?? FALLBACK_HEIGHTS[node.type ?? ''] ?? 120) + PADDING
+            g.setNode(node.id, { width: w, height: h })
         })
 
         edges.forEach((edge) => {
-            g.setEdge(edge.source, edge.target)
+            if (g.hasNode(edge.source) && g.hasNode(edge.target)) {
+                g.setEdge(edge.source, edge.target)
+            }
         })
 
         Dagre.layout(g)
 
         const newPositions: Record<string, { x: number; y: number }> = {}
         const layoutedNodes = nodes.map((node) => {
-            const { x, y } = g.node(node.id)
-            const width = NODE_WIDTHS[node.type ?? ''] ?? 200
-            const position = { x: x - width / 2, y: y - NODE_HEIGHT / 2 }
+            const n = g.node(node.id)
+            const w = node.width ?? FALLBACK_WIDTHS[node.type ?? ''] ?? 220
+            const h = node.height ?? FALLBACK_HEIGHTS[node.type ?? ''] ?? 120
+            const position = { x: n.x - w / 2, y: n.y - h / 2 }
             newPositions[node.id] = position
             return { ...node, position }
         })

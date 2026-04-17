@@ -61,42 +61,118 @@ function StatFormulaRow({ row, classId, level, onRefetch }: {
 }
 
 // ─── Skill tree row with inline edit ─────────────────────────────────────────
-function SkillTreeRow({ row, classId, onRefetch }: {
-    row: { id: number; skillId: number; skillName: string | null; skillSlug: string | null; requiredLevel: number | null; isDefault: boolean | null };
+function SkillTreeRow({ row, classId, allSkills, onRefetch }: {
+    row: {
+        id: number; skillId: number; skillName: string | null; skillSlug: string | null;
+        requiredLevel: number | null; isDefault: boolean | null;
+        prerequisiteSkillId: number | null; skillPointCost: number | null;
+        goldCost: number | null; maxLevel: number | null;
+        requiresBook: boolean | null; skillBookItemId: number | null;
+    };
     classId: number;
+    allSkills: { id: number; name: string }[];
     onRefetch: () => void;
 }) {
     const t = useTranslations('classes')
     const [editing, setEditing] = useState(false)
     const [level, setLevel] = useState(String(row.requiredLevel ?? 1))
     const [isDefault, setIsDefault] = useState(row.isDefault ?? false)
+    const [prereqId, setPrereqId] = useState(row.prerequisiteSkillId != null ? String(row.prerequisiteSkillId) : '__none__')
+    const [spCost, setSpCost] = useState(String(row.skillPointCost ?? 0))
+    const [goldCost, setGoldCost] = useState(String(row.goldCost ?? 0))
+    const [maxLvl, setMaxLvl] = useState(String(row.maxLevel ?? 1))
+    const [reqBook, setReqBook] = useState(row.requiresBook ?? false)
+    const [bookItemId, setBookItemId] = useState(row.skillBookItemId != null ? String(row.skillBookItemId) : '')
 
     const dirty = level !== String(row.requiredLevel ?? 1) || isDefault !== (row.isDefault ?? false)
+        || prereqId !== (row.prerequisiteSkillId != null ? String(row.prerequisiteSkillId) : '__none__')
+        || spCost !== String(row.skillPointCost ?? 0) || goldCost !== String(row.goldCost ?? 0)
+        || maxLvl !== String(row.maxLevel ?? 1) || reqBook !== (row.requiresBook ?? false)
+        || bookItemId !== (row.skillBookItemId != null ? String(row.skillBookItemId) : '')
 
     const update = trpc.classes.updateClassSkill.useMutation({ onSuccess: () => { toast.success(t('saved')); onRefetch(); setEditing(false) } })
     const del = trpc.classes.removeSkillFromClass.useMutation({ onSuccess: () => { toast.success(t('removed')); onRefetch() } })
 
-    function save() { update.mutate({ id: row.id, requiredLevel: Number(level), isDefault }) }
-    function cancel() { setLevel(String(row.requiredLevel ?? 1)); setIsDefault(row.isDefault ?? false); setEditing(false) }
+    function save() {
+        update.mutate({
+            id: row.id,
+            requiredLevel: Number(level),
+            isDefault,
+            prerequisiteSkillId: prereqId === '__none__' ? null : Number(prereqId),
+            skillPointCost: Number(spCost),
+            goldCost: Number(goldCost),
+            maxLevel: Number(maxLvl),
+            requiresBook: reqBook,
+            skillBookItemId: bookItemId === '' ? null : Number(bookItemId),
+        })
+    }
+    function cancel() {
+        setLevel(String(row.requiredLevel ?? 1)); setIsDefault(row.isDefault ?? false)
+        setPrereqId(row.prerequisiteSkillId != null ? String(row.prerequisiteSkillId) : '__none__')
+        setSpCost(String(row.skillPointCost ?? 0)); setGoldCost(String(row.goldCost ?? 0))
+        setMaxLvl(String(row.maxLevel ?? 1)); setReqBook(row.requiresBook ?? false)
+        setBookItemId(row.skillBookItemId != null ? String(row.skillBookItemId) : '')
+        setEditing(false)
+    }
+
+    const prereqSkillName = allSkills.find(s => s.id === row.prerequisiteSkillId)?.name
 
     return (
         <TableRow>
             <TableCell className="font-medium">{row.skillName}</TableCell>
             <TableCell className="font-mono text-xs text-muted-foreground">{row.skillSlug}</TableCell>
-            <TableCell className="text-center w-32">
+            <TableCell className="text-center w-24">
                 {editing ? (
-                    <Input type="number" min={1} value={level} onChange={e => setLevel(e.target.value)}
-                        className="h-7 w-20 text-sm mx-auto"
-                        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel() }} />
+                    <Input type="number" min={1} value={level} onChange={e => setLevel(e.target.value)} className="h-7 w-16 text-sm mx-auto" />
                 ) : (
                     <span>{row.requiredLevel ?? 1}</span>
                 )}
             </TableCell>
-            <TableCell className="text-center w-24">
+            <TableCell className="text-center w-20">
                 {editing ? (
                     <Switch checked={isDefault} onCheckedChange={setIsDefault} />
                 ) : (
                     row.isDefault ? <Badge variant="secondary">Default</Badge> : '—'
+                )}
+            </TableCell>
+            <TableCell className="w-28">
+                {editing ? (
+                    <Select value={prereqId} onValueChange={setPrereqId}>
+                        <SelectTrigger className="h-7 text-xs w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="__none__">{t('skillTree.noPrerequisite')}</SelectItem>
+                            {allSkills.filter(s => s.id !== row.skillId).map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                ) : (
+                    <span className="text-xs text-muted-foreground">{prereqSkillName ?? '—'}</span>
+                )}
+            </TableCell>
+            <TableCell className="text-center w-16">
+                {editing ? (
+                    <Input type="number" min={0} value={spCost} onChange={e => setSpCost(e.target.value)} className="h-7 w-14 text-sm mx-auto" />
+                ) : <span className="text-sm">{row.skillPointCost ?? 0}</span>}
+            </TableCell>
+            <TableCell className="text-center w-16">
+                {editing ? (
+                    <Input type="number" min={0} value={goldCost} onChange={e => setGoldCost(e.target.value)} className="h-7 w-16 text-sm mx-auto" />
+                ) : <span className="text-sm">{row.goldCost ?? 0}</span>}
+            </TableCell>
+            <TableCell className="text-center w-16">
+                {editing ? (
+                    <Input type="number" min={1} value={maxLvl} onChange={e => setMaxLvl(e.target.value)} className="h-7 w-14 text-sm mx-auto" />
+                ) : <span className="text-sm">{row.maxLevel ?? 1}</span>}
+            </TableCell>
+            <TableCell className="text-center w-20">
+                {editing ? (
+                    <div className="space-y-1">
+                        <Switch checked={reqBook} onCheckedChange={setReqBook} />
+                        {reqBook && (
+                            <Input type="number" min={1} value={bookItemId} onChange={e => setBookItemId(e.target.value)} className="h-6 w-20 text-xs mx-auto" placeholder="Item ID" />
+                        )}
+                    </div>
+                ) : (
+                    row.requiresBook ? <Badge variant="outline" className="text-xs">#{row.skillBookItemId ?? '?'}</Badge> : '—'
                 )}
             </TableCell>
             <TableCell className="text-right w-28">
@@ -161,6 +237,12 @@ export default function ClassDetailPage() {
     const [addSkillId, setAddSkillId] = useState('')
     const [addLevel, setAddLevel] = useState('1')
     const [addDefault, setAddDefault] = useState(false)
+    const [addPrereqId, setAddPrereqId] = useState('__none__')
+    const [addSpCost, setAddSpCost] = useState('0')
+    const [addGoldCost, setAddGoldCost] = useState('0')
+    const [addMaxLvl, setAddMaxLvl] = useState('1')
+    const [addReqBook, setAddReqBook] = useState(false)
+    const [addBookItemId, setAddBookItemId] = useState('')
 
     // Preview level for calc
     const [previewLevel, setPreviewLevel] = useState(30)
@@ -296,11 +378,44 @@ export default function ClassDetailPage() {
                                     <Input type="number" min={1} value={addLevel} onChange={e => setAddLevel(e.target.value)} className="w-16 h-8 text-sm" disabled={unusedSkills.length === 0} />
                                 </div>
                                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>{t('skillTree.skillPointCost')}</span>
+                                    <Input type="number" min={0} value={addSpCost} onChange={e => setAddSpCost(e.target.value)} className="w-14 h-8 text-sm" disabled={unusedSkills.length === 0} />
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>{t('skillTree.goldCost')}</span>
+                                    <Input type="number" min={0} value={addGoldCost} onChange={e => setAddGoldCost(e.target.value)} className="w-16 h-8 text-sm" disabled={unusedSkills.length === 0} />
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>{t('skillTree.maxLevel')}</span>
+                                    <Input type="number" min={1} value={addMaxLvl} onChange={e => setAddMaxLvl(e.target.value)} className="w-14 h-8 text-sm" disabled={unusedSkills.length === 0} />
+                                </div>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                                     <span>{t('skillTree.default')}</span>
                                     <Switch checked={addDefault} onCheckedChange={setAddDefault} disabled={unusedSkills.length === 0} />
                                 </div>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <span>{t('skillTree.requiresBook')}</span>
+                                    <Switch checked={addReqBook} onCheckedChange={setAddReqBook} disabled={unusedSkills.length === 0} />
+                                </div>
+                                {addReqBook && (
+                                    <Input type="number" min={1} value={addBookItemId} onChange={e => setAddBookItemId(e.target.value)} className="w-24 h-8 text-sm" placeholder="Book Item ID" />
+                                )}
                                 <Button size="sm" className="h-8 gap-1" disabled={!addSkillId || addSkill.isPending || unusedSkills.length === 0}
-                                    onClick={() => { addSkill.mutate({ classId, skillId: Number(addSkillId), requiredLevel: Number(addLevel), isDefault: addDefault }); setAddSkillId('') }}>
+                                    onClick={() => {
+                                        addSkill.mutate({
+                                            classId,
+                                            skillId: Number(addSkillId),
+                                            requiredLevel: Number(addLevel),
+                                            isDefault: addDefault,
+                                            prerequisiteSkillId: addPrereqId === '__none__' ? null : Number(addPrereqId),
+                                            skillPointCost: Number(addSpCost),
+                                            goldCost: Number(addGoldCost),
+                                            maxLevel: Number(addMaxLvl),
+                                            requiresBook: addReqBook,
+                                            skillBookItemId: addBookItemId === '' ? null : Number(addBookItemId),
+                                        })
+                                        setAddSkillId('')
+                                    }}>
                                     <Plus className="h-3.5 w-3.5" />{tc('add')}
                                 </Button>
                             </div>
@@ -311,16 +426,21 @@ export default function ClassDetailPage() {
                                     <TableRow>
                                         <TableHead>{t('skillTree.table.skill')}</TableHead>
                                         <TableHead>{t('skillTree.table.slug')}</TableHead>
-                                        <TableHead className="w-32 text-center">{t('skillTree.table.requiredLevel')}</TableHead>
-                                        <TableHead className="w-24 text-center">{t('skillTree.table.default')}</TableHead>
+                                        <TableHead className="w-24 text-center">{t('skillTree.table.requiredLevel')}</TableHead>
+                                        <TableHead className="w-20 text-center">{t('skillTree.table.default')}</TableHead>
+                                        <TableHead className="w-28">{t('skillTree.prerequisiteSkill')}</TableHead>
+                                        <TableHead className="w-16 text-center">{t('skillTree.table.spCost')}</TableHead>
+                                        <TableHead className="w-16 text-center">{t('skillTree.table.goldCost')}</TableHead>
+                                        <TableHead className="w-16 text-center">{t('skillTree.table.maxLvl')}</TableHead>
+                                        <TableHead className="w-20 text-center">{t('skillTree.requiresBook')}</TableHead>
                                         <TableHead className="text-right w-28">{t('skillTree.table.actions')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {(skillTree ?? []).length === 0 ? (
-                                        <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground text-sm">{t('skillTree.noSkills')}</TableCell></TableRow>
+                                        <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground text-sm">{t('skillTree.noSkills')}</TableCell></TableRow>
                                     ) : (skillTree ?? []).map(s => (
-                                        <SkillTreeRow key={s.id} row={s} classId={classId} onRefetch={refetchTree} />
+                                        <SkillTreeRow key={s.id} row={s} classId={classId} allSkills={(allSkills?.data ?? []).map(sk => ({ id: sk.id, name: sk.name ?? '' }))} onRefetch={refetchTree} />
                                     ))}
                                 </TableBody>
                             </Table>

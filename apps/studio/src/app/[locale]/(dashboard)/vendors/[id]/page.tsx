@@ -17,25 +17,38 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 
 function InventoryRow({ row, onUpdate, onRemove }: {
-    row: { id: bigint | number; itemId: bigint | number; itemName: string | null; stockCount: number | null; priceOverride: bigint | number | null }
-    onUpdate: (id: number, data: { stockCount?: number; priceOverride?: number | null }) => void
+    row: {
+        id: bigint | number; itemId: bigint | number; itemName: string | null;
+        stockCount: number | null; priceOverride: bigint | number | null;
+        restockAmount: number | null; stockMax: number | null; restockIntervalSec: number | null;
+    }
+    onUpdate: (id: number, data: { stockCount?: number; priceOverride?: number | null; restockAmount?: number; stockMax?: number; restockIntervalSec?: number }) => void
     onRemove: (id: number) => void
 }) {
     const t = useTranslations('vendors')
     const [editing, setEditing] = useState(false)
     const [stock, setStock] = useState(row.stockCount === -1 ? '' : String(row.stockCount ?? ''))
     const [price, setPrice] = useState(row.priceOverride != null ? String(row.priceOverride) : '')
+    const [restockAmt, setRestockAmt] = useState(String(row.restockAmount ?? 0))
+    const [stockMax, setStockMax] = useState(String(row.stockMax ?? -1))
+    const [restockInterval, setRestockInterval] = useState(String(row.restockIntervalSec ?? 3600))
 
     function save() {
         onUpdate(Number(row.id), {
             stockCount: stock === '' ? -1 : Number(stock),
             priceOverride: price === '' ? null : Number(price),
+            restockAmount: Number(restockAmt),
+            stockMax: Number(stockMax),
+            restockIntervalSec: Number(restockInterval),
         })
         setEditing(false)
     }
     function cancel() {
         setStock(row.stockCount === -1 ? '' : String(row.stockCount ?? ''))
         setPrice(row.priceOverride != null ? String(row.priceOverride) : '')
+        setRestockAmt(String(row.restockAmount ?? 0))
+        setStockMax(String(row.stockMax ?? -1))
+        setRestockInterval(String(row.restockIntervalSec ?? 3600))
         setEditing(false)
     }
 
@@ -54,6 +67,27 @@ function InventoryRow({ row, onUpdate, onRemove }: {
                     <Input type="number" className="h-7 w-36 text-sm" value={price} onChange={e => setPrice(e.target.value)} placeholder={t('defaultPrice')} />
                 ) : (
                     <span className="text-sm">{row.priceOverride != null ? String(row.priceOverride) : <span className="text-muted-foreground text-xs">{t('defaultPrice')}</span>}</span>
+                )}
+            </TableCell>
+            <TableCell>
+                {editing ? (
+                    <Input type="number" min={0} className="h-7 w-20 text-sm" value={restockAmt} onChange={e => setRestockAmt(e.target.value)} />
+                ) : (
+                    <span className="text-sm">{row.restockAmount ?? 0}</span>
+                )}
+            </TableCell>
+            <TableCell>
+                {editing ? (
+                    <Input type="number" className="h-7 w-20 text-sm" value={stockMax} onChange={e => setStockMax(e.target.value)} />
+                ) : (
+                    <span className="text-sm">{row.stockMax === -1 ? <span className="text-muted-foreground text-xs">{t('unlimited')}</span> : row.stockMax}</span>
+                )}
+            </TableCell>
+            <TableCell>
+                {editing ? (
+                    <Input type="number" min={0} className="h-7 w-24 text-sm" value={restockInterval} onChange={e => setRestockInterval(e.target.value)} />
+                ) : (
+                    <span className="text-sm">{row.restockIntervalSec ?? 3600}</span>
                 )}
             </TableCell>
             <TableCell className="text-right">
@@ -85,6 +119,9 @@ export default function VendorDetailPage() {
     const [addItemId, setAddItemId] = useState('')
     const [addStock, setAddStock] = useState('')
     const [addPrice, setAddPrice] = useState('')
+    const [addRestockAmount, setAddRestockAmount] = useState('0')
+    const [addStockMax, setAddStockMax] = useState('-1')
+    const [addRestockInterval, setAddRestockInterval] = useState('3600')
     const [removeTarget, setRemoveTarget] = useState<{ id: number; itemName: string | null } | null>(null)
 
     const { data: vendor, isLoading, refetch } = trpc.vendors.getById.useQuery({ id: vendorId })
@@ -92,7 +129,7 @@ export default function VendorDetailPage() {
     const { data: allItems } = trpc.vendors.allItems.useQuery()
 
     const updateVendor = trpc.vendors.update.useMutation({ onSuccess: () => { toast.success(t('markupUpdated')); refetch(); setEditMarkup(false) } })
-    const addItem = trpc.vendors.addItem.useMutation({ onSuccess: () => { toast.success(t('itemAdded')); refetchInv(); setAddItemId(''); setAddStock(''); setAddPrice('') } })
+    const addItem = trpc.vendors.addItem.useMutation({ onSuccess: () => { toast.success(t('itemAdded')); refetchInv(); setAddItemId(''); setAddStock(''); setAddPrice(''); setAddRestockAmount('0'); setAddStockMax('-1'); setAddRestockInterval('3600') } })
     const updateItem = trpc.vendors.updateItem.useMutation({ onSuccess: () => { toast.success(t('itemUpdated')); refetchInv() } })
     const removeItem = trpc.vendors.removeItem.useMutation({ onSuccess: () => { toast.success(t('itemRemoved')); refetchInv(); setRemoveTarget(null) } })
 
@@ -181,12 +218,27 @@ export default function VendorDetailPage() {
                                 <Label className="text-xs">{t('priceOverride')}</Label>
                                 <Input className="h-8 text-sm" type="number" value={addPrice} onChange={e => setAddPrice(e.target.value)} placeholder="Default" />
                             </div>
+                            <div className="space-y-1 w-24">
+                                <Label className="text-xs">{t('inventoryTable.restockAmount')}</Label>
+                                <Input className="h-8 text-sm" type="number" min={0} value={addRestockAmount} onChange={e => setAddRestockAmount(e.target.value)} />
+                            </div>
+                            <div className="space-y-1 w-24">
+                                <Label className="text-xs">{t('inventoryTable.stockMax')}</Label>
+                                <Input className="h-8 text-sm" type="number" value={addStockMax} onChange={e => setAddStockMax(e.target.value)} />
+                            </div>
+                            <div className="space-y-1 w-28">
+                                <Label className="text-xs">{t('inventoryTable.restockIntervalSec')}</Label>
+                                <Input className="h-8 text-sm" type="number" min={0} value={addRestockInterval} onChange={e => setAddRestockInterval(e.target.value)} />
+                            </div>
                             <Button size="sm" className="h-8 gap-1.5" disabled={!addItemId || addItem.isPending}
                                 onClick={() => addItem.mutate({
                                     vendorNpcId: vendorId,
                                     itemId: Number(addItemId),
                                     stockCount: addStock === '' ? -1 : Number(addStock),
                                     priceOverride: addPrice === '' ? null : Number(addPrice),
+                                    restockAmount: Number(addRestockAmount),
+                                    stockMax: Number(addStockMax),
+                                    restockIntervalSec: Number(addRestockInterval),
                                 })}>
                                 <Plus className="h-3.5 w-3.5" />{tc('add')}
                             </Button>
@@ -202,6 +254,9 @@ export default function VendorDetailPage() {
                                     <TableHead>{t('inventoryTable.item')}</TableHead>
                                     <TableHead className="w-28">{t('inventoryTable.stock')}</TableHead>
                                     <TableHead className="w-36">{t('inventoryTable.price')}</TableHead>
+                                    <TableHead className="w-28">{t('inventoryTable.restockAmount')}</TableHead>
+                                    <TableHead className="w-28">{t('inventoryTable.stockMax')}</TableHead>
+                                    <TableHead className="w-32">{t('inventoryTable.restockIntervalSec')}</TableHead>
                                     <TableHead className="text-right w-24">{t('inventoryTable.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>

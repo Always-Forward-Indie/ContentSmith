@@ -81,6 +81,9 @@ export const vendorsRouter = createTRPCRouter({
         itemSlug: items.slug,
         stockCount: vendorInventory.stockCount,
         priceOverride: vendorInventory.priceOverride,
+        restockAmount: vendorInventory.restockAmount,
+        stockMax: vendorInventory.stockMax,
+        restockIntervalSec: vendorInventory.restockIntervalSec,
       })
       .from(vendorInventory)
       .leftJoin(items, eq(items.id, vendorInventory.itemId))

@@ -32,5 +32,6 @@
     "schoolRequired": "School is required",
     "scaleTypeRequired": "Scale type is required",
     "nameRequired": "Name is required",
-    "slugRequired": "Slug is required"
+    "slugRequired": "Slug is required",
+    "isPassive": "Passive Skill"
 }

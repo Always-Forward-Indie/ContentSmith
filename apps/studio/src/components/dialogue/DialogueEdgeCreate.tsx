@@ -6,7 +6,6 @@ import { ArrowRight, AlertCircle, ChevronDown, ChevronUp, Lock } from 'lucide-re
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import {
     Dialog,
@@ -15,6 +14,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import ConditionGroupEditor from '@/components/editors/ConditionGroupEditor'
+import ActionListEditor from '@/components/editors/ActionListEditor'
 import { cn } from '@/lib/utils'
 
 interface DialogueEdgeCreateProps {
@@ -46,10 +47,6 @@ export default function DialogueEdgeCreate({
     const t = useTranslations('dialogues.components.edgeCreate')
     const [formData, setFormData] = useState(EMPTY_FORM(dialogueId))
     const [validationError, setValidationError] = useState('')
-    const [conditionsRaw, setConditionsRaw] = useState('')
-    const [actionsRaw, setActionsRaw] = useState('')
-    const [conditionsError, setConditionsError] = useState(false)
-    const [actionsError, setActionsError] = useState(false)
     const [advancedOpen, setAdvancedOpen] = useState(false)
 
     const fromNode = nodes.find(n => n.id === formData.fromNodeId)
@@ -66,10 +63,6 @@ export default function DialogueEdgeCreate({
         onSave(formData)
         onOpenChange(false)
         setFormData(EMPTY_FORM(dialogueId))
-        setConditionsRaw('')
-        setActionsRaw('')
-        setConditionsError(false)
-        setActionsError(false)
         setAdvancedOpen(false)
     }
 
@@ -226,59 +219,16 @@ export default function DialogueEdgeCreate({
 
                             {advancedOpen && (
                                 <div className="mt-4 space-y-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="conditionGroup">{t('fields.conditions')}</Label>
-                                            {conditionsError && (
-                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                            )}
-                                        </div>
-                                        <Textarea
-                                            id="conditionGroup"
-                                            value={conditionsRaw}
-                                            onChange={(e) => {
-                                                setConditionsRaw(e.target.value)
-                                                try {
-                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                    setFormData(prev => ({ ...prev, conditionGroup: parsed }))
-                                                    setConditionsError(false)
-                                                } catch {
-                                                    setConditionsError(true)
-                                                }
-                                            }}
-                                            placeholder={t('fields.conditionsPlaceholder')}
-                                            rows={3}
-                                            className={cn('font-mono text-xs', conditionsError && 'border-destructive focus-visible:ring-destructive')}
-                                        />
-                                        <p className="text-xs text-muted-foreground">{t('fields.conditionsDescription')}</p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <div className="flex items-center justify-between">
-                                            <Label htmlFor="actionGroup">{t('fields.actions')}</Label>
-                                            {actionsError && (
-                                                <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                            )}
-                                        </div>
-                                        <Textarea
-                                            id="actionGroup"
-                                            value={actionsRaw}
-                                            onChange={(e) => {
-                                                setActionsRaw(e.target.value)
-                                                try {
-                                                    const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                    setFormData(prev => ({ ...prev, actionGroup: parsed }))
-                                                    setActionsError(false)
-                                                } catch {
-                                                    setActionsError(true)
-                                                }
-                                            }}
-                                            placeholder={t('fields.actionsPlaceholder')}
-                                            rows={3}
-                                            className={cn('font-mono text-xs', actionsError && 'border-destructive focus-visible:ring-destructive')}
-                                        />
-                                        <p className="text-xs text-muted-foreground">{t('fields.actionsDescription')}</p>
-                                    </div>
+                                    <ConditionGroupEditor
+                                        label={t('fields.conditions')}
+                                        value={formData.conditionGroup}
+                                        onChange={(v) => setFormData(prev => ({ ...prev, conditionGroup: v }))}
+                                    />
+                                    <ActionListEditor
+                                        label={t('fields.actions')}
+                                        value={formData.actionGroup}
+                                        onChange={(v) => setFormData(prev => ({ ...prev, actionGroup: v }))}
+                                    />
                                 </div>
                             )}
                         </div>
@@ -289,7 +239,7 @@ export default function DialogueEdgeCreate({
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                             {t('buttons.cancel')}
                         </Button>
-                        <Button type="submit" disabled={conditionsError || actionsError}>
+                        <Button type="submit">
                             {t('buttons.create')}
                         </Button>
                     </DialogFooter>

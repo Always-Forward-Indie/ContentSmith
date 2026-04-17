@@ -14,8 +14,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
+import ConditionGroupEditor from './ConditionGroupEditor'
+import ActionListEditor from './ActionListEditor'
 import { cn } from '@/lib/utils'
 
 interface EdgeEditDialogProps {
@@ -42,10 +43,6 @@ export default function EdgeEditDialog({
         orderIndex: 0,
         hideIfLocked: false,
     })
-    const [conditionsRaw, setConditionsRaw] = useState('')
-    const [actionsRaw, setActionsRaw] = useState('')
-    const [conditionsError, setConditionsError] = useState(false)
-    const [actionsError, setActionsError] = useState(false)
     const [advancedOpen, setAdvancedOpen] = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -58,10 +55,6 @@ export default function EdgeEditDialog({
                 orderIndex: edge.data?.orderIndex || 0,
                 hideIfLocked: edge.data?.hideIfLocked || false,
             })
-            setConditionsRaw(edge.data?.conditionGroup ? JSON.stringify(edge.data.conditionGroup, null, 2) : '')
-            setActionsRaw(edge.data?.actionGroup ? JSON.stringify(edge.data.actionGroup, null, 2) : '')
-            setConditionsError(false)
-            setActionsError(false)
             setAdvancedOpen(!!(edge.data?.conditionGroup || edge.data?.actionGroup))
             setConfirmDelete(false)
         }
@@ -164,57 +157,16 @@ export default function EdgeEditDialog({
 
                         {advancedOpen && (
                             <div className="mt-4 space-y-4">
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="conditions">{t('fields.conditions.label')}</Label>
-                                        {conditionsError && (
-                                            <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                        )}
-                                    </div>
-                                    <Textarea
-                                        id="conditions"
-                                        value={conditionsRaw}
-                                        onChange={(e) => {
-                                            setConditionsRaw(e.target.value)
-                                            try {
-                                                const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                setFormData(prev => ({ ...prev, conditionGroup: parsed }))
-                                                setConditionsError(false)
-                                            } catch {
-                                                setConditionsError(true)
-                                            }
-                                        }}
-                                        placeholder={t('fields.conditions.placeholder')}
-                                        rows={3}
-                                        className={cn('font-mono text-xs', conditionsError && 'border-destructive focus-visible:ring-destructive')}
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Label htmlFor="actions">{t('fields.actions.label')}</Label>
-                                        {actionsError && (
-                                            <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                        )}
-                                    </div>
-                                    <Textarea
-                                        id="actions"
-                                        value={actionsRaw}
-                                        onChange={(e) => {
-                                            setActionsRaw(e.target.value)
-                                            try {
-                                                const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                setFormData(prev => ({ ...prev, actionGroup: parsed }))
-                                                setActionsError(false)
-                                            } catch {
-                                                setActionsError(true)
-                                            }
-                                        }}
-                                        placeholder={t('fields.actions.placeholder')}
-                                        rows={3}
-                                        className={cn('font-mono text-xs', actionsError && 'border-destructive focus-visible:ring-destructive')}
-                                    />
-                                </div>
+                                <ConditionGroupEditor
+                                    label={t('fields.conditions.label')}
+                                    value={formData.conditionGroup}
+                                    onChange={(v) => setFormData(prev => ({ ...prev, conditionGroup: v }))}
+                                />
+                                <ActionListEditor
+                                    label={t('fields.actions.label')}
+                                    value={formData.actionGroup}
+                                    onChange={(v) => setFormData(prev => ({ ...prev, actionGroup: v }))}
+                                />
                             </div>
                         )}
                     </div>
@@ -251,7 +203,7 @@ export default function EdgeEditDialog({
                                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                                     {t('buttons.cancel')}
                                 </Button>
-                                <Button onClick={handleSave} disabled={conditionsError || actionsError}>
+                                <Button onClick={handleSave}>
                                     {t('buttons.save')}
                                 </Button>
                             </div>

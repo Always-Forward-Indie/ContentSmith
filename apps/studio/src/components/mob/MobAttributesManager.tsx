@@ -25,7 +25,9 @@ import { useToast } from '@/hooks/use-toast'
 interface MobAttribute {
     id: number
     attributeId: number
-    value: number
+    flatValue: number
+    multiplier: number | null
+    exponent: number | null
     attributeName: string | null
     attributeSlug: string | null
 }
@@ -42,6 +44,8 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
     const [deleteConfirmAttribute, setDeleteConfirmAttribute] = useState<MobAttribute | null>(null)
     const [selectedAttributeId, setSelectedAttributeId] = useState<string>('')
     const [attributeValue, setAttributeValue] = useState<number>(1)
+    const [attributeMultiplier, setAttributeMultiplier] = useState<number | ''>('')
+    const [attributeExponent, setAttributeExponent] = useState<number | ''>('')
 
     const t = useTranslations('mobs')
     const commonT = useTranslations('common')
@@ -72,22 +76,36 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
         },
     })
 
-    const resetForm = () => { setSelectedAttributeId(''); setAttributeValue(1) }
+    const resetForm = () => { setSelectedAttributeId(''); setAttributeValue(1); setAttributeMultiplier(''); setAttributeExponent('') }
 
     const handleAddAttribute = () => {
         if (!selectedAttributeId) return
-        setAttributeMutation.mutate({ mobId, attributeId: parseInt(selectedAttributeId), value: attributeValue })
+        setAttributeMutation.mutate({
+            mobId,
+            attributeId: parseInt(selectedAttributeId),
+            flatValue: attributeValue,
+            multiplier: attributeMultiplier !== '' ? attributeMultiplier : null,
+            exponent: attributeExponent !== '' ? attributeExponent : null,
+        })
     }
 
     const handleEditAttribute = (attribute: MobAttribute) => {
         setEditingAttribute(attribute)
         setSelectedAttributeId(attribute.attributeId.toString())
-        setAttributeValue(attribute.value)
+        setAttributeValue(attribute.flatValue)
+        setAttributeMultiplier(attribute.multiplier ?? '')
+        setAttributeExponent(attribute.exponent ?? '')
     }
 
     const handleUpdateAttribute = () => {
         if (!editingAttribute) return
-        setAttributeMutation.mutate({ mobId, attributeId: editingAttribute.attributeId, value: attributeValue })
+        setAttributeMutation.mutate({
+            mobId,
+            attributeId: editingAttribute.attributeId,
+            flatValue: attributeValue,
+            multiplier: attributeMultiplier !== '' ? attributeMultiplier : null,
+            exponent: attributeExponent !== '' ? attributeExponent : null,
+        })
     }
 
     const handleRemoveAttribute = (attributeId: number) => {
@@ -133,8 +151,18 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label>{t('value')}</Label>
-                                <Input type="number" value={attributeValue} onChange={e => setAttributeValue(parseInt(e.target.value) || 0)} />
+                                <Label>{t('flatValue')}</Label>
+                                <Input type="number" step="any" value={attributeValue} onChange={e => setAttributeValue(parseFloat(e.target.value) || 0)} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label>{t('multiplier')} <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                                    <Input type="number" step="any" placeholder="e.g. 0.5" value={attributeMultiplier} onChange={e => setAttributeMultiplier(e.target.value ? parseFloat(e.target.value) : '')} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>{t('exponent')} <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                                    <Input type="number" step="any" placeholder="e.g. 1.0" value={attributeExponent} onChange={e => setAttributeExponent(e.target.value ? parseFloat(e.target.value) : '')} />
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>
@@ -164,7 +192,10 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
-                                    <Badge variant="secondary" className="font-mono">{attribute.value}</Badge>
+                                    <Badge variant="secondary" className="font-mono">{attribute.flatValue}</Badge>
+                                    {attribute.multiplier != null && (
+                                        <Badge variant="outline" className="font-mono text-[10px]">×{attribute.multiplier}</Badge>
+                                    )}
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -202,8 +233,18 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
                             <p className="text-sm font-medium">{editingAttribute?.attributeName}</p>
                         </div>
                         <div className="space-y-2">
-                            <Label>{t('value')}</Label>
-                            <Input type="number" value={attributeValue} onChange={e => setAttributeValue(parseInt(e.target.value) || 0)} />
+                            <Label>{t('flatValue')}</Label>
+                            <Input type="number" step="any" value={attributeValue} onChange={e => setAttributeValue(parseFloat(e.target.value) || 0)} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label>{t('multiplier')} <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                                <Input type="number" step="any" placeholder="e.g. 0.5" value={attributeMultiplier} onChange={e => setAttributeMultiplier(e.target.value ? parseFloat(e.target.value) : '')} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>{t('exponent')} <span className="text-xs text-muted-foreground">(optional)</span></Label>
+                                <Input type="number" step="any" placeholder="e.g. 1.0" value={attributeExponent} onChange={e => setAttributeExponent(e.target.value ? parseFloat(e.target.value) : '')} />
+                            </div>
                         </div>
                     </div>
                     <DialogFooter>

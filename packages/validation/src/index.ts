@@ -16,6 +16,17 @@ export * from './classes';
 export * from './exp-for-level';
 export * from './vendors';
 export * from './zones';
+export * from './factions';
+export * from './damage-elements';
+export * from './mastery-definitions';
+export * from './status-effects';
+export * from './item-sets';
+export * from './title-definitions';
+export * from './emote-definitions';
+export * from './respawn-zones';
+export * from './zone-events';
+export * from './timed-champions';
+export * from './world-objects';
 
 // Common validation utilities
 export { z } from 'zod';

@@ -51,7 +51,11 @@
         "questReceiver": "Quest Receiver NPC",
         "questReceiverDescription": "NPC to whom player submits completed quest",
         "clientKey": "Client UI Key",
-        "clientKeyDescription": "Key for quest name/description in client interface"
+        "clientKeyDescription": "Key for quest name/description in client interface",
+        "reputationFactionSlug": "Faction Slug",
+        "reputationFactionSlugDescription": "Faction slug for reputation change",
+        "reputationOnComplete": "Reputation on Complete",
+        "reputationOnFail": "Reputation on Fail"
     },
     "edit": {
         "title": "Edit Quest",
@@ -143,6 +147,13 @@
             "clientStepKey": "Step Key",
             "clientStepKeyPlaceholder": "e.g., collect_wood, talk_to_guard",
             "clientStepKeyDescription": "Unique key for this step (optional)",
+            "completionMode": "Completion Mode",
+            "completionModeDescription": "How completion of this step is determined",
+            "completionModeOptions": {
+                "auto": "Automatic",
+                "manual": "Manual (server)",
+                "all": "All conditions"
+            },
             "parameters": "Parameters (JSON)",
             "parametersDescription": "JSON configuration for this step type"
         },
@@ -178,15 +189,17 @@
         "visualEditors": {
             "collect": {
                 "title": "Collect Items Parameters",
-                "itemId": "Item ID",
+                "itemId": "Item",
                 "itemIdPlaceholder": "wood",
+                "selectItem": "Select item...",
                 "count": "Count",
                 "countPlaceholder": "5"
             },
             "kill": {
                 "title": "Kill Creatures Parameters",
-                "npcId": "Mob/NPC ID",
+                "npcId": "Mob / NPC",
                 "npcIdPlaceholder": "wolf_mob",
+                "selectMob": "Select mob...",
                 "count": "Count",
                 "countPlaceholder": "3"
             },
@@ -246,7 +259,9 @@
             "itemSearch": "Search items",
             "itemSearchPlaceholder": "Type to filter items...",
             "quantity": "Quantity",
-            "amount": "Amount"
+            "amount": "Amount",
+            "isHidden": "Hidden Reward",
+            "isHiddenDescription": "Reward is not shown to the player until received"
         }
     }
 }

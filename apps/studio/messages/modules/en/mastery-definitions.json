@@ -1,0 +1,17 @@
+{
+    "title": "Mastery",
+    "description": "Manage mastery types (weapon mastery, magic, etc.)",
+    "createNew": "Create Mastery",
+    "editMastery": "Edit Mastery",
+    "slug": "Slug",
+    "name": "Name",
+    "weaponTypeSlug": "Weapon Type",
+    "maxValue": "Max Value",
+    "noMasteries": "No masteries found",
+    "searchPlaceholder": "Search masteries...",
+    "deleteConfirmTitle": "Delete Mastery",
+    "deleteConfirmDescription": "Delete mastery {name}?",
+    "createSuccess": "Mastery created",
+    "updateSuccess": "Mastery updated",
+    "deleteSuccess": "Mastery deleted"
+}

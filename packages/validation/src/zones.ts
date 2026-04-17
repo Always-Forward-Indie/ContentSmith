@@ -9,6 +9,12 @@ export const createZoneSchema = z.object({
   maxLevel: z.number().int().min(1).default(999),
   isPvp: z.boolean().default(false),
   isSafeZone: z.boolean().default(false),
+  minX: z.number().default(0),
+  maxX: z.number().default(0),
+  minY: z.number().default(0),
+  maxY: z.number().default(0),
+  explorationXpReward: z.number().int().min(0).default(100),
+  championThresholdKills: z.number().int().min(0).default(100),
 });
 
 export const updateZoneSchema = createZoneSchema.partial().extend({

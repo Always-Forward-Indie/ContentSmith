@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { itemAttributes, eq, desc, asc, like, and, sql } from '@contentsmith/database';
+import { entityAttributes, eq, desc, asc, like, and, sql } from '@contentsmith/database';
 import { 
   createItemAttributeSchema, 
   updateItemAttributeSchema, 
@@ -23,35 +23,31 @@ export const itemAttributesRouter = createTRPCRouter({
       const { search, page, limit, sortBy, sortOrder } = input;
       const offset = (page - 1) * limit;
 
-      // Build where conditions
       const whereConditions = [];
       if (search) {
-        whereConditions.push(like(itemAttributes.name, `%${search}%`));
+        whereConditions.push(like(entityAttributes.name, `%${search}%`));
       }
       const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-      // Build order by
       let orderBy;
       if (sortBy === 'name') {
-        orderBy = sortOrder === 'desc' ? desc(itemAttributes.name) : asc(itemAttributes.name);
+        orderBy = sortOrder === 'desc' ? desc(entityAttributes.name) : asc(entityAttributes.name);
       } else if (sortBy === 'slug') {
-        orderBy = sortOrder === 'desc' ? desc(itemAttributes.slug) : asc(itemAttributes.slug);
+        orderBy = sortOrder === 'desc' ? desc(entityAttributes.slug) : asc(entityAttributes.slug);
       } else {
-        orderBy = asc(itemAttributes.name); // default
+        orderBy = asc(entityAttributes.name);
       }
 
-      // Get total count
       const [totalResult] = await db
         .select({ total: sql<number>`count(*)` })
-        .from(itemAttributes)
+        .from(entityAttributes)
         .where(whereClause);
       
       const total = totalResult?.total ?? 0;
 
-      // Get paginated data
       const data = await db
         .select()
-        .from(itemAttributes)
+        .from(entityAttributes)
         .where(whereClause)
         .orderBy(orderBy)
         .limit(limit)
@@ -71,27 +67,27 @@ export const itemAttributesRouter = createTRPCRouter({
   getById: publicProcedure
     .input(itemAttributeIdSchema)
     .query(async ({ input }) => {
-      const [itemAttribute] = await db
+      const [attr] = await db
         .select()
-        .from(itemAttributes)
-        .where(eq(itemAttributes.id, input.id));
+        .from(entityAttributes)
+        .where(eq(entityAttributes.id, input.id));
 
-      if (!itemAttribute) {
-        throw new Error('Item attribute not found');
+      if (!attr) {
+        throw new Error('Attribute not found');
       }
 
-      return itemAttribute;
+      return attr;
     }),
 
   create: publicProcedure
     .input(createItemAttributeSchema)
     .mutation(async ({ input }) => {
-      const [newItemAttribute] = await db
-        .insert(itemAttributes)
+      const [newAttr] = await db
+        .insert(entityAttributes)
         .values(input)
         .returning();
 
-      return newItemAttribute;
+      return newAttr;
     }),
 
   update: publicProcedure
@@ -99,31 +95,31 @@ export const itemAttributesRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const { id, ...updateData } = input;
 
-      const [updatedItemAttribute] = await db
-        .update(itemAttributes)
+      const [updatedAttr] = await db
+        .update(entityAttributes)
         .set(updateData)
-        .where(eq(itemAttributes.id, id))
+        .where(eq(entityAttributes.id, id))
         .returning();
 
-      if (!updatedItemAttribute) {
-        throw new Error('Item attribute not found');
+      if (!updatedAttr) {
+        throw new Error('Attribute not found');
       }
 
-      return updatedItemAttribute;
+      return updatedAttr;
     }),
 
   delete: publicProcedure
     .input(itemAttributeIdSchema)
     .mutation(async ({ input }) => {
-      const [deletedItemAttribute] = await db
-        .delete(itemAttributes)
-        .where(eq(itemAttributes.id, input.id))
+      const [deletedAttr] = await db
+        .delete(entityAttributes)
+        .where(eq(entityAttributes.id, input.id))
         .returning();
 
-      if (!deletedItemAttribute) {
-        throw new Error('Item attribute not found');
+      if (!deletedAttr) {
+        throw new Error('Attribute not found');
       }
 
-      return deletedItemAttribute;
+      return deletedAttr;
     }),
 });

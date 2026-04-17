@@ -27,6 +27,9 @@ interface MobLootEntry {
     mobId?: number
     itemId: number
     dropChance: number
+    isHarvestOnly: boolean
+    minQuantity: number
+    maxQuantity: number
     itemName: string | null
     itemSlug: string | null
 }
@@ -37,7 +40,7 @@ interface MobLootManagerProps {
     onUpdate: () => void
 }
 
-const defaultForm = { itemId: '', dropChance: 10 }
+const defaultForm = { itemId: '', dropChance: 10, isHarvestOnly: false, minQuantity: 1, maxQuantity: 1 }
 
 export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -91,6 +94,9 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
             mobId,
             itemId: parseInt(form.itemId),
             dropChance: form.dropChance,
+            isHarvestOnly: form.isHarvestOnly,
+            minQuantity: form.minQuantity,
+            maxQuantity: form.maxQuantity,
         })
     }
 
@@ -99,6 +105,9 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
         updateLootMutation.mutate({
             id: editingEntry.id,
             dropChance: editingEntry.dropChance,
+            isHarvestOnly: editingEntry.isHarvestOnly,
+            minQuantity: editingEntry.minQuantity,
+            maxQuantity: editingEntry.maxQuantity,
         })
     }
 
@@ -148,6 +157,24 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
                                 <Input type="number" min={0} max={100} step={0.01} value={form.dropChance}
                                     onChange={e => setForm(f => ({ ...f, dropChance: parseFloat(e.target.value) || 0 }))} />
                             </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label>{t('minQuantity')}</Label>
+                                    <Input type="number" min={1} value={form.minQuantity}
+                                        onChange={e => setForm(f => ({ ...f, minQuantity: parseInt(e.target.value) || 1 }))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>{t('maxQuantity')}</Label>
+                                    <Input type="number" min={1} value={form.maxQuantity}
+                                        onChange={e => setForm(f => ({ ...f, maxQuantity: parseInt(e.target.value) || 1 }))} />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                                <Label className="cursor-pointer">{t('isHarvestOnly')}</Label>
+                                <input type="checkbox" checked={form.isHarvestOnly}
+                                    onChange={e => setForm(f => ({ ...f, isHarvestOnly: e.target.checked }))}
+                                    className="h-4 w-4" />
+                            </div>
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => { setIsAddDialogOpen(false); setForm(defaultForm) }}>{commonT('cancel')}</Button>
@@ -172,6 +199,12 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
                                 <div className="flex items-center gap-2 min-w-0 flex-1">
                                     <span className="text-sm font-medium truncate">{entry.itemName}</span>
                                     <Badge variant="outline" className="font-mono text-[10px]">{entry.dropChance}%</Badge>
+                                    {entry.minQuantity !== 1 || entry.maxQuantity !== 1 ? (
+                                        <Badge variant="secondary" className="text-[10px]">{entry.minQuantity}–{entry.maxQuantity}x</Badge>
+                                    ) : null}
+                                    {entry.isHarvestOnly && (
+                                        <Badge variant="outline" className="text-[10px] text-orange-600">harvest</Badge>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                     <TooltipProvider>
@@ -212,6 +245,24 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
                                 <Label>{t('dropChance')}</Label>
                                 <Input type="number" min={0} max={100} step={0.01} value={editingEntry.dropChance}
                                     onChange={e => setEditingEntry(v => v && ({ ...v, dropChance: parseFloat(e.target.value) || 0 }))} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label>{t('minQuantity')}</Label>
+                                    <Input type="number" min={1} value={editingEntry.minQuantity}
+                                        onChange={e => setEditingEntry(v => v && ({ ...v, minQuantity: parseInt(e.target.value) || 1 }))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>{t('maxQuantity')}</Label>
+                                    <Input type="number" min={1} value={editingEntry.maxQuantity}
+                                        onChange={e => setEditingEntry(v => v && ({ ...v, maxQuantity: parseInt(e.target.value) || 1 }))} />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg border px-3 py-2">
+                                <Label className="cursor-pointer">{t('isHarvestOnly')}</Label>
+                                <input type="checkbox" checked={editingEntry.isHarvestOnly}
+                                    onChange={e => setEditingEntry(v => v && ({ ...v, isHarvestOnly: e.target.checked }))}
+                                    className="h-4 w-4" />
                             </div>
                         </div>
                     )}

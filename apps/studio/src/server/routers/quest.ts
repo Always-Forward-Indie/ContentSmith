@@ -70,6 +70,18 @@ export const questRouter = createTRPCRouter({
       };
     }),
 
+  // Get single quest by slug
+  getBySlug: requirePerm(permissions.QUEST_READ)
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const [result] = await ctx.db
+        .select({ id: quest.id, slug: quest.slug, clientQuestKey: quest.clientQuestKey, minLevel: quest.minLevel })
+        .from(quest)
+        .where(eq(quest.slug, input.slug))
+        .limit(1);
+      return result ?? null;
+    }),
+
   // Get NPCs that are linked to quests as giver or turnin
   getQuestNpcs: requirePerm(permissions.QUEST_READ)
     .query(async ({ ctx }) => {
@@ -162,6 +174,7 @@ export const questRouter = createTRPCRouter({
           itemId: questReward.itemId,
           quantity: questReward.quantity,
           amount: questReward.amount,
+          isHidden: questReward.isHidden,
           itemName: items.name,
           itemSlug: items.slug,
         })
@@ -239,6 +252,7 @@ export const questRouter = createTRPCRouter({
       stepType: z.enum(['collect', 'kill', 'talk', 'reach', 'custom']),
       params: z.record(z.unknown()),
       clientStepKey: z.string().nullable().optional(),
+      completionMode: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.db
@@ -257,6 +271,7 @@ export const questRouter = createTRPCRouter({
       stepType: z.enum(['collect', 'kill', 'talk', 'reach', 'custom']).optional(),
       params: z.record(z.unknown()).optional(),
       clientStepKey: z.string().nullable().optional(),
+      completionMode: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input;
@@ -323,6 +338,7 @@ export const questRouter = createTRPCRouter({
           itemId: questReward.itemId,
           quantity: questReward.quantity,
           amount: questReward.amount,
+          isHidden: questReward.isHidden,
           itemName: items.name,
           itemSlug: items.slug,
         })
@@ -341,6 +357,7 @@ export const questRouter = createTRPCRouter({
       itemId: z.number().nullable().optional(),
       quantity: z.number().min(1).default(1),
       amount: z.number().min(0).default(0),
+      isHidden: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const result = await ctx.db
@@ -359,6 +376,7 @@ export const questRouter = createTRPCRouter({
       itemId: z.number().nullable().optional(),
       quantity: z.number().min(1).optional(),
       amount: z.number().min(0).optional(),
+      isHidden: z.boolean().optional(),
     }))
     .mutation(async ({ input, ctx }) => {
       const { id, ...updateData } = input;

@@ -120,6 +120,12 @@ export const classesRouter = createTRPCRouter({
           skillSlug: skills.slug,
           requiredLevel: classSkillTree.requiredLevel,
           isDefault: classSkillTree.isDefault,
+          prerequisiteSkillId: classSkillTree.prerequisiteSkillId,
+          skillPointCost: classSkillTree.skillPointCost,
+          goldCost: classSkillTree.goldCost,
+          maxLevel: classSkillTree.maxLevel,
+          requiresBook: classSkillTree.requiresBook,
+          skillBookItemId: classSkillTree.skillBookItemId,
         })
         .from(classSkillTree)
         .leftJoin(skills, eq(skills.id, classSkillTree.skillId))

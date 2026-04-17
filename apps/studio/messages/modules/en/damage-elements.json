@@ -1,0 +1,13 @@
+{
+    "title": "Damage Elements",
+    "description": "Manage elemental damage types (fire, ice, poison, etc.)",
+    "createNew": "Add Element",
+    "slug": "Slug",
+    "slugDescription": "Unique identifier for the damage type (e.g. fire, ice, lightning)",
+    "noElements": "No elements found",
+    "searchPlaceholder": "Search elements...",
+    "deleteConfirmTitle": "Delete Element",
+    "deleteConfirmDescription": "Delete element {slug}?",
+    "createSuccess": "Element created",
+    "deleteSuccess": "Element deleted"
+}

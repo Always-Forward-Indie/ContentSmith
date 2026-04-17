@@ -1,0 +1,19 @@
+{
+    "title": "Титулы",
+    "description": "Управление титулами персонажей",
+    "createNew": "Создать титул",
+    "editTitle": "Редактировать титул",
+    "slug": "Слаг",
+    "displayName": "Отображаемое название",
+    "description": "Описание",
+    "earnCondition": "Условие получения",
+    "bonuses": "Бонусы (JSON)",
+    "conditionParams": "Параметры условий (JSON)",
+    "noTitles": "Титулы не найдены",
+    "searchPlaceholder": "Поиск титулов...",
+    "deleteConfirmTitle": "Удалить титул",
+    "deleteConfirmDescription": "Удалить титул {displayName}?",
+    "createSuccess": "Титул создан",
+    "updateSuccess": "Титул обновлён",
+    "deleteSuccess": "Титул удалён"
+}

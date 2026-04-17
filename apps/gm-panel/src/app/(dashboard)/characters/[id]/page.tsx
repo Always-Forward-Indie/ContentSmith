@@ -305,6 +305,14 @@ export default function CharacterPage() {
     const { data: balanceData, refetch: refetchBalance } = trpc.transactions.balance.useQuery({ characterId });
     const { data: genders } = trpc.accounts.allGenders.useQuery();
 
+    const { data: titles, isLoading: titlesLoading, refetch: refetchTitles } = trpc.characterExtras.listTitles.useQuery({ characterId });
+    const { data: reputation, isLoading: repLoading, refetch: refetchRep } = trpc.characterExtras.listReputation.useQuery({ characterId });
+    const { data: mastery, isLoading: masteryLoading, refetch: refetchMastery } = trpc.characterExtras.listMastery.useQuery({ characterId });
+    const { data: emotes, isLoading: emotesLoading, refetch: refetchEmotes } = trpc.characterExtras.listEmotes.useQuery({ characterId });
+    const { data: bestiary, isLoading: bestiaryLoading } = trpc.characterExtras.listBestiary.useQuery({ characterId });
+    const { data: pity, isLoading: pityLoading, refetch: refetchPity } = trpc.characterExtras.listPity.useQuery({ characterId });
+    const { data: skillBar, isLoading: skillBarLoading } = trpc.characterExtras.listSkillBar.useQuery({ characterId });
+
     const { data: classStats } = trpc.characters.classStatFormula.useQuery({ classId: char?.classId ?? 0 }, { enabled: !!char?.classId });
     const { data: classTree } = trpc.characters.classSkillTree.useQuery({ classId: char?.classId ?? 0 }, { enabled: !!char?.classId });
 
@@ -332,6 +340,20 @@ export default function CharacterPage() {
     const addEffect = trpc.effects.addEffect.useMutation({ onSuccess: () => { refetchEffects(); toast.success('Эффект применён'); }, onError: (e) => toast.error(e.message) });
     const removeEffect = trpc.effects.removeEffect.useMutation({ onSuccess: () => { refetchEffects(); toast.success('Эффект снят'); }, onError: (e) => toast.error(e.message) });
     const clearEffects = trpc.effects.clearAll.useMutation({ onSuccess: () => { refetchEffects(); toast.success('Все эффекты сняты'); }, onError: (e) => toast.error(e.message) });
+
+    const grantTitle = trpc.characterExtras.grantTitle.useMutation({ onSuccess: () => { refetchTitles(); toast.success('Титул выдан'); }, onError: (e) => toast.error(e.message) });
+    const revokeTitle = trpc.characterExtras.revokeTitle.useMutation({ onSuccess: () => { refetchTitles(); toast.success('Титул отозван'); }, onError: (e) => toast.error(e.message) });
+    const setTitleEquipped = trpc.characterExtras.setTitleEquipped.useMutation({ onSuccess: () => { refetchTitles(); toast.success('Активный титул обновлён'); }, onError: (e) => toast.error(e.message) });
+
+    const setReputation = trpc.characterExtras.setReputation.useMutation({ onSuccess: () => { refetchRep(); toast.success('Репутация обновлена'); }, onError: (e) => toast.error(e.message) });
+    const resetReputation = trpc.characterExtras.resetReputation.useMutation({ onSuccess: () => { refetchRep(); toast.success('Репутация сброшена'); }, onError: (e) => toast.error(e.message) });
+
+    const setMastery = trpc.characterExtras.setMastery.useMutation({ onSuccess: () => { refetchMastery(); toast.success('Мастерство обновлено'); }, onError: (e) => toast.error(e.message) });
+
+    const grantEmote = trpc.characterExtras.grantEmote.useMutation({ onSuccess: () => { refetchEmotes(); toast.success('Эмоут выдан'); }, onError: (e) => toast.error(e.message) });
+    const revokeEmote = trpc.characterExtras.revokeEmote.useMutation({ onSuccess: () => { refetchEmotes(); toast.success('Эмоут отозван'); }, onError: (e) => toast.error(e.message) });
+
+    const resetPity = trpc.characterExtras.resetPity.useMutation({ onSuccess: () => { refetchPity(); toast.success('Pity счётчик сброшен'); }, onError: (e) => toast.error(e.message) });
 
     const addSkill = trpc.skills.addSkill.useMutation({ onSuccess: () => { refetchSkills(); toast.success('Скил добавлен'); }, onError: (e) => toast.error(e.message) });
     const removeSkill = trpc.skills.removeSkill.useMutation({ onSuccess: () => { refetchSkills(); toast.success('Скил удалён'); }, onError: (e) => toast.error(e.message) });
@@ -379,6 +401,12 @@ export default function CharacterPage() {
     const [addAttrId, setAddAttrId] = useState('');
     const [addAttrVal, setAddAttrVal] = useState('0');
     const [addAttrSource, setAddAttrSource] = useState('gm');
+
+    // Extras forms
+    const [newTitleSlug, setNewTitleSlug] = useState('');
+    const [newEmoteSlug, setNewEmoteSlug] = useState('');
+    const [newRepFaction, setNewRepFaction] = useState('');
+    const [newRepValue, setNewRepValue] = useState('0');
 
     if (charLoading) {
         return (
@@ -479,10 +507,10 @@ export default function CharacterPage() {
                                 <span className={char.currentHealth != null && char.maxHealth != null && char.currentHealth < char.maxHealth * 0.25 ? 'text-destructive' : ''}>
                                     {char.currentHealth ?? '—'}
                                 </span>
-                                {char.maxHealth != null && (
-                                    <span className="text-muted-foreground font-normal"> / {char.maxHealth}</span>
-                                )}
                             </p>
+                            {char.maxHealth != null && (
+                                <p className="text-xs text-muted-foreground font-mono">база {char.maxHealth}</p>
+                            )}
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5"><Zap className="inline h-3 w-3 mr-0.5" />MP</p>
@@ -490,10 +518,10 @@ export default function CharacterPage() {
                                 <span className={char.currentMana != null && char.maxMana != null && char.currentMana < char.maxMana * 0.25 ? 'text-blue-400' : ''}>
                                     {char.currentMana ?? '—'}
                                 </span>
-                                {char.maxMana != null && (
-                                    <span className="text-muted-foreground font-normal"> / {char.maxMana}</span>
-                                )}
                             </p>
+                            {char.maxMana != null && (
+                                <p className="text-xs text-muted-foreground font-mono">база {char.maxMana}</p>
+                            )}
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5">Опыт</p>
@@ -557,7 +585,7 @@ export default function CharacterPage() {
 
             {/* Tabs */}
             <Tabs defaultValue="attributes">
-                <TabsList>
+                <TabsList className="h-auto flex-wrap justify-start gap-y-1 mb-1">
                     <TabsTrigger value="attributes">Бонусы {(attrs ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(attrs ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="inventory">Инвентарь {(inventory ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(inventory ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="quests">Квесты {(quests ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(quests ?? []).length})</span>}</TabsTrigger>
@@ -566,6 +594,12 @@ export default function CharacterPage() {
                     <TabsTrigger value="skills">Скилы {(skills ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(skills ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="equipment">Экипировка {(equipment ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(equipment ?? []).length})</span>}</TabsTrigger>
                     <TabsTrigger value="transactions">Транзакции</TabsTrigger>
+                    <TabsTrigger value="titles">Титулы {(titles ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(titles ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="reputation">Репутация {(reputation ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(reputation ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="mastery">Мастерство {(mastery ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(mastery ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="emotes">Эмоуты {(emotes ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(emotes ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="bestiary">Бестиарий {(bestiary ?? []).length > 0 && <span className="ml-1 text-xs opacity-60">({(bestiary ?? []).length})</span>}</TabsTrigger>
+                    <TabsTrigger value="skillbar">Панель скилов</TabsTrigger>
                     <TabsTrigger value="class">Класс</TabsTrigger>
                 </TabsList>
 
@@ -903,7 +937,7 @@ export default function CharacterPage() {
                                 <Input type="number" placeholder="TTL (сек)" className="w-24 h-8 text-sm" value={addEffectTtl} onChange={e => setAddEffectTtl(e.target.value)} />
                                 <Button size="sm" className="h-8 gap-1.5" disabled={!addEffectId || addEffect.isLoading}
                                     onClick={() => {
-                                        addEffect.mutate({ characterId, effectId: Number(addEffectId), value: Number(addEffectVal), expiresInSeconds: addEffectTtl ? Number(addEffectTtl) : null });
+                                        addEffect.mutate({ characterId, statusEffectId: Number(addEffectId), value: Number(addEffectVal), expiresInSeconds: addEffectTtl ? Number(addEffectTtl) : null });
                                         setAddEffectId(''); setAddEffectVal('0'); setAddEffectTtl('');
                                     }}>
                                     <Plus className="h-3.5 w-3.5" />Добавить
@@ -929,7 +963,7 @@ export default function CharacterPage() {
                                         <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">Активных эффектов нет</TableCell></TableRow>
                                     ) : (effects ?? []).map(e => (
                                         <TableRow key={e.id}>
-                                            <TableCell className="font-mono text-xs">{e.effectSlug ?? e.effectId}</TableCell>
+                                            <TableCell className="font-mono text-xs">{e.effectSlug ?? e.statusEffectId}</TableCell>
                                             <TableCell className="text-xs text-muted-foreground">{e.sourceType}</TableCell>
                                             <TableCell className="text-center font-mono text-sm">{e.value}</TableCell>
                                             <TableCell className="text-xs text-muted-foreground">{formatDate(e.appliedAt)}</TableCell>
@@ -1170,6 +1204,234 @@ export default function CharacterPage() {
                     </div>
                 </TabsContent>
 
+                {/* ══ Титулы ══ */}
+                <TabsContent value="titles">
+                    <Card>
+                        <div className="px-4 pt-4 pb-3 border-b">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Выдать титул</p>
+                            <div className="flex items-center gap-2">
+                                <Input placeholder="slug титула..." className="flex-1 max-w-xs h-8 text-sm font-mono" value={newTitleSlug} onChange={e => setNewTitleSlug(e.target.value)} />
+                                <Button size="sm" className="h-8 gap-1.5" disabled={!newTitleSlug.trim() || grantTitle.isLoading}
+                                    onClick={() => { grantTitle.mutate({ characterId, titleSlug: newTitleSlug.trim() }); setNewTitleSlug(''); }}>
+                                    <Plus className="h-3.5 w-3.5" />Выдать
+                                </Button>
+                            </div>
+                        </div>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Slug</TableHead>
+                                        <TableHead className="text-center w-28">Активен</TableHead>
+                                        <TableHead className="w-40">Получен</TableHead>
+                                        <TableHead className="text-right w-24">Отозвать</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {titlesLoading ? (
+                                        <TableRow><TableCell colSpan={4}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (titles ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={4} className="text-center py-6 text-muted-foreground">Нет титулов</TableCell></TableRow>
+                                    ) : (titles ?? []).map(t => (
+                                        <TableRow key={t.titleSlug}>
+                                            <TableCell className="font-mono text-sm">{t.titleSlug}</TableCell>
+                                            <TableCell className="text-center">
+                                                <button
+                                                    className={`inline-flex items-center justify-center h-6 w-6 rounded text-xs font-medium transition-colors ${t.equipped ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30' : 'bg-muted text-muted-foreground hover:bg-accent'}`}
+                                                    onClick={() => setTitleEquipped.mutate({ characterId, titleSlug: t.titleSlug, equipped: !t.equipped })}
+                                                    title={t.equipped ? 'Снять' : 'Надеть'}
+                                                >
+                                                    {t.equipped ? '✓' : '○'}
+                                                </button>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{formatDate(t.earnedAt)}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={() => revokeTitle.mutate({ characterId, titleSlug: t.titleSlug })} disabled={revokeTitle.isLoading}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ══ Репутация ══ */}
+                <TabsContent value="reputation">
+                    <Card>
+                        <div className="px-4 pt-4 pb-3 border-b">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Установить репутацию</p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <Input placeholder="faction_slug..." className="w-44 h-8 text-sm font-mono" value={newRepFaction} onChange={e => setNewRepFaction(e.target.value)} />
+                                <Input type="number" placeholder="Значение" className="w-28 h-8 text-sm" value={newRepValue} onChange={e => setNewRepValue(e.target.value)} />
+                                <Button size="sm" className="h-8 gap-1.5" disabled={!newRepFaction.trim() || setReputation.isLoading}
+                                    onClick={() => { setReputation.mutate({ characterId, factionSlug: newRepFaction.trim(), value: Number(newRepValue) || 0 }); setNewRepFaction(''); setNewRepValue('0'); }}>
+                                    <Plus className="h-3.5 w-3.5" />Установить
+                                </Button>
+                            </div>
+                        </div>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Фракция</TableHead>
+                                        <TableHead className="text-right w-40">Значение</TableHead>
+                                        <TableHead className="text-right w-24">Сбросить</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {repLoading ? (
+                                        <TableRow><TableCell colSpan={3}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (reputation ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">Нет записей репутации</TableCell></TableRow>
+                                    ) : (reputation ?? []).map(r => (
+                                        <ReputationRow
+                                            key={r.factionSlug}
+                                            rep={r}
+                                            onSave={(val) => setReputation.mutate({ characterId, factionSlug: r.factionSlug, value: val })}
+                                            onReset={() => resetReputation.mutate({ characterId, factionSlug: r.factionSlug })}
+                                            isSaving={setReputation.isLoading}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ══ Мастерство ══ */}
+                <TabsContent value="mastery">
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Мастерство</TableHead>
+                                        <TableHead className="text-right w-44">Значение</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {masteryLoading ? (
+                                        <TableRow><TableCell colSpan={2}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (mastery ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={2} className="text-center py-6 text-muted-foreground">Нет данных мастерства</TableCell></TableRow>
+                                    ) : (mastery ?? []).map(m => (
+                                        <MasteryRow
+                                            key={m.masterySlug}
+                                            m={m}
+                                            onSave={(val) => setMastery.mutate({ characterId, masterySlug: m.masterySlug, value: val })}
+                                            isSaving={setMastery.isLoading}
+                                        />
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ══ Эмоуты ══ */}
+                <TabsContent value="emotes">
+                    <Card>
+                        <div className="px-4 pt-4 pb-3 border-b">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Выдать эмоут</p>
+                            <div className="flex items-center gap-2">
+                                <Input placeholder="emote_slug..." className="flex-1 max-w-xs h-8 text-sm font-mono" value={newEmoteSlug} onChange={e => setNewEmoteSlug(e.target.value)} />
+                                <Button size="sm" className="h-8 gap-1.5" disabled={!newEmoteSlug.trim() || grantEmote.isLoading}
+                                    onClick={() => { grantEmote.mutate({ characterId, emoteSlug: newEmoteSlug.trim() }); setNewEmoteSlug(''); }}>
+                                    <Plus className="h-3.5 w-3.5" />Выдать
+                                </Button>
+                            </div>
+                        </div>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Slug</TableHead>
+                                        <TableHead className="w-40">Получен</TableHead>
+                                        <TableHead className="text-right w-24">Отозвать</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {emotesLoading ? (
+                                        <TableRow><TableCell colSpan={3}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (emotes ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">Нет разблокированных эмоутов</TableCell></TableRow>
+                                    ) : (emotes ?? []).map(e => (
+                                        <TableRow key={e.emoteSlug}>
+                                            <TableCell className="font-mono text-sm">{e.emoteSlug}</TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{formatDate(e.unlockedAt)}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={() => revokeEmote.mutate({ characterId, emoteSlug: e.emoteSlug })} disabled={revokeEmote.isLoading}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ══ Бестиарий ══ */}
+                <TabsContent value="bestiary">
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>ID моба</TableHead>
+                                        <TableHead className="text-right w-36">Убийств</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {bestiaryLoading ? (
+                                        <TableRow><TableCell colSpan={2}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (bestiary ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={2} className="text-center py-6 text-muted-foreground">Данных бестиария нет</TableCell></TableRow>
+                                    ) : (bestiary ?? []).map(b => (
+                                        <TableRow key={b.mobTemplateId}>
+                                            <TableCell className="font-mono text-sm">mob#{b.mobTemplateId}</TableCell>
+                                            <TableCell className="text-right font-mono">{b.killCount}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* ══ Панель скилов ══ */}
+                <TabsContent value="skillbar">
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-20 text-center">Слот</TableHead>
+                                        <TableHead>Skill slug</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {skillBarLoading ? (
+                                        <TableRow><TableCell colSpan={2}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                    ) : (skillBar ?? []).length === 0 ? (
+                                        <TableRow><TableCell colSpan={2} className="text-center py-6 text-muted-foreground">Панель скилов пуста</TableCell></TableRow>
+                                    ) : (skillBar ?? []).map(s => (
+                                        <TableRow key={s.slotIndex}>
+                                            <TableCell className="text-center font-mono font-semibold">{s.slotIndex}</TableCell>
+                                            <TableCell className="font-mono text-sm">{s.skillSlug}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
                 {/* ══ Класс: базовые статы + дерево скиллов ══ */}
                 <TabsContent value="class">
                     <div className="space-y-4">
@@ -1243,6 +1505,80 @@ export default function CharacterPage() {
                 </TabsContent>
             </Tabs>
         </div>
+    );
+}
+
+// ─── Вспомогательный компонент для строки репутации ─────────────────────────
+type RepRowData = { factionSlug: string; value: number };
+
+function ReputationRow({ rep, onSave, onReset, isSaving }: {
+    rep: RepRowData;
+    onSave: (val: number) => void;
+    onReset: () => void;
+    isSaving: boolean;
+}) {
+    const [val, setVal] = useState(String(rep.value));
+    const dirty = val !== String(rep.value);
+
+    return (
+        <TableRow>
+            <TableCell className="font-mono text-sm">{rep.factionSlug}</TableCell>
+            <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-1">
+                    <Input type="number" className="w-28 h-7 text-right text-sm font-mono"
+                        value={val} onChange={e => setVal(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && dirty && !isSaving) onSave(Number(val)); }} />
+                    <Button size="sm" className="h-7 text-xs" variant={dirty ? 'default' : 'outline'}
+                        disabled={!dirty || isSaving} onClick={() => onSave(Number(val))}>OK</Button>
+                </div>
+            </TableCell>
+            <TableCell className="text-right">
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Сбросить репутацию с «{rep.factionSlug}»?</AlertDialogTitle>
+                            <AlertDialogDescription>Запись будет удалена.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Отмена</AlertDialogCancel>
+                            <AlertDialogAction onClick={onReset}>Сбросить</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </TableCell>
+        </TableRow>
+    );
+}
+
+// ─── Вспомогательный компонент для строки мастерства ─────────────────────────
+type MasteryRowData = { masterySlug: string; value: number };
+
+function MasteryRow({ m, onSave, isSaving }: {
+    m: MasteryRowData;
+    onSave: (val: number) => void;
+    isSaving: boolean;
+}) {
+    const [val, setVal] = useState(String(m.value));
+    const dirty = val !== String(m.value);
+
+    return (
+        <TableRow>
+            <TableCell className="font-mono text-sm">{m.masterySlug}</TableCell>
+            <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-1">
+                    <Input type="number" min={0} max={200} step={0.1} className="w-24 h-7 text-right text-sm font-mono"
+                        value={val} onChange={e => setVal(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter' && dirty && !isSaving) onSave(Number(val)); }} />
+                    <Button size="sm" className="h-7 text-xs" variant={dirty ? 'default' : 'outline'}
+                        disabled={!dirty || isSaving} onClick={() => onSave(Number(val))}>OK</Button>
+                </div>
+            </TableCell>
+        </TableRow>
     );
 }
 

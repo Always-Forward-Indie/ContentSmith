@@ -43,6 +43,7 @@ interface QuestReward {
     itemId: number | null
     quantity: number
     amount: number
+    isHidden: boolean
     itemName: string | null
     itemSlug: string | null
 }
@@ -58,6 +59,7 @@ interface RewardFormState {
     itemId: string
     quantity: number
     amount: number
+    isHidden: boolean
 }
 
 const defaultForm = (): RewardFormState => ({
@@ -65,6 +67,7 @@ const defaultForm = (): RewardFormState => ({
     itemId: '',
     quantity: 1,
     amount: 0,
+    isHidden: false,
 })
 
 export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewardsManagerProps) {
@@ -119,6 +122,7 @@ export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewards
             itemId: form.rewardType === 'item' && form.itemId ? parseInt(form.itemId) : null,
             quantity: form.quantity,
             amount: form.amount,
+            isHidden: form.isHidden,
         })
     }
 
@@ -130,6 +134,7 @@ export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewards
             itemId: form.rewardType === 'item' && form.itemId ? parseInt(form.itemId) : null,
             quantity: form.quantity,
             amount: form.amount,
+            isHidden: form.isHidden,
         })
     }
 
@@ -139,6 +144,7 @@ export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewards
             itemId: reward.itemId?.toString() ?? '',
             quantity: reward.quantity,
             amount: Number(reward.amount),
+            isHidden: reward.isHidden,
         })
         setEditingReward(reward)
     }
@@ -251,6 +257,19 @@ export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewards
                 </div>
             )}
 
+            <div className="flex items-center justify-between rounded-lg border px-3 py-2.5">
+                <div>
+                    <p className="text-sm font-medium">{t('fields.isHidden')}</p>
+                    <p className="text-xs text-muted-foreground">{t('fields.isHiddenDescription')}</p>
+                </div>
+                <input
+                    type="checkbox"
+                    checked={form.isHidden}
+                    onChange={(e) => setForm(prev => ({ ...prev, isHidden: e.target.checked }))}
+                    className="h-4 w-4 rounded border-input"
+                />
+            </div>
+
             <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => { setIsAddOpen(false); setEditingReward(null); setForm(defaultForm()) }}>
                     {commonT('cancel')}
@@ -311,6 +330,11 @@ export function QuestRewardsManager({ questId, rewards, onUpdate }: QuestRewards
                                         {t(`types.${reward.rewardType}`)}
                                     </span>
                                     <span className="text-sm font-medium">{rewardLabel(reward)}</span>
+                                    {reward.isHidden && (
+                                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground">
+                                            {t('fields.isHidden')}
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <TooltipProvider delayDuration={300}>

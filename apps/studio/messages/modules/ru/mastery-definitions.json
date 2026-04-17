@@ -1,0 +1,17 @@
+{
+    "title": "Мастерство",
+    "description": "Управление типами мастерства (владение оружием, магия и т.д.)",
+    "createNew": "Создать мастерство",
+    "editMastery": "Редактировать мастерство",
+    "slug": "Слаг",
+    "name": "Название",
+    "weaponTypeSlug": "Тип оружия",
+    "maxValue": "Максимальное значение",
+    "noMasteries": "Мастерство не найдено",
+    "searchPlaceholder": "Поиск мастерства...",
+    "deleteConfirmTitle": "Удалить мастерство",
+    "deleteConfirmDescription": "Удалить мастерство {name}?",
+    "createSuccess": "Мастерство создано",
+    "updateSuccess": "Мастерство обновлено",
+    "deleteSuccess": "Мастерство удалено"
+}

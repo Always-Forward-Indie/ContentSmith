@@ -1,0 +1,16 @@
+{
+    "title": "Фракции",
+    "description": "Управление фракциями и репутацией",
+    "createNew": "Создать фракцию",
+    "editFaction": "Редактировать фракцию",
+    "slug": "Слаг",
+    "slugDescription": "Уникальный идентификатор фракции (например: guards, bandits)",
+    "name": "Название",
+    "noFactions": "Фракции не найдены",
+    "searchPlaceholder": "Поиск фракций...",
+    "deleteConfirmTitle": "Удалить фракцию",
+    "deleteConfirmDescription": "Вы уверены, что хотите удалить {name}? Это действие нельзя отменить.",
+    "createSuccess": "Фракция создана",
+    "updateSuccess": "Фракция обновлена",
+    "deleteSuccess": "Фракция удалена"
+}

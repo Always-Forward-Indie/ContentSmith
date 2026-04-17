@@ -32,5 +32,6 @@
     "schoolRequired": "Школа обязательна",
     "scaleTypeRequired": "Тип масштабирования обязателен",
     "nameRequired": "Название обязательно",
-    "slugRequired": "Слаг обязателен"
+    "slugRequired": "Слаг обязателен",
+    "isPassive": "Пассивный навык"
 }

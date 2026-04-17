@@ -5,9 +5,12 @@ import {
   items,
   itemTypes,
   itemsRarity,
-  itemAttributes,
+  entityAttributes,
   itemAttributesMapping,
   equipSlot,
+  itemUseEffects,
+  itemClassRestrictions,
+  characterClass,
 } from '@contentsmith/database';
 import { like, or, desc, asc, eq, and, sql } from '@contentsmith/database';
 import {
@@ -112,6 +115,7 @@ export const itemsRouter = createTRPCRouter({
           levelRequirement: items.levelRequirement,
           isEquippable: items.isEquippable,
           isHarvest: items.isHarvest,
+          isUsable: items.isUsable,
           typeName: itemTypes.name,
           typeSlug: itemTypes.slug,
           rarityName: itemsRarity.name,
@@ -168,6 +172,9 @@ export const itemsRouter = createTRPCRouter({
           levelRequirement: items.levelRequirement,
           isEquippable: items.isEquippable,
           isHarvest: items.isHarvest,
+          isUsable: items.isUsable,
+          isTwoHanded: items.isTwoHanded,
+          masterySlug: items.masterySlug,
           typeName: itemTypes.name,
           typeSlug: itemTypes.slug,
           rarityName: itemsRarity.name,
@@ -194,11 +201,12 @@ export const itemsRouter = createTRPCRouter({
           id: itemAttributesMapping.id,
           attributeId: itemAttributesMapping.attributeId,
           value: itemAttributesMapping.value,
-          attributeName: itemAttributes.name,
-          attributeSlug: itemAttributes.slug,
+          applyOn: itemAttributesMapping.applyOn,
+          attributeName: entityAttributes.name,
+          attributeSlug: entityAttributes.slug,
         })
         .from(itemAttributesMapping)
-        .leftJoin(itemAttributes, eq(itemAttributesMapping.attributeId, itemAttributes.id))
+        .leftJoin(entityAttributes, eq(itemAttributesMapping.attributeId, entityAttributes.id))
         .where(eq(itemAttributesMapping.itemId, input.id));
 
       return {
@@ -465,14 +473,14 @@ export const itemsRouter = createTRPCRouter({
       }),
   }),
 
-  // ===== ITEM ATTRIBUTES =====
+  // ===== ITEM ATTRIBUTES (backed by entity_attributes) =====
   attributes: createTRPCRouter({
     list: requirePerm('items:read')
       .query(async () => {
         return await db
           .select()
-          .from(itemAttributes)
-          .orderBy(asc(itemAttributes.name));
+          .from(entityAttributes)
+          .orderBy(asc(entityAttributes.name));
       }),
 
     getById: requirePerm('items:read')
@@ -480,14 +488,14 @@ export const itemsRouter = createTRPCRouter({
       .query(async ({ input }) => {
         const [attribute] = await db
           .select()
-          .from(itemAttributes)
-          .where(eq(itemAttributes.id, input.id))
+          .from(entityAttributes)
+          .where(eq(entityAttributes.id, input.id))
           .limit(1);
 
         if (!attribute) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'Item attribute not found',
+            message: 'Attribute not found',
           });
         }
 
@@ -498,7 +506,7 @@ export const itemsRouter = createTRPCRouter({
       .input(createItemAttributeSchema)
       .mutation(async ({ input }) => {
         const [newAttribute] = await db
-          .insert(itemAttributes)
+          .insert(entityAttributes)
           .values(input)
           .returning();
 
@@ -512,15 +520,15 @@ export const itemsRouter = createTRPCRouter({
       }))
       .mutation(async ({ input }) => {
         const [updatedAttribute] = await db
-          .update(itemAttributes)
+          .update(entityAttributes)
           .set(input.data)
-          .where(eq(itemAttributes.id, input.id))
+          .where(eq(entityAttributes.id, input.id))
           .returning();
 
         if (!updatedAttribute) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'Item attribute not found',
+            message: 'Attribute not found',
           });
         }
 
@@ -531,18 +539,98 @@ export const itemsRouter = createTRPCRouter({
       .input(itemAttributeIdSchema)
       .mutation(async ({ input }) => {
         const [deletedAttribute] = await db
-          .delete(itemAttributes)
-          .where(eq(itemAttributes.id, input.id))
+          .delete(entityAttributes)
+          .where(eq(entityAttributes.id, input.id))
           .returning();
 
         if (!deletedAttribute) {
           throw new TRPCError({
             code: 'NOT_FOUND',
-            message: 'Item attribute not found',
+            message: 'Attribute not found',
           });
         }
 
         return deletedAttribute;
       }),
   }),
+
+  // ===== ITEM USE EFFECTS =====
+
+  getUseEffects: requirePerm('items:read')
+    .input(z.number().int().positive())
+    .query(async ({ input }) => {
+      return await db.select().from(itemUseEffects).where(eq(itemUseEffects.itemId, input))
+    }),
+
+  addUseEffect: requirePerm('items:write')
+    .input(z.object({
+      itemId: z.number().int().positive(),
+      effectSlug: z.string().min(1).max(64),
+      attributeSlug: z.string().max(64).default(''),
+      value: z.number().default(0),
+      isInstant: z.boolean().default(true),
+      durationSeconds: z.number().int().min(0).default(0),
+      tickMs: z.number().int().min(0).default(0),
+      cooldownSeconds: z.number().int().min(0).default(30),
+    }))
+    .mutation(async ({ input }) => {
+      const [result] = await db.insert(itemUseEffects).values(input).returning()
+      return result
+    }),
+
+  updateUseEffect: requirePerm('items:write')
+    .input(z.object({
+      id: z.number().int().positive(),
+      effectSlug: z.string().max(64).optional(),
+      attributeSlug: z.string().max(64).optional(),
+      value: z.number().optional(),
+      isInstant: z.boolean().optional(),
+      durationSeconds: z.number().int().min(0).optional(),
+      tickMs: z.number().int().min(0).optional(),
+      cooldownSeconds: z.number().int().min(0).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input
+      const [result] = await db.update(itemUseEffects).set(data).where(eq(itemUseEffects.id, id)).returning()
+      if (!result) throw new TRPCError({ code: 'NOT_FOUND', message: 'Use effect not found' })
+      return result
+    }),
+
+  removeUseEffect: requirePerm('items:delete')
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(itemUseEffects).where(eq(itemUseEffects.id, input.id))
+      return { success: true }
+    }),
+
+  // ===== ITEM CLASS RESTRICTIONS =====
+
+  getClassRestrictions: requirePerm('items:read')
+    .input(z.number().int().positive())
+    .query(async ({ input }) => {
+      return await db
+        .select({ classId: itemClassRestrictions.classId, className: characterClass.name })
+        .from(itemClassRestrictions)
+        .leftJoin(characterClass, eq(itemClassRestrictions.classId, characterClass.id))
+        .where(eq(itemClassRestrictions.itemId, input))
+    }),
+
+  addClassRestriction: requirePerm('items:write')
+    .input(z.object({ itemId: z.number().int().positive(), classId: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.insert(itemClassRestrictions).values(input).onConflictDoNothing()
+      return { success: true }
+    }),
+
+  removeClassRestriction: requirePerm('items:delete')
+    .input(z.object({ itemId: z.number().int().positive(), classId: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(itemClassRestrictions).where(and(eq(itemClassRestrictions.itemId, input.itemId), eq(itemClassRestrictions.classId, input.classId)))
+      return { success: true }
+    }),
+
+  getAvailableClasses: requirePerm('items:read')
+    .query(async () => {
+      return await db.select({ id: characterClass.id, name: characterClass.name }).from(characterClass).orderBy(characterClass.name)
+    }),
 });

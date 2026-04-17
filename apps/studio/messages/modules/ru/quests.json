@@ -51,7 +51,11 @@
         "questReceiver": "NPC принимающий квест",
         "questReceiverDescription": "NPC, которому игрок сдает завершенный квест",
         "clientKey": "Ключ клиентского UI",
-        "clientKeyDescription": "Ключ для названия/описания квеста в клиентском интерфейсе"
+        "clientKeyDescription": "Ключ для названия/описания квеста в клиентском интерфейсе",
+        "reputationFactionSlug": "Фракция (slug)",
+        "reputationFactionSlugDescription": "Слаг фракции для изменения репутации",
+        "reputationOnComplete": "Репутация за выполнение",
+        "reputationOnFail": "Репутация за провал"
     },
     "edit": {
         "title": "Редактировать квест",
@@ -143,6 +147,13 @@
             "clientStepKey": "Ключ шага",
             "clientStepKeyPlaceholder": "например, collect_wood, talk_to_guard",
             "clientStepKeyDescription": "Уникальный ключ для этого шага (необязательно)",
+            "completionMode": "Режим завершения",
+            "completionModeDescription": "Как определяется выполнение шага",
+            "completionModeOptions": {
+                "auto": "Автоматически",
+                "manual": "Вручную (сервером)",
+                "all": "Все условия"
+            },
             "parameters": "Параметры (JSON)",
             "parametersDescription": "JSON конфигурация для этого типа шага"
         },
@@ -178,15 +189,17 @@
         "visualEditors": {
             "collect": {
                 "title": "Параметры сбора предметов",
-                "itemId": "ID предмета",
+                "itemId": "Предмет",
                 "itemIdPlaceholder": "wood",
+                "selectItem": "Выбрать предмет...",
                 "count": "Количество",
                 "countPlaceholder": "5"
             },
             "kill": {
                 "title": "Параметры убийства существ",
-                "npcId": "ID моба/NPC",
+                "npcId": "Моб / NPC",
                 "npcIdPlaceholder": "wolf_mob",
+                "selectMob": "Выбрать моба...",
                 "count": "Количество",
                 "countPlaceholder": "3"
             },
@@ -245,7 +258,9 @@
             "itemSearch": "Поиск предметов",
             "itemSearchPlaceholder": "Начните ввод для фильтрации...",
             "quantity": "Количество",
-            "amount": "Сумма"
+            "amount": "Сумма",
+            "isHidden": "Скрытая награда",
+            "isHiddenDescription": "Награда не показывается игроку до получения"
         }
     }
 }

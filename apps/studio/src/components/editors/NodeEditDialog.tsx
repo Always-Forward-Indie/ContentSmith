@@ -14,8 +14,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import NPCSelect from './NPCSelect'
+import ConditionGroupEditor from './ConditionGroupEditor'
+import ActionListEditor from './ActionListEditor'
 import { cn } from '@/lib/utils'
 
 const NODE_TYPE_CONFIG = {
@@ -58,10 +59,6 @@ export default function NodeEditDialog({
         actionGroup: null as any,
         jumpTargetNodeId: null as number | null,
     })
-    const [conditionsRaw, setConditionsRaw] = useState('')
-    const [actionsRaw, setActionsRaw] = useState('')
-    const [conditionsError, setConditionsError] = useState(false)
-    const [actionsError, setActionsError] = useState(false)
     const [advancedOpen, setAdvancedOpen] = useState(false)
     const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -74,10 +71,6 @@ export default function NodeEditDialog({
                 actionGroup: node.data.actionGroup || null,
                 jumpTargetNodeId: node.data.jumpTargetNodeId || null,
             })
-            setConditionsRaw(node.data.conditionGroup ? JSON.stringify(node.data.conditionGroup, null, 2) : '')
-            setActionsRaw(node.data.actionGroup ? JSON.stringify(node.data.actionGroup, null, 2) : '')
-            setConditionsError(false)
-            setActionsError(false)
             setAdvancedOpen(!!(node.data.conditionGroup || node.data.actionGroup))
             setConfirmDelete(false)
         }
@@ -191,68 +184,19 @@ export default function NodeEditDialog({
                             {advancedOpen && (
                                 <div className="mt-4 space-y-4">
                                     {(nodeType === 'line' || nodeType === 'choice_hub') && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <Label htmlFor="conditions">
-                                                    {nodeType === 'choice_hub'
-                                                        ? t('nodeTypes.choice_hub.conditionsLabel')
-                                                        : t('fields.conditions.label')
-                                                    }
-                                                </Label>
-                                                {conditionsError && (
-                                                    <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                                )}
-                                            </div>
-                                            <Textarea
-                                                id="conditions"
-                                                value={conditionsRaw}
-                                                onChange={(e) => {
-                                                    setConditionsRaw(e.target.value)
-                                                    try {
-                                                        const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                        setFormData(prev => ({ ...prev, conditionGroup: parsed }))
-                                                        setConditionsError(false)
-                                                    } catch {
-                                                        setConditionsError(true)
-                                                    }
-                                                }}
-                                                placeholder={
-                                                    nodeType === 'choice_hub'
-                                                        ? t('nodeTypes.choice_hub.placeholder')
-                                                        : t('fields.conditions.placeholder')
-                                                }
-                                                rows={3}
-                                                className={cn('font-mono text-xs', conditionsError && 'border-destructive focus-visible:ring-destructive')}
-                                            />
-                                        </div>
+                                        <ConditionGroupEditor
+                                            label={nodeType === 'choice_hub' ? t('nodeTypes.choice_hub.conditionsLabel') : t('fields.conditions.label')}
+                                            value={formData.conditionGroup}
+                                            onChange={(v) => setFormData(prev => ({ ...prev, conditionGroup: v }))}
+                                        />
                                     )}
 
                                     {nodeType === 'action' && (
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between">
-                                                <Label htmlFor="actions">{t('fields.actions.label')}</Label>
-                                                {actionsError && (
-                                                    <span className="text-xs text-destructive">{t('fields.jsonError')}</span>
-                                                )}
-                                            </div>
-                                            <Textarea
-                                                id="actions"
-                                                value={actionsRaw}
-                                                onChange={(e) => {
-                                                    setActionsRaw(e.target.value)
-                                                    try {
-                                                        const parsed = e.target.value ? JSON.parse(e.target.value) : null
-                                                        setFormData(prev => ({ ...prev, actionGroup: parsed }))
-                                                        setActionsError(false)
-                                                    } catch {
-                                                        setActionsError(true)
-                                                    }
-                                                }}
-                                                placeholder={t('fields.actions.placeholder')}
-                                                rows={3}
-                                                className={cn('font-mono text-xs', actionsError && 'border-destructive focus-visible:ring-destructive')}
-                                            />
-                                        </div>
+                                        <ActionListEditor
+                                            label={t('fields.actions.label')}
+                                            value={formData.actionGroup}
+                                            onChange={(v) => setFormData(prev => ({ ...prev, actionGroup: v }))}
+                                        />
                                     )}
                                 </div>
                             )}
@@ -291,7 +235,7 @@ export default function NodeEditDialog({
                                 <Button variant="outline" onClick={() => onOpenChange(false)}>
                                     {t('buttons.cancel')}
                                 </Button>
-                                <Button onClick={handleSave} disabled={conditionsError || actionsError}>
+                                <Button onClick={handleSave}>
                                     {t('buttons.save')}
                                 </Button>
                             </div>

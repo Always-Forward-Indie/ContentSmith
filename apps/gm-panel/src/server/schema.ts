@@ -16,6 +16,7 @@ import {
   doublePrecision,
   pgEnum,
   primaryKey,
+  inet,
 } from 'drizzle-orm/pg-core';
 
 // ─── Enums ───────────────────────────────────────────────
@@ -25,6 +26,28 @@ export const questStateEnum = pgEnum('quest_state', [
   'completed',
   'turned_in',
   'failed',
+]);
+
+export const questStepTypeEnum = pgEnum('quest_step_type', [
+  'collect',
+  'kill',
+  'talk',
+  'reach',
+  'custom',
+]);
+
+export const statusEffectCategoryEnum = pgEnum('status_effect_category', [
+  'buff',
+  'debuff',
+  'dot',
+  'hot',
+  'cc',
+]);
+
+export const effectModifierTypeEnum = pgEnum('effect_modifier_type', [
+  'flat',
+  'percent',
+  'percent_all',
 ]);
 
 // ─── Reference / mapping tables ──────────────────────────
@@ -82,9 +105,11 @@ export const quest = pgTable('quest', {
   clientQuestKey: text('client_quest_key'),
 });
 
-export const skillEffects = pgTable('skill_effects', {
+export const statusEffects = pgTable('status_effects', {
   id: serial('id').primaryKey(),
   slug: text('slug').notNull(),
+  category: statusEffectCategoryEnum('category').notNull(),
+  durationSec: integer('duration_sec'),
 });
 
 export const skills = pgTable('skills', {
@@ -101,13 +126,12 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }),
   role: smallint('role').notNull().default(0).references(() => userRoles.id),
   lastLogin: timestamp('last_login', { withTimezone: true }).notNull(),
-  sessionKey: varchar('session_key', { length: 50 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   isActive: boolean('is_active').notNull().default(true),
   failedLoginAttempts: smallint('failed_login_attempts').notNull().default(0),
   lockedUntil: timestamp('locked_until', { withTimezone: true }),
-  lastLoginIp: text('last_login_ip'),
-  registrationIp: text('registration_ip'),
+  lastLoginIp: inet('last_login_ip'),
+  registrationIp: inet('registration_ip'),
   isEmailVerified: boolean('is_email_verified').notNull().default(false),
 }, (t) => ({
   loginIdx: index('users_login_idx').on(t.login),
@@ -117,7 +141,7 @@ export const userSessions = pgTable('user_sessions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   userId: bigint('user_id', { mode: 'number' }).notNull().references(() => users.id, { onDelete: 'cascade' }),
   tokenHash: varchar('token_hash', { length: 255 }).notNull().unique(),
-  ip: text('ip'),
+  ip: inet('ip'),
   userAgent: text('user_agent'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
@@ -171,6 +195,7 @@ export const characters = pgTable('characters', {
   bindY: doublePrecision('bind_y'),
   bindZ: doublePrecision('bind_z'),
   appearance: jsonb('appearance').$type<Record<string, unknown>>(),
+  experienceDebt: integer('experience_debt').notNull().default(0),
 }, (t) => ({
   ownerIdx: index('characters_owner_idx').on(t.ownerId),
   ownerSlotIdx: index('ix_characters_owner_slot').on(t.ownerId, t.accountSlot),
@@ -221,6 +246,7 @@ export const playerInventory = pgTable('player_inventory', {
   quantity: integer('quantity').notNull().default(1),
   slotIndex: smallint('slot_index'),
   durabilityCurrent: integer('durability_current'),
+  killCount: integer('kill_count').notNull().default(0),
 }, (t) => ({
   charIdx: index('player_inventory_char_idx').on(t.characterId),
 }));
@@ -325,14 +351,92 @@ export const gmActionLog = pgTable('gm_action_log', {
 }));
 
 export const playerActiveEffect = pgTable('player_active_effect', {
-  id: serial('id').primaryKey(),
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
   playerId: bigint('player_id', { mode: 'number' }).notNull().references(() => characters.id),
-  effectId: integer('effect_id').notNull().references(() => skillEffects.id),
+  statusEffectId: integer('status_effect_id').notNull().references(() => statusEffects.id),
   sourceType: text('source_type').notNull(),
   sourceId: bigint('source_id', { mode: 'number' }),
   value: numeric('value').notNull().default('0'),
   appliedAt: timestamp('applied_at', { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
+  attributeId: integer('attribute_id'),
+  tickMs: integer('tick_ms').notNull().default(0),
+  groupId: bigint('group_id', { mode: 'number' }),
 }, (t) => ({
   playerIdx: index('player_active_effect_player_idx').on(t.playerId),
 }));
+
+// ─── Character progression tables ────────────────────────
+export const characterTitles = pgTable('character_titles', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  titleSlug: varchar('title_slug', { length: 80 }).notNull(),
+  equipped: boolean('equipped').notNull().default(false),
+  earnedAt: timestamp('earned_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.titleSlug] }),
+  charIdx: index('ix_character_titles_char').on(t.characterId),
+}));
+
+export const characterReputation = pgTable('character_reputation', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  factionSlug: varchar('faction_slug', { length: 60 }).notNull(),
+  value: integer('value').notNull().default(0),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.factionSlug] }),
+  charIdx: index('ix_character_reputation_char').on(t.characterId),
+}));
+
+export const characterPity = pgTable('character_pity', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  itemId: integer('item_id').notNull(),
+  killCount: integer('kill_count').notNull().default(0),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.itemId] }),
+  charIdx: index('ix_character_pity_char').on(t.characterId),
+}));
+
+export const characterBestiary = pgTable('character_bestiary', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  mobTemplateId: integer('mob_template_id').notNull(),
+  killCount: integer('kill_count').notNull().default(0),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.mobTemplateId] }),
+  charIdx: index('ix_character_bestiary_char').on(t.characterId),
+}));
+
+export const characterEmotes = pgTable('character_emotes', {
+  id: serial('id').primaryKey(),
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  emoteSlug: varchar('emote_slug', { length: 64 }).notNull(),
+  unlockedAt: timestamp('unlocked_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  charIdx: index('ix_character_emotes_char').on(t.characterId),
+  unique: unique('uq_character_emote').on(t.characterId, t.emoteSlug),
+}));
+
+export const characterSkillMastery = pgTable('character_skill_mastery', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  masterySlug: varchar('mastery_slug', { length: 60 }).notNull(),
+  value: doublePrecision('value').notNull().default(0),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.masterySlug] }),
+  charIdx: index('ix_character_skill_mastery_char').on(t.characterId),
+}));
+
+export const characterSkillBar = pgTable('character_skill_bar', {
+  characterId: integer('character_id').notNull().references(() => characters.id, { onDelete: 'cascade' }),
+  slotIndex: smallint('slot_index').notNull(),
+  skillSlug: varchar('skill_slug', { length: 64 }).notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.characterId, t.slotIndex] }),
+  charIdx: index('ix_character_skill_bar_char').on(t.characterId),
+}));
+
+// ─── Game configuration ───────────────────────────────────
+export const gameConfig = pgTable('game_config', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  valueType: text('value_type').notNull().default('float'),
+  description: text('description'),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
@@ -20,6 +21,7 @@ const createSkillFormSchema = z.object({
     slug: z.string().min(1, 'Slug is required').max(255),
     schoolId: z.number().int().positive('School is required'),
     scaleStatId: z.number().int().positive('Scale type is required'),
+    isPassive: z.boolean().default(false),
 });
 
 type CreateSkillFormData = z.infer<typeof createSkillFormSchema>;
@@ -41,9 +43,11 @@ export default function CreateSkillPage() {
         register,
         handleSubmit,
         setValue,
+        control,
         formState: { errors },
     } = useForm<CreateSkillFormData>({
         resolver: zodResolver(createSkillFormSchema),
+        defaultValues: { isPassive: false },
     });
 
     // Mutation для создания скила
@@ -179,6 +183,14 @@ export default function CreateSkillPage() {
                             {errors.scaleStatId && (
                                 <p className="text-sm text-red-600">{t('scaleTypeRequired')}</p>
                             )}
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <div>
+                                <p className="text-sm font-medium">{t('isPassive')}</p>
+                            </div>
+                            <Controller name="isPassive" control={control}
+                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
                         </div>
 
                         <div className="flex gap-4 pt-4">

@@ -1,0 +1,34 @@
+{
+    "title": "Status Effects",
+    "description": "Manage status effects (buffs, debuffs, DoT, etc.)",
+    "createNew": "Create Status Effect",
+    "editEffect": "Edit Status Effect",
+    "slug": "Slug",
+    "category": "Category",
+    "categories": {
+        "buff": "Buff",
+        "debuff": "Debuff",
+        "dot": "DoT (damage over time)",
+        "hot": "HoT (heal over time)",
+        "cc": "Crowd Control"
+    },
+    "durationSec": "Duration (sec)",
+    "modifiers": "Modifiers",
+    "addModifier": "Add Modifier",
+    "modifierType": "Modifier Type",
+    "modifierTypes": {
+        "flat": "Flat",
+        "percent": "Percent",
+        "percent_all": "Percent (all)"
+    },
+    "attribute": "Attribute",
+    "value": "Value",
+    "noEffects": "No status effects found",
+    "noModifiers": "No modifiers added",
+    "searchPlaceholder": "Search status effects...",
+    "deleteConfirmTitle": "Delete Status Effect",
+    "deleteConfirmDescription": "Delete status effect {slug}?",
+    "createSuccess": "Status effect created",
+    "updateSuccess": "Status effect updated",
+    "deleteSuccess": "Status effect deleted"
+}

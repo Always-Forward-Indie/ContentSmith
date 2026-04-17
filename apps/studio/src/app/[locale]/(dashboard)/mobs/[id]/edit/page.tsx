@@ -27,8 +27,8 @@ const editMobFormSchema = z.object({
     level: z.number().int().positive(),
     raceId: z.number().int().positive(),
     rankId: z.number().int().positive(),
-    currentHealth: z.number().int().positive(),
-    currentMana: z.number().int().min(0),
+    spawnHealth: z.number().int().positive(),
+    spawnMana: z.number().int().min(0),
     baseXp: z.number().int().min(0),
     radius: z.number().int().positive(),
     isAggressive: z.boolean(),
@@ -36,6 +36,23 @@ const editMobFormSchema = z.object({
     positionX: z.number().nullable().optional(),
     positionY: z.number().nullable().optional(),
     positionZ: z.number().nullable().optional(),
+    aggroRange: z.number().int().min(0).nullable().optional(),
+    attackRange: z.number().int().min(0).nullable().optional(),
+    attackCooldown: z.number().int().min(0).nullable().optional(),
+    chaseMultiplier: z.number().min(0).nullable().optional(),
+    patrolSpeed: z.number().min(0).nullable().optional(),
+    isSocial: z.boolean().optional(),
+    chaseDuration: z.number().int().min(0).nullable().optional(),
+    fleeHpThreshold: z.number().min(0).max(1).nullable().optional(),
+    aiArchetype: z.enum(['melee', 'ranged', 'caster', 'support', 'flee']).nullable().optional(),
+    canEvolve: z.boolean().optional(),
+    isRare: z.boolean().optional(),
+    rareSpawnChance: z.number().min(0).max(1).nullable().optional(),
+    rareSpawnCondition: z.string().nullable().optional(),
+    factionSlug: z.string().nullable().optional(),
+    biomeSlug: z.string().nullable().optional(),
+    mobTypeSlug: z.string().nullable().optional(),
+    repDeltaPerKill: z.number().int().nullable().optional(),
 })
 
 type EditMobForm = z.infer<typeof editMobFormSchema>
@@ -96,8 +113,8 @@ export default function EditMobPage() {
                 level: mob.level,
                 raceId: mob.raceId ?? 1,
                 rankId: mob.rankId ?? 1,
-                currentHealth: mob.currentHealth ?? 1,
-                currentMana: mob.currentMana ?? 0,
+                spawnHealth: mob.spawnHealth ?? 1,
+                spawnMana: mob.spawnMana ?? 0,
                 baseXp: mob.baseXp ?? 0,
                 radius: mob.radius ?? 100,
                 isAggressive: mob.isAggressive ?? false,
@@ -105,13 +122,50 @@ export default function EditMobPage() {
                 positionX: mob.positionX as number ?? undefined,
                 positionY: mob.positionY as number ?? undefined,
                 positionZ: mob.positionZ as number ?? undefined,
+                aggroRange: mob.aggroRange ?? undefined,
+                attackRange: mob.attackRange ?? undefined,
+                attackCooldown: mob.attackCooldown ?? undefined,
+                chaseMultiplier: mob.chaseMultiplier ?? undefined,
+                patrolSpeed: mob.patrolSpeed ?? undefined,
+                isSocial: mob.isSocial ?? false,
+                chaseDuration: mob.chaseDuration ?? undefined,
+                fleeHpThreshold: mob.fleeHpThreshold ?? undefined,
+                aiArchetype: (mob.aiArchetype as 'melee' | 'ranged' | 'caster' | 'support' | 'flee' | null) ?? undefined,
+                canEvolve: mob.canEvolve ?? false,
+                isRare: mob.isRare ?? false,
+                rareSpawnChance: mob.rareSpawnChance ?? undefined,
+                rareSpawnCondition: mob.rareSpawnCondition ?? undefined,
+                factionSlug: mob.factionSlug ?? undefined,
+                biomeSlug: mob.biomeSlug ?? undefined,
+                mobTypeSlug: mob.mobTypeSlug ?? undefined,
+                repDeltaPerKill: mob.repDeltaPerKill ?? undefined,
             })
         }
     }, [mob, races, ranks, reset])
 
     const onSubmit = async (data: EditMobForm) => {
         const { positionX, positionY, positionZ, ...mobData } = data
-        await updateMobMutation.mutateAsync({ id: mobId, ...mobData, slug: mobData.slug || null })
+        await updateMobMutation.mutateAsync({
+            id: mobId,
+            ...mobData,
+            slug: mobData.slug || null,
+            aggroRange: mobData.aggroRange ?? undefined,
+            attackRange: mobData.attackRange ?? undefined,
+            attackCooldown: mobData.attackCooldown ?? undefined,
+            chaseMultiplier: mobData.chaseMultiplier ?? undefined,
+            patrolSpeed: mobData.patrolSpeed ?? undefined,
+            chaseDuration: mobData.chaseDuration ?? undefined,
+            fleeHpThreshold: mobData.fleeHpThreshold ?? undefined,
+            aiArchetype: mobData.aiArchetype ?? undefined,
+            canEvolve: mobData.canEvolve,
+            isRare: mobData.isRare,
+            rareSpawnChance: mobData.rareSpawnChance ?? undefined,
+            rareSpawnCondition: mobData.rareSpawnCondition ?? undefined,
+            factionSlug: mobData.factionSlug ?? undefined,
+            biomeSlug: mobData.biomeSlug ?? undefined,
+            mobTypeSlug: mobData.mobTypeSlug ?? undefined,
+            repDeltaPerKill: mobData.repDeltaPerKill ?? undefined,
+        })
         if (positionX != null || positionY != null || positionZ != null) {
             await updatePositionMutation.mutateAsync({
                 mobId,
@@ -230,12 +284,12 @@ export default function EditMobPage() {
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-1.5">
-                                <Label htmlFor="currentHealth">{t('currentHealth')}</Label>
-                                <Input id="currentHealth" type="number" min={1} {...register('currentHealth', { valueAsNumber: true })} />
+                                <Label htmlFor="spawnHealth">{t('spawnHealth')}</Label>
+                                <Input id="spawnHealth" type="number" min={1} {...register('spawnHealth', { valueAsNumber: true })} />
                             </div>
                             <div className="space-y-1.5">
-                                <Label htmlFor="currentMana">{t('currentMana')}</Label>
-                                <Input id="currentMana" type="number" min={0} {...register('currentMana', { valueAsNumber: true })} />
+                                <Label htmlFor="spawnMana">{t('spawnMana')}</Label>
+                                <Input id="spawnMana" type="number" min={0} {...register('spawnMana', { valueAsNumber: true })} />
                             </div>
                             <div className="space-y-1.5">
                                 <Label htmlFor="baseXp">{t('baseXp')}</Label>
@@ -254,6 +308,53 @@ export default function EditMobPage() {
                             <p className="text-sm font-medium">{t('isDead')}</p>
                             <Controller name="isDead" control={control}
                                 render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Properties */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">{t('properties')}</CardTitle>
+                        <CardDescription>{t('propertiesDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('canEvolve')}</p>
+                            <Controller name="canEvolve" control={control}
+                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('isRare')}</p>
+                            <Controller name="isRare" control={control}
+                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="rareSpawnChance">{t('rareSpawnChance')}</Label>
+                                <Input id="rareSpawnChance" type="number" step="0.001" min={0} max={1} {...register('rareSpawnChance', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="repDeltaPerKill">{t('repDeltaPerKill')}</Label>
+                                <Input id="repDeltaPerKill" type="number" step="1" {...register('repDeltaPerKill', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="rareSpawnCondition">{t('rareSpawnCondition')}</Label>
+                                <Input id="rareSpawnCondition" {...register('rareSpawnCondition')} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="factionSlug">{t('factionSlug')}</Label>
+                                <Input id="factionSlug" {...register('factionSlug')} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="biomeSlug">{t('biomeSlug')}</Label>
+                                <Input id="biomeSlug" {...register('biomeSlug')} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="mobTypeSlug">{t('mobTypeSlug')}</Label>
+                                <Input id="mobTypeSlug" {...register('mobTypeSlug')} />
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
@@ -281,6 +382,64 @@ export default function EditMobPage() {
                                 <Label htmlFor="positionZ">{t('positionZ')}</Label>
                                 <Input id="positionZ" type="number" step="any" {...register('positionZ', { valueAsNumber: true })} />
                             </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* AI Behavior */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">{t('aiBehavior')}</CardTitle>
+                        <CardDescription>{t('aiBehaviorDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="aggroRange">{t('aggroRange')}</Label>
+                                <Input id="aggroRange" type="number" min={0} {...register('aggroRange', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="attackRange">{t('attackRange')}</Label>
+                                <Input id="attackRange" type="number" min={0} {...register('attackRange', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="attackCooldown">{t('attackCooldown')}</Label>
+                                <Input id="attackCooldown" type="number" min={0} {...register('attackCooldown', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="chaseMultiplier">{t('chaseMultiplier')}</Label>
+                                <Input id="chaseMultiplier" type="number" step="0.01" min={0} {...register('chaseMultiplier', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="patrolSpeed">{t('patrolSpeed')}</Label>
+                                <Input id="patrolSpeed" type="number" step="0.01" min={0} {...register('patrolSpeed', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="chaseDuration">{t('chaseDuration')}</Label>
+                                <Input id="chaseDuration" type="number" min={0} {...register('chaseDuration', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="fleeHpThreshold">{t('fleeHpThreshold')}</Label>
+                                <Input id="fleeHpThreshold" type="number" step="0.01" min={0} max={1} {...register('fleeHpThreshold', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label>{t('aiArchetype')}</Label>
+                                <Controller name="aiArchetype" control={control} render={({ field }) => (
+                                    <Select value={field.value ?? ''} onValueChange={v => field.onChange(v || null)}>
+                                        <SelectTrigger><SelectValue placeholder="Select archetype..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {['melee', 'ranged', 'caster', 'support', 'flee'].map(v => (
+                                                <SelectItem key={v} value={v} className="capitalize">{v}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )} />
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('isSocial')}</p>
+                            <Controller name="isSocial" control={control}
+                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
                         </div>
                     </CardContent>
                 </Card>

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { eq, ilike, or, and, isNotNull, count, gt, SQL } from 'drizzle-orm';
+import { eq, ilike, or, and, isNotNull, isNull, count, gt, SQL } from 'drizzle-orm';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState } from '../schema';
+import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState, userSessions } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 const PAGE_SIZE = 20;
@@ -160,7 +160,6 @@ export const accountsRouter = createTRPCRouter({
           userId: users.id,
           login: users.login,
           lastLogin: users.lastLogin,
-          sessionKey: users.sessionKey,
           role: users.role,
           isActive: users.isActive,
           createdAt: users.createdAt,
@@ -188,11 +187,10 @@ export const accountsRouter = createTRPCRouter({
   kick: publicProcedure
     .input(z.object({ userId: z.number(), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
-      const newKey = crypto.randomUUID();
       await ctx.db
-        .update(users)
-        .set({ sessionKey: newKey })
-        .where(eq(users.id, input.userId));
+        .update(userSessions)
+        .set({ revokedAt: new Date() })
+        .where(and(eq(userSessions.userId, input.userId), isNull(userSessions.revokedAt)));
       await logGmAction({ actionType: 'kick_user', targetType: 'user', targetId: input.userId, gmUserId: input.gmUserId ?? null });
       return { success: true };
     }),
@@ -246,7 +244,6 @@ export const accountsRouter = createTRPCRouter({
           login: input.login,
           password: input.password,
           lastLogin: new Date(),
-          sessionKey: crypto.randomUUID(),
         })
         .returning({ id: users.id });
       await logGmAction({ actionType: 'create_user', targetType: 'user', targetId: created!.id, newValue: { login: input.login }, gmUserId: input.gmUserId ?? null });

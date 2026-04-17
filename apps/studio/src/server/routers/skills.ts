@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skills, skillSchool, skillScaleType } from '@contentsmith/database';
+import { skills, skillSchool, skillScaleType, passiveSkillModifiers } from '@contentsmith/database';
 import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillListQuerySchema,
@@ -54,6 +54,18 @@ export const skillsRouter = createTRPCRouter({
       };
     }),
 
+  // Получить скил по slug
+  getBySlug: publicProcedure
+    .input(z.object({ slug: z.string() }))
+    .query(async ({ input }) => {
+      const [result] = await db
+        .select({ id: skills.id, name: skills.name, slug: skills.slug })
+        .from(skills)
+        .where(eq(skills.slug, input.slug))
+        .limit(1);
+      return result ?? null;
+    }),
+
   // Получить скил по ID
   getById: publicProcedure
     .input(skillIdSchema)
@@ -67,6 +79,7 @@ export const skillsRouter = createTRPCRouter({
           slug: skills.slug,
           scaleStatId: skills.scaleStatId,
           schoolId: skills.schoolId,
+          isPassive: skills.isPassive,
           skillSchool: {
             id: skillSchool.id,
             name: skillSchool.name,
@@ -164,5 +177,47 @@ export const skillsRouter = createTRPCRouter({
         })
         .from(skillScaleType)
         .orderBy(skillScaleType.name);
+    }),
+
+  // ===== PASSIVE SKILL MODIFIERS =====
+
+  getPassiveModifiers: publicProcedure
+    .input(z.number().int().positive())
+    .query(async ({ input }) => {
+      return await db.select().from(passiveSkillModifiers).where(eq(passiveSkillModifiers.skillId, input))
+    }),
+
+  addPassiveModifier: publicProcedure
+    .input(z.object({
+      skillId: z.number().int().positive(),
+      attributeSlug: z.string().min(1),
+      modifierType: z.string().default('flat'),
+      value: z.number(),
+    }))
+    .mutation(async ({ input }) => {
+      const [result] = await db.insert(passiveSkillModifiers).values({ ...input, value: String(input.value) }).returning()
+      return result
+    }),
+
+  updatePassiveModifier: publicProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      attributeSlug: z.string().optional(),
+      modifierType: z.string().optional(),
+      value: z.number().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, value, ...data } = input
+      const updateData = value !== undefined ? { ...data, value: String(value) } : data
+      const [result] = await db.update(passiveSkillModifiers).set(updateData).where(eq(passiveSkillModifiers.id, id)).returning()
+      if (!result) throw new Error('Passive modifier not found')
+      return result
+    }),
+
+  removePassiveModifier: publicProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(passiveSkillModifiers).where(eq(passiveSkillModifiers.id, input.id))
+      return { success: true }
     }),
 });

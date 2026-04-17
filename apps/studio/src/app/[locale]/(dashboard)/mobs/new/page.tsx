@@ -31,6 +31,14 @@ const createMobFormSchema = z.object({
     radius: z.number().int().positive().default(100),
     isAggressive: z.boolean().default(false),
     isDead: z.boolean().default(false),
+    canEvolve: z.boolean().default(false),
+    isRare: z.boolean().default(false),
+    rareSpawnChance: z.number().min(0).max(1).optional(),
+    rareSpawnCondition: z.string().max(30).nullable().optional(),
+    factionSlug: z.string().max(60).nullable().optional(),
+    biomeSlug: z.string().max(64).optional(),
+    mobTypeSlug: z.string().max(64).optional(),
+    repDeltaPerKill: z.number().int().optional(),
 })
 
 type CreateMobForm = z.infer<typeof createMobFormSchema>
@@ -58,6 +66,12 @@ export default function CreateMobPage() {
             isDead: false,
             raceId: 1,
             rankId: 1,
+            canEvolve: false,
+            isRare: false,
+            rareSpawnChance: 0,
+            biomeSlug: '',
+            mobTypeSlug: 'beast',
+            repDeltaPerKill: 0,
         },
     })
 
@@ -186,6 +200,54 @@ export default function CreateMobPage() {
                             <p className="text-sm font-medium">{t('isDead')}</p>
                             <Controller name="isDead" control={control}
                                 render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Properties */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-base">{t('properties')}</CardTitle>
+                        <CardDescription>{t('propertiesDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('canEvolve')}</p>
+                            <Controller name="canEvolve" control={control}
+                                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('isRare')}</p>
+                            <Controller name="isRare" control={control}
+                                render={({ field }) => <Switch checked={field.value} onCheckedChange={field.onChange} />} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="rareSpawnChance">{t('rareSpawnChance')}</Label>
+                                <Input id="rareSpawnChance" type="number" step="0.001" min={0} max={1}
+                                    {...register('rareSpawnChance', { valueAsNumber: true })} />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="rareSpawnCondition">{t('rareSpawnCondition')}</Label>
+                                <Input id="rareSpawnCondition" {...register('rareSpawnCondition')} placeholder="night_only" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="factionSlug">{t('factionSlug')}</Label>
+                                <Input id="factionSlug" {...register('factionSlug')} placeholder="undead" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="biomeSlug">{t('biomeSlug')}</Label>
+                                <Input id="biomeSlug" {...register('biomeSlug')} placeholder="forest" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="mobTypeSlug">{t('mobTypeSlug')}</Label>
+                                <Input id="mobTypeSlug" {...register('mobTypeSlug')} placeholder="beast" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="repDeltaPerKill">{t('repDeltaPerKill')}</Label>
+                                <Input id="repDeltaPerKill" type="number"
+                                    {...register('repDeltaPerKill', { valueAsNumber: true })} />
+                            </div>
                         </div>
                     </CardContent>
                 </Card>

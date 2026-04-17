@@ -1,0 +1,19 @@
+{
+    "title": "Зоны возрождения",
+    "description": "Управление зонами возрождения игроков",
+    "createNew": "Создать зону возрождения",
+    "editZone": "Редактировать зону возрождения",
+    "name": "Название",
+    "zone": "Игровая зона",
+    "positionX": "X",
+    "positionY": "Y",
+    "positionZ": "Z",
+    "isDefault": "По умолчанию",
+    "noZones": "Зоны возрождения не найдены",
+    "searchPlaceholder": "Поиск зон возрождения...",
+    "deleteConfirmTitle": "Удалить зону возрождения",
+    "deleteConfirmDescription": "Удалить зону возрождения {name}?",
+    "createSuccess": "Зона возрождения создана",
+    "updateSuccess": "Зона возрождения обновлена",
+    "deleteSuccess": "Зона возрождения удалена"
+}

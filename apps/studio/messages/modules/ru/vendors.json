@@ -27,10 +27,16 @@
     "selectItem": "Выберите предмет…",
     "unlimited": "Неограничено",
     "defaultPrice": "По умолчанию",
+    "restockAmount": "Кол-во при пополнении",
+    "stockMax": "Макс. запас (-1=∞)",
+    "restockIntervalSec": "Интервал пополнения (сек)",
     "inventoryTable": {
         "item": "Предмет",
         "stock": "Кол-во",
         "price": "Переопред. цена",
+        "restockAmount": "Пополнение",
+        "stockMax": "Макс. запас",
+        "restockIntervalSec": "Интервал (сек)",
         "actions": "Действия"
     },
     "removeTitle": "Убрать «{name}» из инвентаря?",

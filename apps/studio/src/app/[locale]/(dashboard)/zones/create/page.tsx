@@ -30,6 +30,12 @@ export default function CreateZonePage() {
     const [maxLevel, setMaxLevel] = useState('999')
     const [isPvp, setIsPvp] = useState(false)
     const [isSafeZone, setIsSafeZone] = useState(false)
+    const [minX, setMinX] = useState('0')
+    const [maxX, setMaxX] = useState('0')
+    const [minY, setMinY] = useState('0')
+    const [maxY, setMaxY] = useState('0')
+    const [explorationXp, setExplorationXp] = useState('100')
+    const [championKills, setChampionKills] = useState('100')
 
     const create = trpc.zones.create.useMutation({
         onSuccess: data => {
@@ -94,13 +100,56 @@ export default function CreateZonePage() {
                             <Label htmlFor="safe-switch">{t('fields.safeZone')}</Label>
                         </div>
                     </div>
+
+                    {/* Boundaries */}
+                    <div className="space-y-1.5">
+                        <Label className="text-sm font-medium">{t('boundaries')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('boundariesDescription')}</p>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-1">
+                                <Label className="text-xs">{t('fields.minX')}</Label>
+                                <Input type="number" value={minX} onChange={e => setMinX(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs">{t('fields.maxX')}</Label>
+                                <Input type="number" value={maxX} onChange={e => setMaxX(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs">{t('fields.minY')}</Label>
+                                <Input type="number" value={minY} onChange={e => setMinY(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                            <div className="space-y-1">
+                                <Label className="text-xs">{t('fields.maxY')}</Label>
+                                <Input type="number" value={maxY} onChange={e => setMaxY(e.target.value)} className="h-8 text-sm" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label>{t('fields.explorationXpReward')}</Label>
+                            <Input type="number" min={0} value={explorationXp} onChange={e => setExplorationXp(e.target.value)} />
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>{t('fields.championThresholdKills')}</Label>
+                            <Input type="number" min={0} value={championKills} onChange={e => setChampionKills(e.target.value)} />
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 
             <div className="flex justify-end gap-2">
                 <Button variant="outline" asChild><Link href={`/${locale}/zones`}>{tc('cancel')}</Link></Button>
                 <Button disabled={!name || !slug || create.isPending}
-                    onClick={() => create.mutate({ name, slug, minLevel: Number(minLevel), maxLevel: Number(maxLevel), isPvp, isSafeZone })}>
+                    onClick={() => create.mutate({
+                        name, slug,
+                        minLevel: Number(minLevel), maxLevel: Number(maxLevel),
+                        isPvp, isSafeZone,
+                        minX: Number(minX), maxX: Number(maxX),
+                        minY: Number(minY), maxY: Number(maxY),
+                        explorationXpReward: Number(explorationXp),
+                        championThresholdKills: Number(championKills),
+                    })}>
                     {create.isPending ? t('creating') : t('createZone')}
                 </Button>
             </div>

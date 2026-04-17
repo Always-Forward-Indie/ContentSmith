@@ -24,6 +24,17 @@ import { mobRaceRouter } from './mob-race';
 import { mobRanksRouter } from './mob-ranks';
 import { targetTypeRouter } from './target-type';
 import { characterGendersRouter } from './character-genders';
+import { factionsRouter } from './factions';
+import { damageElementsRouter } from './damage-elements';
+import { masteryDefinitionsRouter } from './mastery-definitions';
+import { statusEffectsRouter } from './status-effects';
+import { itemSetsRouter } from './item-sets';
+import { titleDefinitionsRouter } from './title-definitions';
+import { emoteDefinitionsRouter } from './emote-definitions';
+import { respawnZonesRouter } from './respawn-zones';
+import { zoneEventsRouter } from './zone-events';
+import { timedChampionsRouter } from './timed-champions';
+import { worldObjectsRouter } from './world-objects';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -51,6 +62,17 @@ export const appRouter = createTRPCRouter({
   mobRanks: mobRanksRouter,
   targetType: targetTypeRouter,
   characterGenders: characterGendersRouter,
+  factions: factionsRouter,
+  damageElements: damageElementsRouter,
+  masteryDefinitions: masteryDefinitionsRouter,
+  statusEffects: statusEffectsRouter,
+  itemSets: itemSetsRouter,
+  titleDefinitions: titleDefinitionsRouter,
+  emoteDefinitions: emoteDefinitionsRouter,
+  respawnZones: respawnZonesRouter,
+  zoneEvents: zoneEventsRouter,
+  timedChampions: timedChampionsRouter,
+  worldObjects: worldObjectsRouter,
 });
 
 export type AppRouter = typeof appRouter;

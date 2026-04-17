@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-const ITEM_PATHS = ['/items', '/item-types', '/items-rarity', '/item-attributes']
+const ITEM_PATHS = ['/items', '/item-types', '/items-rarity', '/item-attributes', '/item-sets']
 
 export function NavigationItemsDropdown() {
     const t = useTranslations()
@@ -55,6 +55,12 @@ export function NavigationItemsDropdown() {
                 <DropdownMenuItem asChild>
                     <Link href={`/${locale}/item-attributes`} className="w-full">
                         {t('navigation.itemAttributes')}
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                    <Link href={`/${locale}/item-sets`} className="w-full">
+                        {t('navigation.itemSets')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>

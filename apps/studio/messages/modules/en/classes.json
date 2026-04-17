@@ -47,11 +47,21 @@
         "requiredLvl": "Required lvl:",
         "default": "Default:",
         "noSkills": "No skills in tree. Add skills above.",
+        "prerequisiteSkill": "Prerequisite Skill",
+        "noPrerequisite": "None",
+        "skillPointCost": "SP Cost",
+        "goldCost": "Gold Cost",
+        "maxLevel": "Max Level",
+        "requiresBook": "Requires Book",
+        "skillBookItemId": "Skill Book Item ID",
         "table": {
             "skill": "Skill",
             "slug": "Slug",
             "requiredLevel": "Required Level",
             "default": "Default",
+            "spCost": "SP",
+            "goldCost": "Gold",
+            "maxLvl": "Max Lvl",
             "actions": "Actions"
         }
     },

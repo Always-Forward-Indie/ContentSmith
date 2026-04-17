@@ -36,6 +36,12 @@ export default function ZoneDetailPage() {
     const [eMax, setEMax] = useState('')
     const [ePvp, setEPvp] = useState(false)
     const [eSafe, setESafe] = useState(false)
+    const [eMinX, setEMinX] = useState('0')
+    const [eMaxX, setEMaxX] = useState('0')
+    const [eMinY, setEMinY] = useState('0')
+    const [eMaxY, setEMaxY] = useState('0')
+    const [eExplorationXp, setEExplorationXp] = useState('100')
+    const [eChampionKills, setEChampionKills] = useState('100')
 
     // spawn zone form
     const [spawnZoneName, setSpawnZoneName] = useState('')
@@ -64,6 +70,12 @@ export default function ZoneDetailPage() {
         setEMax(String(zone.maxLevel ?? 999))
         setEPvp(zone.isPvp ?? false)
         setESafe(zone.isSafeZone ?? false)
+        setEMinX(String(zone.minX ?? 0))
+        setEMaxX(String(zone.maxX ?? 0))
+        setEMinY(String(zone.minY ?? 0))
+        setEMaxY(String(zone.maxY ?? 0))
+        setEExplorationXp(String(zone.explorationXpReward ?? 100))
+        setEChampionKills(String(zone.championThresholdKills ?? 100))
         setEditing(true)
     }
 
@@ -140,9 +152,52 @@ export default function ZoneDetailPage() {
                                     <Label htmlFor="edit-safe">{t('fields.safe')}</Label>
                                 </div>
                             </div>
+
+                            {/* Boundaries */}
+                            <div className="space-y-1.5">
+                                <Label className="text-sm font-medium">{t('boundaries')}</Label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">{t('fields.minX')}</Label>
+                                        <Input type="number" value={eMinX} onChange={e => setEMinX(e.target.value)} className="h-8 text-sm" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">{t('fields.maxX')}</Label>
+                                        <Input type="number" value={eMaxX} onChange={e => setEMaxX(e.target.value)} className="h-8 text-sm" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">{t('fields.minY')}</Label>
+                                        <Input type="number" value={eMinY} onChange={e => setEMinY(e.target.value)} className="h-8 text-sm" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label className="text-xs">{t('fields.maxY')}</Label>
+                                        <Input type="number" value={eMaxY} onChange={e => setEMaxY(e.target.value)} className="h-8 text-sm" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label>{t('fields.explorationXpReward')}</Label>
+                                    <Input type="number" min={0} value={eExplorationXp} onChange={e => setEExplorationXp(e.target.value)} />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label>{t('fields.championThresholdKills')}</Label>
+                                    <Input type="number" min={0} value={eChampionKills} onChange={e => setEChampionKills(e.target.value)} />
+                                </div>
+                            </div>
+
                             <div className="flex gap-2 pt-1">
                                 <Button size="sm" disabled={updateZone.isPending}
-                                    onClick={() => updateZone.mutate({ id: zoneId, name: eName, slug: eSlug, minLevel: Number(eMin), maxLevel: Number(eMax), isPvp: ePvp, isSafeZone: eSafe })}>
+                                    onClick={() => updateZone.mutate({
+                                        id: zoneId, name: eName, slug: eSlug,
+                                        minLevel: Number(eMin), maxLevel: Number(eMax),
+                                        isPvp: ePvp, isSafeZone: eSafe,
+                                        minX: Number(eMinX), maxX: Number(eMaxX),
+                                        minY: Number(eMinY), maxY: Number(eMaxY),
+                                        explorationXpReward: Number(eExplorationXp),
+                                        championThresholdKills: Number(eChampionKills),
+                                    })}>
                                     <Check className="h-4 w-4 mr-1" />{updateZone.isPending ? tc('saving') : tc('save')}
                                 </Button>
                                 <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
@@ -160,6 +215,17 @@ export default function ZoneDetailPage() {
                                 {zone.isSafeZone && <Badge variant="secondary" className="text-xs">{t('badges.safeZone')}</Badge>}
                                 {!zone.isPvp && !zone.isSafeZone && <span className="text-muted-foreground">{t('badges.normalZone')}</span>}
                             </div>
+                            {(zone.minX != null || zone.maxX != null) && (
+                                <div className="col-span-2 text-xs text-muted-foreground">
+                                    {t('boundaries')}: X [{zone.minX ?? 0}…{zone.maxX ?? 0}] Y [{zone.minY ?? 0}…{zone.maxY ?? 0}]
+                                </div>
+                            )}
+                            {zone.explorationXpReward != null && (
+                                <div><span className="text-muted-foreground">{t('fields.explorationXpReward')}:</span> <span className="font-medium ml-1">{zone.explorationXpReward}</span></div>
+                            )}
+                            {zone.championThresholdKills != null && (
+                                <div><span className="text-muted-foreground">{t('fields.championThresholdKills')}:</span> <span className="font-medium ml-1">{zone.championThresholdKills}</span></div>
+                            )}
                         </div>
                     )}
                 </CardContent>

@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus, X } from 'lucide-react';
 import { z } from 'zod';
 
 // Схема валидации для формы
@@ -20,6 +21,7 @@ const updateSkillFormSchema = z.object({
     slug: z.string().min(1, 'Slug is required').max(255),
     schoolId: z.number().int().positive('School is required'),
     scaleStatId: z.number().int().positive('Scale type is required'),
+    isPassive: z.boolean().default(false),
 });
 
 type UpdateSkillFormData = z.infer<typeof updateSkillFormSchema>;
@@ -55,6 +57,7 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
         handleSubmit,
         setValue,
         reset,
+        control,
         formState: { errors },
     } = useForm<UpdateSkillFormData>({
         resolver: zodResolver(updateSkillFormSchema),
@@ -68,6 +71,7 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
                 slug: skill.slug,
                 schoolId: skill.schoolId,
                 scaleStatId: skill.scaleStatId,
+                isPassive: skill.isPassive ?? false,
             });
         }
     }, [skill, reset]);
@@ -218,6 +222,12 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
                             )}
                         </div>
 
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('isPassive')}</p>
+                            <Controller name="isPassive" control={control}
+                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
+                        </div>
+
                         <div className="flex gap-4 pt-4">
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? commonT('loading') : commonT('save')}
@@ -229,6 +239,107 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
                     </form>
                 </CardContent>
             </Card>
+
+            {skill.isPassive && (
+                <PassiveModifiersManager skillId={skillId} />
+            )}
         </div>
+    );
+}
+
+function PassiveModifiersManager({ skillId }: { skillId: number }) {
+    const [attrSlug, setAttrSlug] = useState('');
+    const [modType, setModType] = useState('flat');
+    const [modValue, setModValue] = useState('');
+
+    const { data: modifiers, refetch } = trpc.skills.getPassiveModifiers.useQuery(skillId);
+
+    const addMutation = trpc.skills.addPassiveModifier.useMutation({
+        onSuccess: () => { setAttrSlug(''); setModValue(''); refetch(); },
+    });
+    const removeMutation = trpc.skills.removePassiveModifier.useMutation({
+        onSuccess: () => refetch(),
+    });
+
+    const handleAdd = () => {
+        if (!attrSlug.trim() || modValue === '') return;
+        addMutation.mutate({ skillId, attributeSlug: attrSlug.trim(), modifierType: modType, value: parseFloat(modValue) });
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-base">Passive Modifiers</CardTitle>
+                <CardDescription>Attribute modifiers applied passively when this skill is learned</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {modifiers && modifiers.length > 0 && (
+                    <div className="rounded-md border overflow-hidden">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b bg-muted/50">
+                                    <th className="px-3 py-2 text-left font-medium text-xs">Attribute</th>
+                                    <th className="px-3 py-2 text-left font-medium text-xs">Type</th>
+                                    <th className="px-3 py-2 text-left font-medium text-xs">Value</th>
+                                    <th className="px-2 py-2"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {modifiers.map((mod) => (
+                                    <tr key={mod.id} className="border-b last:border-0 hover:bg-muted/30">
+                                        <td className="px-3 py-2 font-mono text-xs">{mod.attributeSlug}</td>
+                                        <td className="px-3 py-2 text-xs">{mod.modifierType}</td>
+                                        <td className="px-3 py-2 text-xs">{mod.value}</td>
+                                        <td className="px-2 py-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => removeMutation.mutate({ id: mod.id })}
+                                                className="text-muted-foreground hover:text-destructive"
+                                                disabled={removeMutation.isPending}
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+                <div className="flex flex-wrap gap-2 items-end">
+                    <div className="space-y-1">
+                        <Label className="text-xs">Attribute Slug</Label>
+                        <Input value={attrSlug} onChange={(e) => setAttrSlug(e.target.value)} placeholder="strength" className="h-8 w-36 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs">Type</Label>
+                        <select
+                            value={modType}
+                            onChange={(e) => setModType(e.target.value)}
+                            className="flex h-8 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                            <option value="flat">flat</option>
+                            <option value="percent">percent</option>
+                            <option value="percent_all">percent_all</option>
+                        </select>
+                    </div>
+                    <div className="space-y-1">
+                        <Label className="text-xs">Value</Label>
+                        <Input value={modValue} onChange={(e) => setModValue(e.target.value)} type="number" placeholder="0" className="h-8 w-24" />
+                    </div>
+                    <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8"
+                        disabled={!attrSlug.trim() || modValue === '' || addMutation.isPending}
+                        onClick={handleAdd}
+                    >
+                        <Plus className="h-3.5 w-3.5 mr-1" />
+                        Add
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 }

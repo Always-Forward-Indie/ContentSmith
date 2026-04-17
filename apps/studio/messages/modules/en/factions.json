@@ -1,0 +1,16 @@
+{
+    "title": "Factions",
+    "description": "Manage factions and reputation",
+    "createNew": "Create Faction",
+    "editFaction": "Edit Faction",
+    "slug": "Slug",
+    "slugDescription": "Unique faction identifier (e.g.: guards, bandits)",
+    "name": "Name",
+    "noFactions": "No factions found",
+    "searchPlaceholder": "Search factions...",
+    "deleteConfirmTitle": "Delete Faction",
+    "deleteConfirmDescription": "Are you sure you want to delete {name}? This action cannot be undone.",
+    "createSuccess": "Faction created",
+    "updateSuccess": "Faction updated",
+    "deleteSuccess": "Faction deleted"
+}

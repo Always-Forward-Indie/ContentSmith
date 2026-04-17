@@ -27,10 +27,16 @@
     "selectItem": "Select item…",
     "unlimited": "Unlimited",
     "defaultPrice": "Default",
+    "restockAmount": "Restock Amount",
+    "stockMax": "Stock Max (-1=∞)",
+    "restockIntervalSec": "Restock Interval (sec)",
     "inventoryTable": {
         "item": "Item",
         "stock": "Stock",
         "price": "Price override",
+        "restockAmount": "Restock Amt",
+        "stockMax": "Stock Max",
+        "restockIntervalSec": "Restock Interval (s)",
         "actions": "Actions"
     },
     "removeTitle": "Remove «{name}» from inventory?",

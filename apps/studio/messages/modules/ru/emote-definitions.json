@@ -1,0 +1,19 @@
+{
+    "title": "Эмоции",
+    "description": "Управление эмоциями персонажей",
+    "createNew": "Создать эмоцию",
+    "editEmote": "Редактировать эмоцию",
+    "slug": "Слаг",
+    "displayName": "Отображаемое название",
+    "animationName": "Название анимации",
+    "category": "Категория",
+    "isDefault": "По умолчанию",
+    "sortOrder": "Порядок сортировки",
+    "noEmotes": "Эмоции не найдены",
+    "searchPlaceholder": "Поиск эмоций...",
+    "deleteConfirmTitle": "Удалить эмоцию",
+    "deleteConfirmDescription": "Удалить эмоцию {displayName}?",
+    "createSuccess": "Эмоция создана",
+    "updateSuccess": "Эмоция обновлена",
+    "deleteSuccess": "Эмоция удалена"
+}

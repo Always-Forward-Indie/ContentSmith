@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillEffectsType } from '@contentsmith/database';
+import { skillDamageTypes } from '@contentsmith/database';
 import { and, eq, like, count } from '@contentsmith/database';
 import {
   skillEffectsTypeSchema,
@@ -29,20 +29,20 @@ export const skillEffectsTypeRouter = createTRPCRouter({
       const offset = (page - 1) * pageSize;
 
       const conditions = [];
-      if (search) conditions.push(like(skillEffectsType.slug, `%${search}%`));
+      if (search) conditions.push(like(skillDamageTypes.slug, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const [totalResult] = await db
         .select({ total: count() })
-        .from(skillEffectsType)
+        .from(skillDamageTypes)
         .where(whereClause);
       const total = totalResult?.total ?? 0;
 
       const skillEffectsTypes = await db
-        .select({ id: skillEffectsType.id, slug: skillEffectsType.slug })
-        .from(skillEffectsType)
+        .select({ id: skillDamageTypes.id, slug: skillDamageTypes.slug })
+        .from(skillDamageTypes)
         .where(whereClause)
-        .orderBy(skillEffectsType.slug)
+        .orderBy(skillDamageTypes.slug)
         .limit(pageSize)
         .offset(offset);
 
@@ -60,11 +60,11 @@ export const skillEffectsTypeRouter = createTRPCRouter({
 
       const skillEffectsTypeRecord = await db
         .select({
-          id: skillEffectsType.id,
-          slug: skillEffectsType.slug,
+          id: skillDamageTypes.id,
+          slug: skillDamageTypes.slug,
         })
-        .from(skillEffectsType)
-        .where(eq(skillEffectsType.id, id))
+        .from(skillDamageTypes)
+        .where(eq(skillDamageTypes.id, id))
         .limit(1);
 
       if (!skillEffectsTypeRecord.length) {
@@ -79,7 +79,7 @@ export const skillEffectsTypeRouter = createTRPCRouter({
     .input(createSkillEffectsTypeSchema)
     .mutation(async ({ input }) => {
       const result = await db
-        .insert(skillEffectsType)
+        .insert(skillDamageTypes)
         .values(input)
         .returning();
 
@@ -93,9 +93,9 @@ export const skillEffectsTypeRouter = createTRPCRouter({
       const { id, ...updateData } = input;
 
       const result = await db
-        .update(skillEffectsType)
+        .update(skillDamageTypes)
         .set(updateData)
-        .where(eq(skillEffectsType.id, id))
+        .where(eq(skillDamageTypes.id, id))
         .returning();
 
       if (!result.length) {
@@ -112,8 +112,8 @@ export const skillEffectsTypeRouter = createTRPCRouter({
       const { id } = input;
 
       const result = await db
-        .delete(skillEffectsType)
-        .where(eq(skillEffectsType.id, id))
+        .delete(skillDamageTypes)
+        .where(eq(skillDamageTypes.id, id))
         .returning();
 
       if (!result.length) {

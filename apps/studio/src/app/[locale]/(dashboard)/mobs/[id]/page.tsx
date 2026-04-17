@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
     Edit, ArrowLeft, AlertCircle, ChevronRight, Swords,
-    Heart, Zap, Star, MapPin, Target, Shield, Crown, Dna, Flame,
+    Heart, Zap, Star, MapPin, Target, Shield, Crown, Dna, Flame, Plus, X,
 } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 
@@ -12,6 +13,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 
 import { trpc } from '@/lib/trpc'
 import { MobAttributesManager } from '@/components/mob/MobAttributesManager'
@@ -58,6 +61,92 @@ function SectionHeader({ icon: Icon, title, description }: {
             </div>
             <Separator className="self-center flex-1 max-w-[60%]" />
         </div>
+    )
+}
+
+function MobElementsManager({ mobId, label, elements, type, onUpdate }: {
+    mobId: number
+    label: string
+    elements: string[]
+    type: 'resistance' | 'weakness'
+    onUpdate: () => void
+}) {
+    const t = useTranslations('mobs')
+    const [newSlug, setNewSlug] = useState('')
+
+    const addMutation = type === 'resistance'
+        ? trpc.mobs.addResistance.useMutation({ onSuccess: () => { setNewSlug(''); onUpdate() } })
+        : trpc.mobs.addWeakness.useMutation({ onSuccess: () => { setNewSlug(''); onUpdate() } })
+
+    const removeMutation = type === 'resistance'
+        ? trpc.mobs.removeResistance.useMutation({ onSuccess: onUpdate })
+        : trpc.mobs.removeWeakness.useMutation({ onSuccess: onUpdate })
+
+    const handleAdd = () => {
+        const slug = newSlug.trim()
+        if (!slug) return
+        if (type === 'resistance') {
+            (addMutation as ReturnType<typeof trpc.mobs.addResistance.useMutation>).mutate({ mobId, elementSlug: slug })
+        } else {
+            (addMutation as ReturnType<typeof trpc.mobs.addWeakness.useMutation>).mutate({ mobId, elementSlug: slug })
+        }
+    }
+
+    const handleRemove = (elementSlug: string) => {
+        if (type === 'resistance') {
+            (removeMutation as ReturnType<typeof trpc.mobs.removeResistance.useMutation>).mutate({ mobId, elementSlug })
+        } else {
+            (removeMutation as ReturnType<typeof trpc.mobs.removeWeakness.useMutation>).mutate({ mobId, elementSlug })
+        }
+    }
+
+    return (
+        <section className="space-y-4">
+            <SectionHeader
+                icon={type === 'resistance' ? Shield : Zap}
+                title={label}
+                description={t(type === 'resistance' ? 'resistancesDescription' : 'weaknessesDescription')}
+            />
+            <div className="flex flex-wrap gap-2 min-h-[2rem]">
+                {elements.length === 0 ? (
+                    <span className="text-sm text-muted-foreground">—</span>
+                ) : (
+                    elements.map((slug) => (
+                        <Badge key={slug} variant="secondary" className="gap-1 pr-1">
+                            {slug}
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(slug)}
+                                className="ml-0.5 rounded-sm opacity-70 hover:opacity-100"
+                                disabled={removeMutation.isPending}
+                            >
+                                <X className="h-3 w-3" />
+                            </button>
+                        </Badge>
+                    ))
+                )}
+            </div>
+            <div className="flex gap-2">
+                <Input
+                    value={newSlug}
+                    onChange={(e) => setNewSlug(e.target.value)}
+                    placeholder={t('elementSlugPlaceholder')}
+                    className="max-w-[200px] h-8 text-sm"
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAdd() } }}
+                />
+                <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleAdd}
+                    disabled={!newSlug.trim() || addMutation.isPending}
+                    className="h-8"
+                >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    {t('addElement')}
+                </Button>
+            </div>
+        </section>
     )
 }
 
@@ -183,18 +272,18 @@ export default function MobDetailPage() {
                         <CardContent className="pt-5 pb-5">
                             <div className="flex items-center gap-2 mb-2">
                                 <Heart className="h-4 w-4 text-rose-500" />
-                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('currentHealth')}</span>
+                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('spawnHealth')}</span>
                             </div>
-                            <p className="text-3xl font-bold tabular-nums">{mob.currentHealth?.toLocaleString()}</p>
+                            <p className="text-3xl font-bold tabular-nums">{mob.spawnHealth?.toLocaleString()}</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardContent className="pt-5 pb-5">
                             <div className="flex items-center gap-2 mb-2">
                                 <Zap className="h-4 w-4 text-blue-500" />
-                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('currentMana')}</span>
+                                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t('spawnMana')}</span>
                             </div>
-                            <p className="text-3xl font-bold tabular-nums">{mob.currentMana?.toLocaleString()}</p>
+                            <p className="text-3xl font-bold tabular-nums">{mob.spawnMana?.toLocaleString()}</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -269,6 +358,12 @@ export default function MobDetailPage() {
 
             {/* Spawn Zones */}
             <SpawnZonesManager mobId={mob.id} />
+
+            {/* Resistances */}
+            <MobElementsManager mobId={mob.id} label={t('resistances')} elements={mob.resistances ?? []} type="resistance" onUpdate={handleUpdate} />
+
+            {/* Weaknesses */}
+            <MobElementsManager mobId={mob.id} label={t('weaknesses')} elements={mob.weaknesses ?? []} type="weakness" onUpdate={handleUpdate} />
         </div>
     )
 }

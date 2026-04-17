@@ -15,6 +15,7 @@
     "itemAttributes": "Item Attributes",
     "itemsRarity": "Items Rarity",
     "itemTypes": "Item Types",
+    "itemSets": "Item Sets",
     "mobs": "Mobs",
     "content": "Content",
     "classes": "Classes",
@@ -27,5 +28,18 @@
     "mobRanks": "Mob Ranks",
     "targetTypes": "Target Types",
     "characterGenders": "Character Genders",
-    "spawnZones": "Spawn Zones"
+    "spawnZones": "Spawn Zones",
+    "factions": "Factions",
+    "damageElements": "Damage Elements",
+    "masteryDefinitions": "Mastery",
+    "statusEffects": "Status Effects",
+    "titleDefinitions": "Titles",
+    "emoteDefinitions": "Emotes",
+    "respawnZones": "Respawn Zones",
+    "zoneEvents": "Zone Events",
+    "timedChampions": "Timed Champions",
+    "worldObjects": "World Objects",
+    "worldMap": "World Map",
+    "world": "World",
+    "gameMechanics": "Game Mechanics"
 }

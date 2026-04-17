@@ -13,6 +13,10 @@ import {
   npcSkills,
   npcDialogue,
   dialogue,
+  npcTrainerClass,
+  npcAmbientSpeechConfigs,
+  npcAmbientSpeechLines,
+  characterClass,
 } from '@contentsmith/database'
 import { like, or, desc, eq, and, count, gte, lte, asc } from '@contentsmith/database'
 import { 
@@ -595,5 +599,111 @@ export const npcRouter = createTRPCRouter({
       }
 
       return result[0]
+    }),
+
+  // ===== NPC TRAINER CLASSES =====
+
+  getTrainerClasses: requirePerm('npc:read')
+    .input(z.number().int().positive())
+    .query(async ({ input }) => {
+      return await db
+        .select({
+          id: npcTrainerClass.id,
+          npcId: npcTrainerClass.npcId,
+          classId: npcTrainerClass.classId,
+          className: characterClass.name,
+        })
+        .from(npcTrainerClass)
+        .leftJoin(characterClass, eq(npcTrainerClass.classId, characterClass.id))
+        .where(eq(npcTrainerClass.npcId, input))
+    }),
+
+  addTrainerClass: requirePerm('npc:write')
+    .input(z.object({ npcId: z.number().int().positive(), classId: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      const [result] = await db.insert(npcTrainerClass).values(input).onConflictDoNothing().returning()
+      return result
+    }),
+
+  removeTrainerClass: requirePerm('npc:delete')
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(npcTrainerClass).where(eq(npcTrainerClass.id, input.id))
+      return { success: true }
+    }),
+
+  getAvailableClasses: requirePerm('npc:read')
+    .query(async () => {
+      return await db.select({ id: characterClass.id, name: characterClass.name, slug: characterClass.slug }).from(characterClass).orderBy(characterClass.name)
+    }),
+
+  // ===== NPC AMBIENT SPEECH =====
+
+  getAmbientSpeechConfig: requirePerm('npc:read')
+    .input(z.number().int().positive())
+    .query(async ({ input }) => {
+      const [config] = await db.select().from(npcAmbientSpeechConfigs).where(eq(npcAmbientSpeechConfigs.npcId, input))
+      const lines = await db.select().from(npcAmbientSpeechLines).where(eq(npcAmbientSpeechLines.npcId, input)).orderBy(npcAmbientSpeechLines.priority)
+      return { config: config ?? null, lines }
+    }),
+
+  upsertAmbientConfig: requirePerm('npc:write')
+    .input(z.object({ npcId: z.number().int().positive(), minIntervalSec: z.number().int().min(1).default(20), maxIntervalSec: z.number().int().min(1).default(60) }))
+    .mutation(async ({ input }) => {
+      const existing = await db.select().from(npcAmbientSpeechConfigs).where(eq(npcAmbientSpeechConfigs.npcId, input.npcId))
+      if (existing.length > 0) {
+        const [result] = await db.update(npcAmbientSpeechConfigs).set({ minIntervalSec: input.minIntervalSec, maxIntervalSec: input.maxIntervalSec }).where(eq(npcAmbientSpeechConfigs.npcId, input.npcId)).returning()
+        return result
+      } else {
+        const [result] = await db.insert(npcAmbientSpeechConfigs).values(input).returning()
+        return result
+      }
+    }),
+
+  addAmbientLine: requirePerm('npc:write')
+    .input(z.object({
+      npcId: z.number().int().positive(),
+      lineKey: z.string().min(1).max(128),
+      triggerType: z.string().max(16).default('periodic'),
+      triggerRadius: z.number().int().default(400),
+      priority: z.number().int().default(0),
+      weight: z.number().int().default(10),
+      cooldownSec: z.number().int().default(60),
+      conditionGroup: z.any().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { conditionGroup, ...rest } = input
+      const [result] = await db.insert(npcAmbientSpeechLines).values({
+        ...rest,
+        conditionGroup: toJsonb(conditionGroup),
+      }).returning()
+      return result
+    }),
+
+  updateAmbientLine: requirePerm('npc:write')
+    .input(z.object({
+      id: z.number().int().positive(),
+      lineKey: z.string().max(128).optional(),
+      triggerType: z.string().max(16).optional(),
+      triggerRadius: z.number().int().optional(),
+      priority: z.number().int().optional(),
+      weight: z.number().int().optional(),
+      cooldownSec: z.number().int().optional(),
+      conditionGroup: z.any().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const { id, conditionGroup, ...rest } = input
+      const data: Record<string, unknown> = { ...rest }
+      if (conditionGroup !== undefined) data.conditionGroup = toJsonb(conditionGroup)
+      const [result] = await db.update(npcAmbientSpeechLines).set(data).where(eq(npcAmbientSpeechLines.id, id)).returning()
+      if (!result) throw new Error('Ambient speech line not found')
+      return result
+    }),
+
+  removeAmbientLine: requirePerm('npc:delete')
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(npcAmbientSpeechLines).where(eq(npcAmbientSpeechLines.id, input.id))
+      return { success: true }
     }),
 })

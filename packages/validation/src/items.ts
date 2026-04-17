@@ -87,6 +87,9 @@ export const createItemSchema = z.object({
   levelRequirement: z.number().int().min(0).default(0),
   isEquippable: z.boolean().default(false),
   isHarvest: z.boolean().default(false),
+  isUsable: z.boolean().default(false),
+  isTwoHanded: z.boolean().default(false),
+  masterySlug: z.string().max(60).nullable().optional(),
 });
 
 export const updateItemSchema = createItemSchema.partial();
@@ -100,6 +103,7 @@ export const createItemAttributeMappingSchema = z.object({
   itemId: z.number().int().positive(),
   attributeId: z.number().int().positive(),
   value: z.number().int(),
+  applyOn: z.enum(['equip', 'use', 'pickup']).default('equip'),
 });
 
 export const updateItemAttributeMappingSchema = createItemAttributeMappingSchema.partial().omit({ itemId: true, attributeId: true });

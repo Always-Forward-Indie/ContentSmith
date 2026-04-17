@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Save, Plus, X, ChevronRight, Package } from 'lucide-react';
+import { Save, Plus, X, ChevronRight, Package, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { trpc } from '@/lib/trpc';
 import { getRarityStyle } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +35,235 @@ interface ItemFormProps {
     itemId?: number;
     onSave?: () => void;
     onCancel?: () => void;
+}
+
+// ─── Use Effects Manager ──────────────────────────────────────────────────────
+
+function UseEffectsManager({ itemId }: { itemId: number }) {
+    const t = useTranslations('items');
+    const { toast } = useToast();
+
+    const { data: effects, refetch } = trpc.items.getUseEffects.useQuery(itemId);
+
+    const addUseEffect = trpc.items.addUseEffect.useMutation({
+        onSuccess: () => { toast({ title: t('addUseEffect'), variant: 'default' }); refetch(); resetNew(); },
+        onError: (e) => { toast({ title: t('createError'), description: e.message, variant: 'error' }); },
+    });
+    const removeUseEffect = trpc.items.removeUseEffect.useMutation({
+        onSuccess: () => { refetch(); },
+        onError: (e) => { toast({ title: t('deleteError'), description: e.message, variant: 'error' }); },
+    });
+
+    const [newEffect, setNewEffect] = useState({
+        effectSlug: '',
+        attributeSlug: '',
+        value: 0,
+        isInstant: true,
+        durationSeconds: 0,
+        tickMs: 0,
+        cooldownSeconds: 30,
+    });
+
+    function resetNew() {
+        setNewEffect({ effectSlug: '', attributeSlug: '', value: 0, isInstant: true, durationSeconds: 0, tickMs: 0, cooldownSeconds: 30 });
+    }
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{t('useEffects')}</CardTitle>
+                <CardDescription>{t('useEffectsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {(!effects || effects.length === 0) ? (
+                    <p className="text-sm text-muted-foreground">{t('noEffects')}</p>
+                ) : (
+                    <div className="space-y-2">
+                        {effects.map((eff) => (
+                            <div key={eff.id} className="flex items-center gap-2 p-2 border rounded-md text-sm">
+                                <div className="flex-1 grid grid-cols-4 gap-2">
+                                    <span className="font-mono font-medium">{eff.effectSlug}</span>
+                                    <span className="text-muted-foreground">{t('effectDuration')}: {eff.durationSeconds}s</span>
+                                    <span className="text-muted-foreground">{t('cooldownSec')}: {eff.cooldownSeconds}s</span>
+                                    <span className="text-muted-foreground">{t('effectValue')}: {eff.value}</span>
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeUseEffect.mutate({ id: eff.id })}
+                                    disabled={removeUseEffect.isPending}
+                                >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {/* Add new effect form */}
+                <div className="p-3 border rounded-lg bg-muted/50 space-y-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div className="col-span-2 space-y-1">
+                            <Label className="text-xs">{t('effectSlug')}</Label>
+                            <Input
+                                value={newEffect.effectSlug}
+                                onChange={(e) => setNewEffect(p => ({ ...p, effectSlug: e.target.value }))}
+                                placeholder="heal_flat"
+                                className="h-8 text-sm font-mono"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs">{t('attributeSlug')}</Label>
+                            <Input
+                                value={newEffect.attributeSlug}
+                                onChange={(e) => setNewEffect(p => ({ ...p, attributeSlug: e.target.value }))}
+                                placeholder="hp"
+                                className="h-8 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs">{t('effectValue')}</Label>
+                            <Input
+                                type="number"
+                                value={newEffect.value}
+                                onChange={(e) => setNewEffect(p => ({ ...p, value: Number(e.target.value) }))}
+                                className="h-8 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs">{t('effectDuration')}</Label>
+                            <Input
+                                type="number"
+                                min={0}
+                                value={newEffect.durationSeconds}
+                                onChange={(e) => setNewEffect(p => ({ ...p, durationSeconds: Number(e.target.value) }))}
+                                className="h-8 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs">{t('tickMs')}</Label>
+                            <Input
+                                type="number"
+                                min={0}
+                                value={newEffect.tickMs}
+                                onChange={(e) => setNewEffect(p => ({ ...p, tickMs: Number(e.target.value) }))}
+                                className="h-8 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-xs">{t('cooldownSec')}</Label>
+                            <Input
+                                type="number"
+                                min={0}
+                                value={newEffect.cooldownSeconds}
+                                onChange={(e) => setNewEffect(p => ({ ...p, cooldownSeconds: Number(e.target.value) }))}
+                                className="h-8 text-sm"
+                            />
+                        </div>
+                        <div className="flex items-end space-y-1">
+                            <div className="flex items-center gap-2 h-8">
+                                <Switch
+                                    checked={newEffect.isInstant}
+                                    onCheckedChange={(v) => setNewEffect(p => ({ ...p, isInstant: v }))}
+                                />
+                                <Label className="text-xs">{t('triggerType')}</Label>
+                            </div>
+                        </div>
+                    </div>
+                    <Button
+                        type="button"
+                        size="sm"
+                        disabled={!newEffect.effectSlug || addUseEffect.isPending}
+                        onClick={() => addUseEffect.mutate({ itemId, ...newEffect })}
+                    >
+                        <Plus className="h-3.5 w-3.5 mr-1" />{t('addUseEffect')}
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+// ─── Class Restrictions Manager ───────────────────────────────────────────────
+
+function ClassRestrictionsManager({ itemId }: { itemId: number }) {
+    const t = useTranslations('items');
+    const { toast } = useToast();
+
+    const { data: restrictions, refetch } = trpc.items.getClassRestrictions.useQuery(itemId);
+    const { data: availableClasses } = trpc.items.getAvailableClasses.useQuery();
+
+    const addRestriction = trpc.items.addClassRestriction.useMutation({
+        onSuccess: () => { refetch(); setSelectedClassId(''); },
+        onError: (e) => { toast({ title: t('createError'), description: e.message, variant: 'error' }); },
+    });
+    const removeRestriction = trpc.items.removeClassRestriction.useMutation({
+        onSuccess: () => { refetch(); },
+        onError: (e) => { toast({ title: t('deleteError'), description: e.message, variant: 'error' }); },
+    });
+
+    const [selectedClassId, setSelectedClassId] = useState('');
+
+    const restrictedIds = new Set((restrictions ?? []).map(r => r.classId));
+    const unusedClasses = (availableClasses ?? []).filter(c => !restrictedIds.has(c.id));
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{t('classRestrictions')}</CardTitle>
+                <CardDescription>{t('classRestrictionsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                {(!restrictions || restrictions.length === 0) ? (
+                    <p className="text-sm text-muted-foreground">{t('noRestrictions')}</p>
+                ) : (
+                    <div className="flex flex-wrap gap-2">
+                        {restrictions.map((r) => (
+                            <Badge key={r.classId} variant="secondary" className="pl-2 pr-1 gap-1">
+                                {r.className}
+                                <button
+                                    type="button"
+                                    className="ml-1 rounded-sm opacity-70 hover:opacity-100"
+                                    onClick={() => removeRestriction.mutate({ itemId, classId: r.classId })}
+                                    disabled={removeRestriction.isPending}
+                                >
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+
+                {unusedClasses.length > 0 && (
+                    <div className="flex items-end gap-2">
+                        <div className="flex-1 space-y-1">
+                            <Label className="text-xs">{t('addClassRestriction')}</Label>
+                            <Select value={selectedClassId} onValueChange={setSelectedClassId}>
+                                <SelectTrigger className="h-8 text-sm">
+                                    <SelectValue placeholder="—" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {unusedClasses.map(c => (
+                                        <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button
+                            type="button"
+                            size="sm"
+                            disabled={!selectedClassId || addRestriction.isPending}
+                            onClick={() => addRestriction.mutate({ itemId, classId: Number(selectedClassId) })}
+                            className="h-8"
+                        >
+                            <Plus className="h-3.5 w-3.5 mr-1" />{t('addClassRestriction')}
+                        </Button>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
@@ -64,6 +294,8 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
         levelRequirement: 0,
         isEquippable: false,
         isHarvest: false,
+        isTwoHanded: false,
+        masterySlug: '' as string,
     });
 
     const [attributes, setAttributes] = useState<ItemAttribute[]>([]);
@@ -138,6 +370,8 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                 levelRequirement: itemData.levelRequirement,
                 isEquippable: itemData.isEquippable,
                 isHarvest: itemData.isHarvest,
+                isTwoHanded: itemData.isTwoHanded ?? false,
+                masterySlug: itemData.masterySlug ?? '',
             });
 
             setAttributes(itemData.attributes?.map((attr: any) => ({
@@ -192,6 +426,7 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
         const submitData = {
             ...formData,
             equipSlot: formData.equipSlot as number | null | undefined,
+            masterySlug: formData.masterySlug === '' ? null : formData.masterySlug,
             attributes: attributes.map(attr => ({
                 attributeId: attr.attributeId,
                 value: attr.value,
@@ -583,6 +818,27 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                                     onCheckedChange={(checked: boolean) => setFormData(prev => ({ ...prev, isHarvest: checked }))}
                                 />
                             </div>
+
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <Label>{t('isTwoHanded')}</Label>
+                                </div>
+                                <Switch
+                                    checked={formData.isTwoHanded}
+                                    onCheckedChange={(checked: boolean) => setFormData(prev => ({ ...prev, isTwoHanded: checked }))}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="masterySlug">{t('masterySlug')}</Label>
+                            <Input
+                                id="masterySlug"
+                                value={formData.masterySlug}
+                                onChange={(e) => setFormData(prev => ({ ...prev, masterySlug: e.target.value }))}
+                                placeholder="sword_mastery"
+                                className="font-mono"
+                            />
                         </div>
                     </CardContent>
                 </Card>
@@ -664,6 +920,14 @@ export function ItemForm({ itemId, onSave, onCancel }: ItemFormProps) {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Use Effects & Class Restrictions (edit mode only) */}
+                {isEditing && itemId && (
+                    <>
+                        <UseEffectsManager itemId={itemId} />
+                        <ClassRestrictionsManager itemId={itemId} />
+                    </>
+                )}
 
                 {/* Actions */}
                 <div className="flex items-center gap-4">

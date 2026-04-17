@@ -195,6 +195,44 @@ export default function NewQuestPage() {
                             )}
                         </div>
 
+                        {/* Reputation */}
+                        <div className="space-y-1.5">
+                            <Label htmlFor="reputationFactionSlug">{t('quests.form.reputationFactionSlug')}</Label>
+                            <Input
+                                id="reputationFactionSlug"
+                                {...register('reputationFactionSlug', {
+                                    setValueAs: (v) => v === '' ? null : v,
+                                })}
+                                placeholder="city_guards"
+                                className="font-mono"
+                                disabled={isSubmitting || createQuest.isPending}
+                            />
+                            <p className="text-xs text-muted-foreground">{t('quests.form.reputationFactionSlugDescription')}</p>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="reputationOnComplete">{t('quests.form.reputationOnComplete')}</Label>
+                                <Input
+                                    id="reputationOnComplete"
+                                    type="number"
+                                    className="w-full"
+                                    {...register('reputationOnComplete', { valueAsNumber: true })}
+                                    disabled={isSubmitting || createQuest.isPending}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="reputationOnFail">{t('quests.form.reputationOnFail')}</Label>
+                                <Input
+                                    id="reputationOnFail"
+                                    type="number"
+                                    className="w-full"
+                                    {...register('reputationOnFail', { valueAsNumber: true })}
+                                    disabled={isSubmitting || createQuest.isPending}
+                                />
+                            </div>
+                        </div>
+
                         {createQuest.error && (
                             <p className="text-sm text-destructive">
                                 {t('quests.createError')}: {createQuest.error.message}

@@ -1,0 +1,19 @@
+{
+    "title": "Emotes",
+    "description": "Manage character emotes",
+    "createNew": "Create Emote",
+    "editEmote": "Edit Emote",
+    "slug": "Slug",
+    "displayName": "Display Name",
+    "animationName": "Animation Name",
+    "category": "Category",
+    "isDefault": "Default",
+    "sortOrder": "Sort Order",
+    "noEmotes": "No emotes found",
+    "searchPlaceholder": "Search emotes...",
+    "deleteConfirmTitle": "Delete Emote",
+    "deleteConfirmDescription": "Delete emote {displayName}?",
+    "createSuccess": "Emote created",
+    "updateSuccess": "Emote updated",
+    "deleteSuccess": "Emote deleted"
+}

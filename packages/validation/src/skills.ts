@@ -12,6 +12,8 @@ export const skillSchema = z.object({
   slug: z.string(),
   scaleStatId: z.number(),
   schoolId: z.number(),
+  animationName: z.string().nullable().optional(),
+  isPassive: z.boolean().default(false),
 });
 
 export const skillWithRelationsSchema = skillSchema.extend({
@@ -24,6 +26,8 @@ export const createSkillSchema = z.object({
   slug: z.string().min(1, 'Slug is required').max(255),
   scaleStatId: z.number().int().positive('Scale stat is required'),
   schoolId: z.number().int().positive('School is required'),
+  animationName: z.string().max(100).nullable().optional(),
+  isPassive: z.boolean().default(false),
 });
 
 export const updateSkillSchema = createSkillSchema.partial();

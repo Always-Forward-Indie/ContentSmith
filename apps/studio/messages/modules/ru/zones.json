@@ -28,8 +28,16 @@
         "pvpZone": "PvP-зона",
         "safeZone": "Безопасная зона",
         "pvp": "PvP",
-        "safe": "Безопасная зона"
+        "safe": "Безопасная зона",
+        "minX": "Мин X",
+        "maxX": "Макс X",
+        "minY": "Мин Y",
+        "maxY": "Макс Y",
+        "explorationXpReward": "XP за исследование",
+        "championThresholdKills": "Порог убийств (чемпион)"
     },
+    "boundaries": "Границы зоны",
+    "boundariesDescription": "Координаты границ зоны (опционально)",
     "badges": {
         "pvp": "PvP",
         "safe": "Безопасно",

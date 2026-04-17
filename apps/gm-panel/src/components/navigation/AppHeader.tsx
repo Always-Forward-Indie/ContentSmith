@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, Sword, Sun, Moon, ScrollText } from 'lucide-react';
+import { Shield, Users, Sword, Sun, Moon, ScrollText, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
     { href: '/accounts', label: 'Аккаунты', icon: Users },
     { href: '/characters', label: 'Персонажи', icon: Sword },
+    { href: '/game-config', label: 'Конфиг', icon: Settings },
     { href: '/gm-log', label: 'Аудит', icon: ScrollText },
 ];
 

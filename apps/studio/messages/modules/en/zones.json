@@ -28,8 +28,16 @@
         "pvpZone": "PvP Zone",
         "safeZone": "Safe Zone",
         "pvp": "PvP",
-        "safe": "Safe Zone"
+        "safe": "Safe Zone",
+        "minX": "Min X",
+        "maxX": "Max X",
+        "minY": "Min Y",
+        "maxY": "Max Y",
+        "explorationXpReward": "Exploration XP Reward",
+        "championThresholdKills": "Champion Threshold Kills"
     },
+    "boundaries": "Zone Boundaries",
+    "boundariesDescription": "Optional coordinate boundaries for the zone",
     "badges": {
         "pvp": "PvP",
         "safe": "Safe",

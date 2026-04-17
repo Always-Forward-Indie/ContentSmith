@@ -1,0 +1,19 @@
+{
+    "title": "Titles",
+    "description": "Manage character titles",
+    "createNew": "Create Title",
+    "editTitle": "Edit Title",
+    "slug": "Slug",
+    "displayName": "Display Name",
+    "description": "Description",
+    "earnCondition": "Earn Condition",
+    "bonuses": "Bonuses (JSON)",
+    "conditionParams": "Condition Params (JSON)",
+    "noTitles": "No titles found",
+    "searchPlaceholder": "Search titles...",
+    "deleteConfirmTitle": "Delete Title",
+    "deleteConfirmDescription": "Delete title {displayName}?",
+    "createSuccess": "Title created",
+    "updateSuccess": "Title updated",
+    "deleteSuccess": "Title deleted"
+}

@@ -1,0 +1,34 @@
+{
+    "title": "Статус эффекты",
+    "description": "Управление статус эффектами (баффы, дебаффы, DoT, и т.д.)",
+    "createNew": "Создать статус эффект",
+    "editEffect": "Редактировать статус эффект",
+    "slug": "Слаг",
+    "category": "Категория",
+    "categories": {
+        "buff": "Бафф",
+        "debuff": "Дебафф",
+        "dot": "DoT (урон со временем)",
+        "hot": "HoT (лечение со временем)",
+        "cc": "Контроль"
+    },
+    "durationSec": "Длительность (сек)",
+    "modifiers": "Модификаторы",
+    "addModifier": "Добавить модификатор",
+    "modifierType": "Тип модификатора",
+    "modifierTypes": {
+        "flat": "Фиксированный",
+        "percent": "Процент",
+        "percent_all": "Процент (всё)"
+    },
+    "attribute": "Атрибут",
+    "value": "Значение",
+    "noEffects": "Статус эффекты не найдены",
+    "noModifiers": "Модификаторы не добавлены",
+    "searchPlaceholder": "Поиск статус эффектов...",
+    "deleteConfirmTitle": "Удалить статус эффект",
+    "deleteConfirmDescription": "Удалить статус эффект {slug}?",
+    "createSuccess": "Статус эффект создан",
+    "updateSuccess": "Статус эффект обновлён",
+    "deleteSuccess": "Статус эффект удалён"
+}

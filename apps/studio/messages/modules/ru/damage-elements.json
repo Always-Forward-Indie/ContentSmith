@@ -1,0 +1,13 @@
+{
+    "title": "Элементы урона",
+    "description": "Управление типами элементального урона (fire, ice, poison и т.д.)",
+    "createNew": "Добавить элемент",
+    "slug": "Слаг",
+    "slugDescription": "Уникальный идентификатор типа урона (например: fire, ice, lightning)",
+    "noElements": "Элементы не найдены",
+    "searchPlaceholder": "Поиск элементов...",
+    "deleteConfirmTitle": "Удалить элемент",
+    "deleteConfirmDescription": "Удалить элемент {slug}?",
+    "createSuccess": "Элемент создан",
+    "deleteSuccess": "Элемент удалён"
+}

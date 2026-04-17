@@ -1,0 +1,19 @@
+{
+    "title": "Timed Champions",
+    "description": "Manage timed world boss templates",
+    "createNew": "Create Champion",
+    "editChampion": "Edit Champion",
+    "slug": "Slug",
+    "zone": "Zone",
+    "mobTemplate": "Mob Template",
+    "intervalHours": "Interval (hours)",
+    "windowMinutes": "Spawn Window (minutes)",
+    "announcementKey": "Announcement Key",
+    "noChampions": "No timed champions found",
+    "searchPlaceholder": "Search champions...",
+    "deleteConfirmTitle": "Delete Champion",
+    "deleteConfirmDescription": "Delete champion {slug}?",
+    "createSuccess": "Champion created",
+    "updateSuccess": "Champion updated",
+    "deleteSuccess": "Champion deleted"
+}

@@ -47,11 +47,21 @@
         "requiredLvl": "Требуемый ур.:",
         "default": "По умолчанию:",
         "noSkills": "Дерево умений пусто. Добавьте умения выше.",
+        "prerequisiteSkill": "Предварительное умение",
+        "noPrerequisite": "Нет",
+        "skillPointCost": "Стоимость (очки)",
+        "goldCost": "Стоимость (золото)",
+        "maxLevel": "Макс. уровень",
+        "requiresBook": "Требует книгу",
+        "skillBookItemId": "ID предмета-книги",
         "table": {
             "skill": "Умение",
             "slug": "Слаг",
             "requiredLevel": "Требуемый уровень",
             "default": "По умолч.",
+            "spCost": "Очки",
+            "goldCost": "Золото",
+            "maxLvl": "Макс ур",
             "actions": "Действия"
         }
     },

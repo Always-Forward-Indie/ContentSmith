@@ -22,12 +22,18 @@ export const addVendorItemSchema = z.object({
   itemId: z.number().int().positive(),
   stockCount: z.number().int().default(-1),
   priceOverride: z.number().int().nullable().optional(),
+  restockAmount: z.number().int().min(0).default(0),
+  stockMax: z.number().int().default(-1),
+  restockIntervalSec: z.number().int().min(0).default(3600),
 });
 
 export const updateVendorItemSchema = z.object({
   id: z.number().int().positive(),
   stockCount: z.number().int().optional(),
   priceOverride: z.number().int().nullable().optional(),
+  restockAmount: z.number().int().min(0).optional(),
+  stockMax: z.number().int().optional(),
+  restockIntervalSec: z.number().int().min(0).optional(),
 });
 
 export const removeVendorItemSchema = z.object({

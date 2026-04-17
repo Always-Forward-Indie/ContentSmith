@@ -19,15 +19,112 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import NPCSelect from '@/components/editors/NPCSelect'
+import { trpc } from '@/lib/trpc'
+import EntityCombobox from '@/components/editors/EntityCombobox'
 
 const QuestStepFormSchema = z.object({
     stepIndex: z.number().min(0),
     stepType: z.enum(['collect', 'kill', 'talk', 'reach', 'custom']),
     params: z.record(z.unknown()),
     clientStepKey: z.string().nullable().optional(),
+    completionMode: z.enum(['auto', 'manual', 'all']).default('auto'),
 })
 
 type QuestStepForm = z.infer<typeof QuestStepFormSchema>
+
+interface VisualEditorInnerProps {
+    stepParams: Record<string, unknown>
+    updateParams: (params: Record<string, unknown>) => void
+    isSubmitting: boolean
+}
+
+function CollectVisualEditor({ stepParams, updateParams, isSubmitting }: VisualEditorInnerProps) {
+    const t = useTranslations('quests.stepEditor')
+    const [search, setSearch] = useState('')
+    const itemId = (stepParams?.item_id as number) || 0
+    const { data: listData, isLoading } = trpc.items.list.useQuery({ search, page: 1, limit: 20 })
+    const { data: current } = trpc.items.getById.useQuery({ id: itemId }, { enabled: !!itemId })
+    const options = (listData?.items ?? []).map((item) => ({
+        value: item.id,
+        label: item.name,
+        sublabel: item.slug,
+    }))
+    return (
+        <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium">{t('visualEditors.collect.title')}</h4>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>{t('visualEditors.collect.itemId')}</Label>
+                    <EntityCombobox
+                        value={itemId || null}
+                        displayName={current?.name ?? null}
+                        onChange={(v) => updateParams({ item_id: v ?? 0 })}
+                        options={options}
+                        isLoading={isLoading}
+                        onSearch={setSearch}
+                        placeholder={t('visualEditors.collect.selectItem')}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="count">{t('visualEditors.collect.count')}</Label>
+                    <Input
+                        id="count"
+                        type="number"
+                        min="1"
+                        placeholder={t('visualEditors.collect.countPlaceholder')}
+                        defaultValue={stepParams?.count as number || 1}
+                        onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
+                        disabled={isSubmitting}
+                    />
+                </div>
+            </div>
+        </div>
+    )
+}
+
+function KillVisualEditor({ stepParams, updateParams, isSubmitting }: VisualEditorInnerProps) {
+    const t = useTranslations('quests.stepEditor')
+    const [search, setSearch] = useState('')
+    const mobId = (stepParams?.mob_id as number) || 0
+    const { data: listData, isLoading } = trpc.mobs.list.useQuery({ search, page: 1, limit: 20 })
+    const { data: current } = trpc.mobs.getById.useQuery(mobId, { enabled: !!mobId })
+    const options = (listData?.data ?? []).map((m) => ({
+        value: m.id,
+        label: m.name,
+        sublabel: m.slug ?? undefined,
+    }))
+    return (
+        <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium">{t('visualEditors.kill.title')}</h4>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>{t('visualEditors.kill.npcId')}</Label>
+                    <EntityCombobox
+                        value={mobId || null}
+                        displayName={current?.name ?? null}
+                        onChange={(v) => updateParams({ mob_id: v ?? 0 })}
+                        options={options}
+                        isLoading={isLoading}
+                        onSearch={setSearch}
+                        placeholder={t('visualEditors.kill.selectMob')}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="count">{t('visualEditors.kill.count')}</Label>
+                    <Input
+                        id="count"
+                        type="number"
+                        min="1"
+                        placeholder={t('visualEditors.kill.countPlaceholder')}
+                        defaultValue={stepParams?.count as number || 1}
+                        onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
+                        disabled={isSubmitting}
+                    />
+                </div>
+            </div>
+        </div>
+    )
+}
 
 interface QuestStepEditorProps {
     questId: number
@@ -37,6 +134,7 @@ interface QuestStepEditorProps {
         stepType: string
         params?: unknown
         clientStepKey?: string | null
+        completionMode?: string | null
     }
     onSave: (data: QuestStepForm & { id?: number }) => Promise<void>
     onCancel: () => void
@@ -78,6 +176,7 @@ export function QuestStepEditor({
             stepType: (step?.stepType as any) ?? 'collect',
             params: stepParams,
             clientStepKey: step?.clientStepKey,
+            completionMode: (step?.completionMode as any) ?? 'auto',
         },
     })
 
@@ -109,13 +208,13 @@ export function QuestStepEditor({
     const getDefaultParamsForType = (type: string) => {
         switch (type) {
             case 'collect':
-                return { itemId: '', count: 1 }
+                return { item_id: 0, count: 1 }
             case 'kill':
-                return { npcId: '', count: 1 }
+                return { mob_id: 0, count: 1 }
             case 'talk':
-                return { npcId: '' }
+                return { npc_id: 0 }
             case 'reach':
-                return { mapId: '', x: 0, y: 0, radius: 5 }
+                return { x: 0, y: 0, radius: 200 }
             case 'custom':
                 return { script: '' }
             default:
@@ -142,64 +241,20 @@ export function QuestStepEditor({
         switch (stepType) {
             case 'collect':
                 return (
-                    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">{t('visualEditors.collect.title')}</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="itemId">{t('visualEditors.collect.itemId')}</Label>
-                                <Input
-                                    id="itemId"
-                                    placeholder={t('visualEditors.collect.itemIdPlaceholder')}
-                                    defaultValue={stepParams?.itemId || ''}
-                                    onChange={(e) => updateParams({ itemId: e.target.value })}
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="count">{t('visualEditors.collect.count')}</Label>
-                                <Input
-                                    id="count"
-                                    type="number"
-                                    min="1"
-                                    placeholder={t('visualEditors.collect.countPlaceholder')}
-                                    defaultValue={stepParams?.count || 1}
-                                    onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <CollectVisualEditor
+                        stepParams={stepParams}
+                        updateParams={updateParams}
+                        isSubmitting={isSubmitting}
+                    />
                 )
 
             case 'kill':
                 return (
-                    <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
-                        <h4 className="font-medium">{t('visualEditors.kill.title')}</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="npcId">{t('visualEditors.kill.npcId')}</Label>
-                                <Input
-                                    id="npcId"
-                                    placeholder={t('visualEditors.kill.npcIdPlaceholder')}
-                                    defaultValue={stepParams?.npcId || ''}
-                                    onChange={(e) => updateParams({ npcId: e.target.value })}
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="count">{t('visualEditors.kill.count')}</Label>
-                                <Input
-                                    id="count"
-                                    type="number"
-                                    min="1"
-                                    placeholder={t('visualEditors.kill.countPlaceholder')}
-                                    defaultValue={stepParams?.count || 1}
-                                    onChange={(e) => updateParams({ count: parseInt(e.target.value) || 1 })}
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    <KillVisualEditor
+                        stepParams={stepParams}
+                        updateParams={updateParams}
+                        isSubmitting={isSubmitting}
+                    />
                 )
 
             case 'talk':
@@ -209,23 +264,9 @@ export function QuestStepEditor({
                         <div className="space-y-4">
                             <NPCSelect
                                 label={t('visualEditors.talk.npcLabel')}
-                                value={stepParams?.npcId ? parseInt(stepParams.npcId) : null}
-                                onChange={(npcId) => updateParams({ npcId: npcId?.toString() })}
+                                value={stepParams?.npc_id ? parseInt(stepParams.npc_id) : null}
+                                onChange={(npcId) => updateParams({ npc_id: npcId ?? 0 })}
                             />
-                            <div className="space-y-1.5">
-                                <Label htmlFor="dialogueId">{t('visualEditors.talk.dialogueId')}</Label>
-                                <Input
-                                    id="dialogueId"
-                                    placeholder={t('visualEditors.talk.dialogueIdPlaceholder')}
-                                    className="font-mono"
-                                    defaultValue={stepParams?.dialogueId || ''}
-                                    onChange={(e) => updateParams({ dialogueId: e.target.value || undefined })}
-                                    disabled={isSubmitting}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    {t('visualEditors.talk.dialogueIdDescription')}
-                                </p>
-                            </div>
                         </div>
                     </div>
                 )
@@ -234,53 +275,43 @@ export function QuestStepEditor({
                 return (
                     <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
                         <h4 className="text-sm font-medium">{t('visualEditors.reach.title')}</h4>
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-3">
                             <div className="space-y-1.5">
-                                <Label htmlFor="mapId">{t('visualEditors.reach.mapId')}</Label>
+                                <Label htmlFor="x">{t('visualEditors.reach.x')}</Label>
                                 <Input
-                                    id="mapId"
-                                    placeholder={t('visualEditors.reach.mapIdPlaceholder')}
-                                    className="font-mono"
-                                    defaultValue={stepParams?.mapId || ''}
-                                    onChange={(e) => updateParams({ mapId: e.target.value })}
+                                    id="x"
+                                    type="number"
+                                    step="any"
+                                    placeholder="0"
+                                    defaultValue={stepParams?.x ?? 0}
+                                    onChange={(e) => updateParams({ x: parseFloat(e.target.value) || 0 })}
                                     disabled={isSubmitting}
                                 />
                             </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="x">{t('visualEditors.reach.x')}</Label>
-                                    <Input
-                                        id="x"
-                                        type="number"
-                                        placeholder="100"
-                                        defaultValue={stepParams?.x || 0}
-                                        onChange={(e) => updateParams({ x: parseFloat(e.target.value) || 0 })}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="y">{t('visualEditors.reach.y')}</Label>
-                                    <Input
-                                        id="y"
-                                        type="number"
-                                        placeholder="200"
-                                        defaultValue={stepParams?.y || 0}
-                                        onChange={(e) => updateParams({ y: parseFloat(e.target.value) || 0 })}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="radius">{t('visualEditors.reach.radius')}</Label>
-                                    <Input
-                                        id="radius"
-                                        type="number"
-                                        min="0"
-                                        placeholder={t('visualEditors.reach.radiusPlaceholder')}
-                                        defaultValue={stepParams?.radius || 5}
-                                        onChange={(e) => updateParams({ radius: parseFloat(e.target.value) || 5 })}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="y">{t('visualEditors.reach.y')}</Label>
+                                <Input
+                                    id="y"
+                                    type="number"
+                                    step="any"
+                                    placeholder="0"
+                                    defaultValue={stepParams?.y ?? 0}
+                                    onChange={(e) => updateParams({ y: parseFloat(e.target.value) || 0 })}
+                                    disabled={isSubmitting}
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="radius">{t('visualEditors.reach.radius')}</Label>
+                                <Input
+                                    id="radius"
+                                    type="number"
+                                    min="1"
+                                    step="any"
+                                    placeholder="200"
+                                    defaultValue={stepParams?.radius ?? 200}
+                                    onChange={(e) => updateParams({ radius: parseFloat(e.target.value) || 200 })}
+                                    disabled={isSubmitting}
+                                />
                             </div>
                         </div>
                     </div>
@@ -395,6 +426,27 @@ export function QuestStepEditor({
                         {errors.clientStepKey && (
                             <p className="text-xs text-destructive">{errors.clientStepKey.message}</p>
                         )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="completionMode">{t('fields.completionMode')}</Label>
+                        <Select
+                            value={watch('completionMode')}
+                            onValueChange={(v) => setValue('completionMode', v as any)}
+                            disabled={isSubmitting}
+                        >
+                            <SelectTrigger id="completionMode">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="auto">{t('fields.completionModeOptions.auto')}</SelectItem>
+                                <SelectItem value="manual">{t('fields.completionModeOptions.manual')}</SelectItem>
+                                <SelectItem value="all">{t('fields.completionModeOptions.all')}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">
+                            {t('fields.completionModeDescription')}
+                        </p>
                     </div>
 
                     <div className="space-y-1.5">

@@ -38,12 +38,24 @@ export const addSkillToClassSchema = z.object({
   skillId: z.number().int().positive(),
   requiredLevel: z.number().int().min(1).default(1),
   isDefault: z.boolean().default(false),
+  prerequisiteSkillId: z.number().int().positive().nullable().optional(),
+  skillPointCost: z.number().int().min(0).default(0),
+  goldCost: z.number().int().min(0).default(0),
+  maxLevel: z.number().int().min(1).default(1),
+  requiresBook: z.boolean().default(false),
+  skillBookItemId: z.number().int().positive().nullable().optional(),
 });
 
 export const updateClassSkillSchema = z.object({
   id: z.number().int().positive(),
   requiredLevel: z.number().int().min(1).optional(),
   isDefault: z.boolean().optional(),
+  prerequisiteSkillId: z.number().int().positive().nullable().optional(),
+  skillPointCost: z.number().int().min(0).optional(),
+  goldCost: z.number().int().min(0).optional(),
+  maxLevel: z.number().int().min(1).optional(),
+  requiresBook: z.boolean().optional(),
+  skillBookItemId: z.number().int().positive().nullable().optional(),
 });
 
 export const removeSkillFromClassSchema = z.object({

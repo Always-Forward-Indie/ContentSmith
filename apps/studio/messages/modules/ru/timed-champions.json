@@ -1,0 +1,19 @@
+{
+    "title": "Таймированные чемпионы",
+    "description": "Управление шаблонами таймированных мировых боссов",
+    "createNew": "Создать чемпиона",
+    "editChampion": "Редактировать чемпиона",
+    "slug": "Слаг",
+    "zone": "Зона",
+    "mobTemplate": "Моб-шаблон",
+    "intervalHours": "Интервал (часы)",
+    "windowMinutes": "Окно появления (минуты)",
+    "announcementKey": "Ключ анонса",
+    "noChampions": "Таймированные чемпионы не найдены",
+    "searchPlaceholder": "Поиск чемпионов...",
+    "deleteConfirmTitle": "Удалить чемпиона",
+    "deleteConfirmDescription": "Удалить чемпиона {slug}?",
+    "createSuccess": "Чемпион создан",
+    "updateSuccess": "Чемпион обновлён",
+    "deleteSuccess": "Чемпион удалён"
+}

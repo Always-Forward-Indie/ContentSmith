@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillEffects, skillEffectsType } from '@contentsmith/database';
+import { skillDamageFormulas, skillDamageTypes } from '@contentsmith/database';
 import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
 import {
   skillEffectSchema,
@@ -32,32 +32,32 @@ export const skillEffectRouter = createTRPCRouter({
       if (search) {
         conditions.push(
           or(
-            like(skillEffects.slug, `%${search}%`),
-            like(skillEffectsType.slug, `%${search}%`)
+            like(skillDamageFormulas.slug, `%${search}%`),
+            like(skillDamageTypes.slug, `%${search}%`)
           )
         );
       }
-      if (effectTypeId) conditions.push(eq(skillEffects.effectTypeId, effectTypeId));
+      if (effectTypeId) conditions.push(eq(skillDamageFormulas.effectTypeId, effectTypeId));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
       const [totalResult] = await db
         .select({ total: count() })
-        .from(skillEffects)
-        .leftJoin(skillEffectsType, eq(skillEffects.effectTypeId, skillEffectsType.id))
+        .from(skillDamageFormulas)
+        .leftJoin(skillDamageTypes, eq(skillDamageFormulas.effectTypeId, skillDamageTypes.id))
         .where(whereClause);
       const total = totalResult?.total ?? 0;
 
       const results = await db
         .select({
-          id: skillEffects.id,
-          slug: skillEffects.slug,
-          effectTypeId: skillEffects.effectTypeId,
-          effectType: { id: skillEffectsType.id, slug: skillEffectsType.slug },
+          id: skillDamageFormulas.id,
+          slug: skillDamageFormulas.slug,
+          effectTypeId: skillDamageFormulas.effectTypeId,
+          effectType: { id: skillDamageTypes.id, slug: skillDamageTypes.slug },
         })
-        .from(skillEffects)
-        .leftJoin(skillEffectsType, eq(skillEffects.effectTypeId, skillEffectsType.id))
+        .from(skillDamageFormulas)
+        .leftJoin(skillDamageTypes, eq(skillDamageFormulas.effectTypeId, skillDamageTypes.id))
         .where(whereClause)
-        .orderBy(skillEffects.slug)
+        .orderBy(skillDamageFormulas.slug)
         .limit(pageSize)
         .offset(offset);
 
@@ -71,26 +71,26 @@ export const skillEffectRouter = createTRPCRouter({
   getById: publicProcedure
     .input(skillEffectIdSchema)
     .query(async ({ input }) => {
-      const skillEffect = await db
+      const skillDamageFormula = await db
         .select({
-          id: skillEffects.id,
-          slug: skillEffects.slug,
-          effectTypeId: skillEffects.effectTypeId,
+          id: skillDamageFormulas.id,
+          slug: skillDamageFormulas.slug,
+          effectTypeId: skillDamageFormulas.effectTypeId,
           effectType: {
-            id: skillEffectsType.id,
-            slug: skillEffectsType.slug,
+            id: skillDamageTypes.id,
+            slug: skillDamageTypes.slug,
           },
         })
-        .from(skillEffects)
-        .leftJoin(skillEffectsType, eq(skillEffects.effectTypeId, skillEffectsType.id))
-        .where(eq(skillEffects.id, input.id))
+        .from(skillDamageFormulas)
+        .leftJoin(skillDamageTypes, eq(skillDamageFormulas.effectTypeId, skillDamageTypes.id))
+        .where(eq(skillDamageFormulas.id, input.id))
         .limit(1);
 
-      if (skillEffect.length === 0) {
+      if (skillDamageFormula.length === 0) {
         throw new Error('Skill effect not found');
       }
 
-      return skillEffect[0];
+      return skillDamageFormula[0];
     }),
 
   // Создать новый эффект навыка
@@ -100,8 +100,8 @@ export const skillEffectRouter = createTRPCRouter({
       // Проверяем, что тип эффекта существует
       const effectType = await db
         .select()
-        .from(skillEffectsType)
-        .where(eq(skillEffectsType.id, input.effectTypeId))
+        .from(skillDamageTypes)
+        .where(eq(skillDamageTypes.id, input.effectTypeId))
         .limit(1);
 
       if (effectType.length === 0) {
@@ -111,8 +111,8 @@ export const skillEffectRouter = createTRPCRouter({
       // Проверяем уникальность slug
       const existingSkillEffect = await db
         .select()
-        .from(skillEffects)
-        .where(eq(skillEffects.slug, input.slug))
+        .from(skillDamageFormulas)
+        .where(eq(skillDamageFormulas.slug, input.slug))
         .limit(1);
 
       if (existingSkillEffect.length > 0) {
@@ -120,7 +120,7 @@ export const skillEffectRouter = createTRPCRouter({
       }
 
       const result = await db
-        .insert(skillEffects)
+        .insert(skillDamageFormulas)
         .values({
           slug: input.slug,
           effectTypeId: input.effectTypeId,
@@ -144,8 +144,8 @@ export const skillEffectRouter = createTRPCRouter({
       // Проверяем, что эффект навыка существует
       const existingSkillEffect = await db
         .select()
-        .from(skillEffects)
-        .where(eq(skillEffects.id, id))
+        .from(skillDamageFormulas)
+        .where(eq(skillDamageFormulas.id, id))
         .limit(1);
 
       if (existingSkillEffect.length === 0) {
@@ -156,8 +156,8 @@ export const skillEffectRouter = createTRPCRouter({
       if (updateData.effectTypeId) {
         const effectType = await db
           .select()
-          .from(skillEffectsType)
-          .where(eq(skillEffectsType.id, updateData.effectTypeId))
+          .from(skillDamageTypes)
+          .where(eq(skillDamageTypes.id, updateData.effectTypeId))
           .limit(1);
 
         if (effectType.length === 0) {
@@ -169,8 +169,8 @@ export const skillEffectRouter = createTRPCRouter({
       if (updateData.slug) {
         const duplicateSkillEffect = await db
           .select()
-          .from(skillEffects)
-          .where(eq(skillEffects.slug, updateData.slug))
+          .from(skillDamageFormulas)
+          .where(eq(skillDamageFormulas.slug, updateData.slug))
           .limit(1);
 
         if (duplicateSkillEffect.length > 0 && duplicateSkillEffect[0].id !== id) {
@@ -179,9 +179,9 @@ export const skillEffectRouter = createTRPCRouter({
       }
 
       const result = await db
-        .update(skillEffects)
+        .update(skillDamageFormulas)
         .set(updateData)
-        .where(eq(skillEffects.id, id))
+        .where(eq(skillDamageFormulas.id, id))
         .returning();
 
       return result[0];
@@ -194,8 +194,8 @@ export const skillEffectRouter = createTRPCRouter({
       // Проверяем, что эффект навыка существует
       const existingSkillEffect = await db
         .select()
-        .from(skillEffects)
-        .where(eq(skillEffects.id, input.id))
+        .from(skillDamageFormulas)
+        .where(eq(skillDamageFormulas.id, input.id))
         .limit(1);
 
       if (existingSkillEffect.length === 0) {
@@ -205,7 +205,7 @@ export const skillEffectRouter = createTRPCRouter({
       // TODO: Проверить, не используется ли этот эффект в других таблицах
       // Например, в skill_effects_mapping
 
-      await db.delete(skillEffects).where(eq(skillEffects.id, input.id));
+      await db.delete(skillDamageFormulas).where(eq(skillDamageFormulas.id, input.id));
 
       return { success: true };
     }),

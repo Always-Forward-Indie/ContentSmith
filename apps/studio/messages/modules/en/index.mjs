@@ -49,6 +49,17 @@ const mobRanks = loadJson('mob-ranks.json');
 const targetTypes = loadJson('target-types.json');
 const characterGenders = loadJson('character-genders.json');
 const spawnZones = loadJson('spawn-zones.json');
+const factions = loadJson('factions.json');
+const damageElements = loadJson('damage-elements.json');
+const masteryDefinitions = loadJson('mastery-definitions.json');
+const statusEffects = loadJson('status-effects.json');
+const itemSets = loadJson('item-sets.json');
+const titleDefinitions = loadJson('title-definitions.json');
+const emoteDefinitions = loadJson('emote-definitions.json');
+const respawnZones = loadJson('respawn-zones.json');
+const zoneEvents = loadJson('zone-events.json');
+const timedChampions = loadJson('timed-champions.json');
+const worldObjects = loadJson('world-objects.json');
 
 export default {
   common,
@@ -81,4 +92,15 @@ export default {
   targetTypes,
   characterGenders,
   spawnZones,
+  factions,
+  damageElements,
+  masteryDefinitions,
+  statusEffects,
+  itemSets,
+  titleDefinitions,
+  emoteDefinitions,
+  respawnZones,
+  zoneEvents,
+  timedChampions,
+  worldObjects,
 };

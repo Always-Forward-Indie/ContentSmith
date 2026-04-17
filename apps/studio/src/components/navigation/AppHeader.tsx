@@ -11,6 +11,8 @@ import { NavigationItemsDropdown } from '@/components/navigation/ItemsDropdown'
 import { NavigationNpcsDropdown } from '@/components/navigation/NpcsDropdown'
 import { NavigationMobsDropdown } from '@/components/navigation/MobsDropdown'
 import { NavigationCharactersDropdown } from '@/components/navigation/CharactersDropdown'
+import { NavigationGameMechanicsDropdown } from '@/components/navigation/GameMechanicsDropdown'
+import { NavigationWorldDropdown } from '@/components/navigation/WorldDropdown'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -82,7 +84,8 @@ export function AppHeader() {
                     <NavigationCharactersDropdown />
                     <NavigationSkillsDropdown />
                     <NavigationItemsDropdown />
-                    <NavLink href={`/${locale}/zones`}>{t('navigation.zones')}</NavLink>
+                    <NavigationWorldDropdown />
+                    <NavigationGameMechanicsDropdown />
                 </nav>
 
                 <div className="ml-auto flex items-center gap-2">
@@ -171,6 +174,22 @@ export function AppHeader() {
                                     {t('home.categories.world')}
                                 </p>
                                 <MobileNavLink href={`/${locale}/zones`}>{t('navigation.zones')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/spawn-zones`}>{t('navigation.spawnZones')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/respawn-zones`}>{t('navigation.respawnZones')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/zone-events`}>{t('navigation.zoneEvents')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/timed-champions`}>{t('navigation.timedChampions')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/world-objects`}>{t('navigation.worldObjects')}</MobileNavLink>
+
+                                <p className="mt-2 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {t('navigation.gameMechanics')}
+                                </p>
+                                <MobileNavLink href={`/${locale}/factions`}>{t('navigation.factions')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/damage-elements`}>{t('navigation.damageElements')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/mastery-definitions`}>{t('navigation.masteryDefinitions')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/status-effects`}>{t('navigation.statusEffects')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/title-definitions`}>{t('navigation.titleDefinitions')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/emote-definitions`}>{t('navigation.emoteDefinitions')}</MobileNavLink>
+                                <MobileNavLink href={`/${locale}/item-sets`}>{t('navigation.itemSets')}</MobileNavLink>
                             </nav>
                         </SheetContent>
                     </Sheet>
