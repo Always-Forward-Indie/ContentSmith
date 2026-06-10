@@ -13,6 +13,11 @@
         "cc": "Контроль"
     },
     "durationSec": "Длительность (сек)",
+    "durationMs": "Длительность (мс)",
+    "nameKey": "Ключ названия",
+    "maxStacks": "Макс. стаков",
+    "isDebuff": "Дебафф",
+    "isPurgeable": "Диспелируемый",
     "modifiers": "Модификаторы",
     "addModifier": "Добавить модификатор",
     "modifierType": "Тип модификатора",
@@ -24,11 +29,19 @@
     "attribute": "Атрибут",
     "value": "Значение",
     "noEffects": "Статус эффекты не найдены",
+    "noItems": "Статус эффекты не найдены",
     "noModifiers": "Модификаторы не добавлены",
     "searchPlaceholder": "Поиск статус эффектов...",
     "deleteConfirmTitle": "Удалить статус эффект",
     "deleteConfirmDescription": "Удалить статус эффект {slug}?",
     "createSuccess": "Статус эффект создан",
     "updateSuccess": "Статус эффект обновлён",
-    "deleteSuccess": "Статус эффект удалён"
+    "deleteSuccess": "Статус эффект удалён",
+    "edit": "Редактировать статус эффект",
+    "deleteTitle": "Удалить статус эффект",
+    "create": "Создать статус эффект",
+    "search": "Поиск статус эффектов...",
+    "modifierAdded": "Модификатор добавлен",
+    "modifierRemoved": "Модификатор удалён",
+    "modifiersDescription": "Модификаторы атрибутов, применяемые этим статус эффектом"
 }

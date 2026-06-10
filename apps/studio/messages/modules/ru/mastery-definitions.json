@@ -13,5 +13,12 @@
     "deleteConfirmDescription": "Удалить мастерство {name}?",
     "createSuccess": "Мастерство создано",
     "updateSuccess": "Мастерство обновлено",
-    "deleteSuccess": "Мастерство удалено"
+    "deleteSuccess": "Мастерство удалено",
+    "edit": "Редактировать мастерство",
+    "deleteTitle": "Удалить мастерство",
+    "notFound": "Мастерство не найдено",
+    "noItemsFound": "Мастерство не найдено",
+    "search": "Поиск мастерства...",
+    "xpPerPoint": "Опыт за очко",
+    "maxPoints": "Макс. очков"
 }

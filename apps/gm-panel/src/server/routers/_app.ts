@@ -14,6 +14,8 @@ import { transactionsRouter } from './transactions';
 import { gmLogRouter } from './gmLog';
 import { characterExtrasRouter } from './characterExtras';
 import { gameConfigRouter } from './gameConfig';
+import { analyticsRouter } from './analytics';
+import { gameAnalyticsRouter } from './gameAnalytics';
 
 export const appRouter = createTRPCRouter({
   accounts: accountsRouter,
@@ -31,6 +33,8 @@ export const appRouter = createTRPCRouter({
   gmLog: gmLogRouter,
   characterExtras: characterExtrasRouter,
   gameConfig: gameConfigRouter,
+  analytics: analyticsRouter,
+  gameAnalytics: gameAnalyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

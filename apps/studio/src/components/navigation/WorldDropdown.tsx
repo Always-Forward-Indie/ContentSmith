@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-const WORLD_PATHS = ['/zones', '/spawn-zones', '/respawn-zones', '/zone-events', '/timed-champions', '/world-objects', '/maps']
+const WORLD_PATHS = ['/zones', '/spawn-zones', '/class-spawn-zones', '/respawn-zones', '/zone-events', '/timed-champions', '/world-objects', '/maps']
 
 export function NavigationWorldDropdown() {
     const t = useTranslations('navigation')
@@ -40,6 +40,9 @@ export function NavigationWorldDropdown() {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link href={`/${locale}/spawn-zones`} className="w-full">{t('spawnZones')}</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href={`/${locale}/class-spawn-zones`} className="w-full">{t('classSpawnZones')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                     <Link href={`/${locale}/respawn-zones`} className="w-full">{t('respawnZones')}</Link>

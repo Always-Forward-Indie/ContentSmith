@@ -13,9 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
+import type { SpawnZoneShape } from '@contentsmith/validation'
 
 function slugify(str: string) {
     return str.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
@@ -42,6 +44,11 @@ export default function ZoneDetailPage() {
     const [eMaxY, setEMaxY] = useState('0')
     const [eExplorationXp, setEExplorationXp] = useState('100')
     const [eChampionKills, setEChampionKills] = useState('100')
+    const [eShapeType, setEShapeType] = useState<SpawnZoneShape>('RECT')
+    const [eCenterX, setECenterX] = useState('0')
+    const [eCenterY, setECenterY] = useState('0')
+    const [eInnerRadius, setEInnerRadius] = useState('0')
+    const [eOuterRadius, setEOuterRadius] = useState('0')
 
     // spawn zone form
     const [spawnZoneName, setSpawnZoneName] = useState('')
@@ -76,6 +83,11 @@ export default function ZoneDetailPage() {
         setEMaxY(String(zone.maxY ?? 0))
         setEExplorationXp(String(zone.explorationXpReward ?? 100))
         setEChampionKills(String(zone.championThresholdKills ?? 100))
+        setEShapeType((zone.shapeType as SpawnZoneShape | null) ?? 'RECT')
+        setECenterX(String(zone.centerX ?? 0))
+        setECenterY(String(zone.centerY ?? 0))
+        setEInnerRadius(String(zone.innerRadius ?? 0))
+        setEOuterRadius(String(zone.outerRadius ?? 0))
         setEditing(true)
     }
 
@@ -187,6 +199,48 @@ export default function ZoneDetailPage() {
                                 </div>
                             </div>
 
+                            {/* Shape type */}
+                            <div className="space-y-1.5">
+                                <Label>{t('fields.shapeType')}</Label>
+                                <Select value={eShapeType} onValueChange={v => setEShapeType(v as SpawnZoneShape)}>
+                                    <SelectTrigger className="h-9">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="RECT">{t('shapes.RECT')}</SelectItem>
+                                        <SelectItem value="CIRCLE">{t('shapes.CIRCLE')}</SelectItem>
+                                        <SelectItem value="ANNULUS">{t('shapes.ANNULUS')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* CIRCLE / ANNULUS fields */}
+                            {(eShapeType === 'CIRCLE' || eShapeType === 'ANNULUS') && (
+                                <div className="space-y-3 p-3 bg-muted/40 rounded-md border">
+                                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('shapeParams')}</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">{t('fields.centerX')}</Label>
+                                            <Input type="number" value={eCenterX} onChange={e => setECenterX(e.target.value)} className="h-8 text-sm" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">{t('fields.centerY')}</Label>
+                                            <Input type="number" value={eCenterY} onChange={e => setECenterY(e.target.value)} className="h-8 text-sm" />
+                                        </div>
+                                        {eShapeType === 'ANNULUS' && (
+                                            <div className="space-y-1">
+                                                <Label className="text-xs">{t('fields.innerRadius')}</Label>
+                                                <Input type="number" min={0} value={eInnerRadius} onChange={e => setEInnerRadius(e.target.value)} className="h-8 text-sm" />
+                                            </div>
+                                        )}
+                                        <div className="space-y-1">
+                                            <Label className="text-xs">{t('fields.outerRadius')}</Label>
+                                            <Input type="number" min={0} value={eOuterRadius} onChange={e => setEOuterRadius(e.target.value)} className="h-8 text-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex gap-2 pt-1">
                                 <Button size="sm" disabled={updateZone.isPending}
                                     onClick={() => updateZone.mutate({
@@ -197,6 +251,11 @@ export default function ZoneDetailPage() {
                                         minY: Number(eMinY), maxY: Number(eMaxY),
                                         explorationXpReward: Number(eExplorationXp),
                                         championThresholdKills: Number(eChampionKills),
+                                        shapeType: eShapeType,
+                                        centerX: (eShapeType !== 'RECT') ? Number(eCenterX) : undefined,
+                                        centerY: (eShapeType !== 'RECT') ? Number(eCenterY) : undefined,
+                                        innerRadius: Number(eInnerRadius),
+                                        outerRadius: Number(eOuterRadius),
                                     })}>
                                     <Check className="h-4 w-4 mr-1" />{updateZone.isPending ? tc('saving') : tc('save')}
                                 </Button>
@@ -215,10 +274,18 @@ export default function ZoneDetailPage() {
                                 {zone.isSafeZone && <Badge variant="secondary" className="text-xs">{t('badges.safeZone')}</Badge>}
                                 {!zone.isPvp && !zone.isSafeZone && <span className="text-muted-foreground">{t('badges.normalZone')}</span>}
                             </div>
-                            {(zone.minX != null || zone.maxX != null) && (
+                            <div><span className="text-muted-foreground">{t('fields.shapeType')}:</span> <Badge variant="outline" className="ml-1 text-xs font-mono">{zone.shapeType ?? 'RECT'}</Badge></div>
+                            {(zone.shapeType === 'CIRCLE' || zone.shapeType === 'ANNULUS') ? (
                                 <div className="col-span-2 text-xs text-muted-foreground">
-                                    {t('boundaries')}: X [{zone.minX ?? 0}…{zone.maxX ?? 0}] Y [{zone.minY ?? 0}…{zone.maxY ?? 0}]
+                                    {t('shapeParams')}: center ({zone.centerX?.toFixed(1)}, {zone.centerY?.toFixed(1)}){' '}
+                                    {zone.shapeType === 'ANNULUS' ? `inner ${zone.innerRadius} / ` : ''}outer {zone.outerRadius}
                                 </div>
+                            ) : (
+                                (zone.minX != null || zone.maxX != null) && (
+                                    <div className="col-span-2 text-xs text-muted-foreground">
+                                        {t('boundaries')}: X [{zone.minX ?? 0}…{zone.maxX ?? 0}] Y [{zone.minY ?? 0}…{zone.maxY ?? 0}]
+                                    </div>
+                                )
                             )}
                             {zone.explorationXpReward != null && (
                                 <div><span className="text-muted-foreground">{t('fields.explorationXpReward')}:</span> <span className="font-medium ml-1">{zone.explorationXpReward}</span></div>

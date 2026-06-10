@@ -21,9 +21,23 @@
         "zoneName": "Название зоны",
         "gameZone": "Игровой регион (необязательно)",
         "selectGameZone": "Выберите регион...",
+        "exclusionGameZone": "Зона исключения (необязательно)",
+        "selectExclusionZone": "Выберите зону исключения...",
+        "noExclusion": "— Без исключения —",
         "coordinates": "Координаты зоны спавна",
         "minCoords": "Мин. координаты (X / Y / Z)",
-        "maxCoords": "Макс. координаты (X / Y / Z)"
+        "maxCoords": "Макс. координаты (X / Y / Z)",
+        "shapeType": "Тип формы",
+        "centerX": "Центр X",
+        "centerY": "Центр Y",
+        "innerRadius": "Внутренний радиус",
+        "outerRadius": "Внешний радиус",
+        "shapeParams": "Параметры формы"
+    },
+    "shapes": {
+        "RECT": "Прямоугольник",
+        "CIRCLE": "Круг",
+        "ANNULUS": "Кольцо (аннулус)"
     },
     "mobs": {
         "title": "Мобы в этой зоне",

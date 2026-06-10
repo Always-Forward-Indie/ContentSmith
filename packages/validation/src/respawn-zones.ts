@@ -8,6 +8,17 @@ export const respawnZoneSchema = z.object({
   z: z.number().default(0),
   zoneId: z.number().int().positive().default(1),
   isDefault: z.boolean().default(false),
+  minX: z.number().default(0),
+  maxX: z.number().default(0),
+  minY: z.number().default(0),
+  maxY: z.number().default(0),
+  minZ: z.number().default(0),
+  maxZ: z.number().default(0),
+  shapeType: z.enum(['RECT', 'CIRCLE', 'ANNULUS']).default('RECT'),
+  centerX: z.number().default(0),
+  centerY: z.number().default(0),
+  innerRadius: z.number().default(0),
+  outerRadius: z.number().default(0),
 });
 
 export const createRespawnZoneSchema = respawnZoneSchema.omit({ id: true });

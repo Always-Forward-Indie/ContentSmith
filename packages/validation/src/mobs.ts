@@ -67,6 +67,7 @@ export const mobPositionSchema = z.object({
   x: z.number().nullable().optional(),
   y: z.number().nullable().optional(),
   z: z.number().nullable().optional(),
+  rotZ: z.number().nullable().optional(),
 });
 
 export const createMobPositionSchema = mobPositionSchema.omit({ id: true });

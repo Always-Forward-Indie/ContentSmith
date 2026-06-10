@@ -29,6 +29,7 @@
     "targetTypes": "Target Types",
     "characterGenders": "Character Genders",
     "spawnZones": "Spawn Zones",
+    "classSpawnZones": "Class Spawn Zones",
     "factions": "Factions",
     "damageElements": "Damage Elements",
     "masteryDefinitions": "Mastery",

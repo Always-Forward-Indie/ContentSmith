@@ -60,6 +60,7 @@ const respawnZones = loadJson('respawn-zones.json');
 const zoneEvents = loadJson('zone-events.json');
 const timedChampions = loadJson('timed-champions.json');
 const worldObjects = loadJson('world-objects.json');
+const balance = loadJson('balance.json');
 
 export default {
   common,
@@ -103,4 +104,5 @@ export default {
   zoneEvents,
   timedChampions,
   worldObjects,
+  balance,
 };

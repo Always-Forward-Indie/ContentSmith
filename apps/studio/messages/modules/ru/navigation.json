@@ -29,6 +29,7 @@
     "targetTypes": "Типы целей",
     "characterGenders": "Гендеры персонажей",
     "spawnZones": "Спавн зоны",
+    "classSpawnZones": "Спавн классов",
     "factions": "Фракции",
     "damageElements": "Элементы урона",
     "masteryDefinitions": "Мастерство",

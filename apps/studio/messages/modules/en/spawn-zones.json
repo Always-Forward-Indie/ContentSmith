@@ -21,9 +21,23 @@
         "zoneName": "Zone Name",
         "gameZone": "Game Region (optional)",
         "selectGameZone": "Select a game region...",
+        "exclusionGameZone": "Exclusion Zone (optional)",
+        "selectExclusionZone": "Select exclusion zone...",
+        "noExclusion": "— No exclusion —",
         "coordinates": "Spawn Area Coordinates",
         "minCoords": "Min Coords (X / Y / Z)",
-        "maxCoords": "Max Coords (X / Y / Z)"
+        "maxCoords": "Max Coords (X / Y / Z)",
+        "shapeType": "Shape Type",
+        "centerX": "Center X",
+        "centerY": "Center Y",
+        "innerRadius": "Inner Radius",
+        "outerRadius": "Outer Radius",
+        "shapeParams": "Shape Parameters"
+    },
+    "shapes": {
+        "RECT": "Rectangle",
+        "CIRCLE": "Circle",
+        "ANNULUS": "Ring (Annulus)"
     },
     "mobs": {
         "title": "Mobs in this zone",

@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import { ChevronRight, Swords, Plus, Trash2, Save, Pencil, X } from 'lucide-react'
+import { ClassBalancePanel } from '@/components/balance/ClassBalancePanel'
 import { trpc } from '@/lib/trpc'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -214,7 +215,7 @@ export default function ClassDetailPage() {
     const { data: formulas, refetch: refetchFormulas } = trpc.classes.listStatFormulas.useQuery({ classId })
     const { data: skillTree, refetch: refetchTree } = trpc.classes.listSkillTree.useQuery({ classId })
     const { data: allAttrs } = trpc.entityAttributes.list.useQuery({ page: 1, pageSize: 100 })
-    const { data: allSkills } = trpc.skills.list.useQuery({ page: 1, limit: 200 })
+    const { data: allSkills } = trpc.skills.list.useQuery({ page: 1, limit: 100 })
 
     // Mutations
     const updateClass = trpc.classes.update.useMutation({ onSuccess: () => { toast.success(t('classUpdated')); refetchClass() } })
@@ -448,6 +449,15 @@ export default function ClassDetailPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
+
+            {/* Balance overview */}
+            {(formulas ?? []).length > 0 && (
+                <ClassBalancePanel
+                    classId={classId}
+                    className={cls.name}
+                    formulas={formulas!}
+                />
+            )}
         </div>
     )
 }

@@ -15,10 +15,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid multipart form data' }, { status: 400 });
   }
 
-  const file = formData.get('file');
-  if (!file || !(file instanceof File)) {
+  const raw = formData.get('file');
+  // `File` global is unavailable in Node.js RSC runtime; `File extends Blob` and Blob IS global.
+  if (!raw || !(raw instanceof Blob)) {
     return NextResponse.json({ error: 'No file provided' }, { status: 400 });
   }
+  // Next.js FormData yields File-shaped Blobs (name + type + size + arrayBuffer).
+  const file = raw as Blob & { name: string };
 
   if (!ALLOWED_TYPES.has(file.type)) {
     return NextResponse.json(

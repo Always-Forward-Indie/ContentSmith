@@ -1,5 +1,52 @@
 # Packages — Changelog
 
+## [Unreleased] — 2026-06-10
+
+---
+
+### `packages/database`
+
+#### Новый enum
+
+- `spawnZoneShapeEnum` (`spawn_zone_shape`): `RECT | CIRCLE | ANNULUS` — форма зоны/спавн-зоны
+
+#### Изменённые таблицы
+
+| Таблица | Изменения |
+|---|---|
+| `spawn_zones` | Добавлены поля: `shape_type` (enum), `center_x`, `center_y`, `inner_radius`, `outer_radius`, `exclusion_game_zone_id` |
+| `zones` | Добавлены поля: `shape_type` (enum), `center_x`, `center_y`, `inner_radius`, `outer_radius` |
+
+#### Новые таблицы
+
+| Таблица | Описание |
+|---|---|
+| `class_spawn_zones` | Зоны возрождения по классам персонажей: `class_id`, `zone_id`, bounds, shape, center, radius |
+
+---
+
+### `packages/validation`
+
+#### Новые схемы
+
+- `skills.ts` — `skillEffectInstanceSchema`, `createSkillEffectInstanceSchema`, `updateSkillEffectInstanceSchema` — CRUD инстансов эффектов скиллов
+- `skills.ts` — `skillEffectMappingSchema`, `createSkillEffectMappingSchema`, `updateSkillEffectMappingSchema` — per-level маппинг значений эффектов (value, tick, duration, attribute)
+
+#### Обновлённые схемы
+
+- `mobs.ts` — минорное обновление
+- `respawn-zones.ts` — расширена схема
+- `skills.ts` — добавлены поля `animationName`
+- `zones.ts` — добавлены shape, center, radius поля
+
+---
+
+### `packages/ui`
+
+Без изменений.
+
+---
+
 ## [Unreleased] — 2026-04-17
 
 ---

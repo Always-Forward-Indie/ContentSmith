@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
-import { MapPin, Plus, Trash2, Edit, AlertCircle, Search, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Map, Plus, Trash2, Edit, AlertCircle, Search, X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 import { trpc } from '@/lib/trpc'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,11 +13,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 
+interface SpawnZoneItem {
+    spawnZoneId: number
+    zoneName: string
+    gameZoneId: number | null
+    gameZoneName: string | null
+    mobCount: number
+}
+
 export default function SpawnZonesPage() {
     const locale = useLocale()
     const t = useTranslations('spawnZones')
     const tc = useTranslations('common')
-    const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
+    const [deleteTarget, setDeleteTarget] = useState<SpawnZoneItem | null>(null)
     const [searchInput, setSearchInput] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState(1)
@@ -32,11 +40,11 @@ export default function SpawnZonesPage() {
         page,
         pageSize: 20,
     })
-    const deleteZone = trpc.zones.deleteSpawnZone.useMutation({
-        onSuccess: () => { toast.success(t('spawnZoneDeleted')); refetch(); setDeleteTarget(null) },
+    const deleteSpawnZone = trpc.zones.deleteSpawnZone.useMutation({
+        onSuccess: () => { toast.success(t('spawnZoneDeleted')); refetch(); setDeleteTarget(null) }
     })
 
-    const zoneList = data?.data ?? []
+    const spawnZoneList = (data?.data ?? []) as SpawnZoneItem[]
     const pag = data?.pagination
 
     if (error) return (
@@ -51,7 +59,7 @@ export default function SpawnZonesPage() {
             <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                     <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
-                        <MapPin className="h-5 w-5" />
+                        <Map className="h-5 w-5" />
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
@@ -66,7 +74,6 @@ export default function SpawnZonesPage() {
                 </Button>
             </div>
 
-            {/* Search */}
             <div className="flex items-center gap-3">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -94,16 +101,12 @@ export default function SpawnZonesPage() {
             <Card>
                 <CardContent className="p-0">
                     {isLoading ? (
-                        <div className="space-y-3 p-4">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-9 bg-muted rounded animate-pulse" />)}</div>
-                    ) : zoneList.length === 0 ? (
+                        <div className="space-y-3 p-4">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-9 bg-muted rounded animate-pulse" />)}</div>
+                    ) : spawnZoneList.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-                            <MapPin className="h-10 w-10 opacity-30" />
+                            <Map className="h-10 w-10 opacity-30" />
                             <p className="text-sm">{searchTerm ? tc('noResults') : t('noSpawnZones')}</p>
-                            {!searchTerm && (
-                                <Button size="sm" asChild>
-                                    <Link href={`/${locale}/spawn-zones/create`}>{t('createFirstSpawnZone')}</Link>
-                                </Button>
-                            )}
+                            {!searchTerm && <Button size="sm" asChild><Link href={`/${locale}/spawn-zones/create`}>{t('createFirstSpawnZone')}</Link></Button>}
                         </div>
                     ) : (
                         <Table>
@@ -111,28 +114,34 @@ export default function SpawnZonesPage() {
                                 <TableRow>
                                     <TableHead>{t('table.zoneName')}</TableHead>
                                     <TableHead>{t('table.gameZone')}</TableHead>
-                                    <TableHead className="w-24 text-right">{t('table.actions')}</TableHead>
+                                    <TableHead className="w-24 text-center">{t('table.mobCount')}</TableHead>
+                                    <TableHead className="text-right w-32">{t('table.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {zoneList.map(zone => (
-                                    <TableRow key={zone.spawnZoneId}>
-                                        <TableCell className="font-medium">{zone.zoneName}</TableCell>
-                                        <TableCell className="text-sm text-muted-foreground">
-                                            {zone.gameZoneName ?? '—'}
+                                {spawnZoneList.map(sz => (
+                                    <TableRow key={sz.spawnZoneId}>
+                                        <TableCell>
+                                            <Link href={`/${locale}/spawn-zones/${sz.spawnZoneId}`} className="font-medium hover:underline">{sz.zoneName}</Link>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground text-sm">
+                                            {sz.gameZoneName ?? '—'}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge variant="secondary" className="text-xs font-normal">{sz.mobCount}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex items-center justify-end gap-1">
-                                                <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                                                    <Link href={`/${locale}/spawn-zones/${zone.spawnZoneId}/edit`}>
-                                                        <Edit className="h-3.5 w-3.5" />
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/${locale}/maps?focus=spawnZone:${sz.spawnZoneId}`} target="_blank" title="View on map">
+                                                        <ExternalLink className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                                <Button
-                                                    variant="ghost" size="icon"
-                                                    className="h-7 w-7 text-destructive hover:text-destructive"
-                                                    onClick={() => setDeleteTarget({ id: zone.spawnZoneId, name: zone.zoneName })}
-                                                >
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/${locale}/spawn-zones/${sz.spawnZoneId}`}><Edit className="h-4 w-4" /></Link>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={() => setDeleteTarget(sz)}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -142,46 +151,45 @@ export default function SpawnZonesPage() {
                             </TableBody>
                         </Table>
                     )}
+
+                    {!isLoading && spawnZoneList.length > 0 && pag && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t">
+                            <p className="text-sm text-muted-foreground">
+                                {tc('showing', {
+                                    from: (pag.page - 1) * pag.pageSize + 1,
+                                    to: Math.min(pag.page * pag.pageSize, pag.total),
+                                    total: pag.total,
+                                })}
+                            </p>
+                            {pag.totalPages > 1 && (
+                                <div className="flex items-center gap-1">
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium px-2">{page} / {pag.totalPages}</span>
+                                    <Button variant="outline" size="icon" className="h-8 w-8"
+                                        onClick={() => setPage(p => p + 1)} disabled={page >= pag.totalPages}>
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
-            {/* Pagination */}
-            {pag && pag.totalPages > 1 && (
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>
-                        {tc('showingOf', {
-                            from: (page - 1) * 20 + 1,
-                            to: Math.min(page * 20, pag.total),
-                            total: pag.total,
-                        })}
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === 1} onClick={() => setPage(p => p - 1)}>
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <span>{page} / {pag.totalPages}</span>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={page === pag.totalPages} onClick={() => setPage(p => p + 1)}>
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete dialog */}
-            <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+            <Dialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{deleteTarget && t('deleteTitle', { name: deleteTarget.name })}</DialogTitle>
+                        <DialogTitle>{t('deleteTitle', { name: deleteTarget?.zoneName ?? '' })}</DialogTitle>
                         <DialogDescription>{t('deleteDescription')}</DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDeleteTarget(null)}>{tc('cancel')}</Button>
-                        <Button
-                            variant="destructive"
-                            disabled={deleteZone.isPending}
-                            onClick={() => deleteTarget && deleteZone.mutate({ spawnZoneId: deleteTarget.id })}
-                        >
-                            {tc('delete')}
+                        <Button variant="destructive" disabled={deleteSpawnZone.isPending}
+                            onClick={() => deleteTarget && deleteSpawnZone.mutate({ spawnZoneId: deleteTarget.spawnZoneId })}>
+                            {deleteSpawnZone.isPending ? '…' : tc('delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

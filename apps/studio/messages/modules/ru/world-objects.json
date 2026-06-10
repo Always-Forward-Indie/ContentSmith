@@ -22,5 +22,13 @@
     "deleteConfirmDescription": "Удалить объект {slug}?",
     "createSuccess": "Объект создан",
     "updateSuccess": "Объект обновлён",
-    "deleteSuccess": "Объект удалён"
+    "deleteSuccess": "Объект удалён",
+    "edit": "Редактировать объект мира",
+    "deleteTitle": "Удалить объект мира",
+    "create": "Создать объект",
+    "createDescription": "Создать новый интерактивный объект мира",
+    "noItems": "Объекты мира не найдены",
+    "filterByType": "Фильтр по типу...",
+    "rotationZ": "Поворот Z",
+    "selectZone": "Выберите зону..."
 }

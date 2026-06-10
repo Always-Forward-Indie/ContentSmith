@@ -11,17 +11,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
 
-// Схема валидации для формы
 const createSkillFormSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
     slug: z.string().min(1, 'Slug is required').max(255),
     schoolId: z.number().int().positive('School is required'),
     scaleStatId: z.number().int().positive('Scale type is required'),
     isPassive: z.boolean().default(false),
+    animationName: z.string().max(100).nullable().optional(),
 });
 
 type CreateSkillFormData = z.infer<typeof createSkillFormSchema>;
@@ -32,13 +33,9 @@ export default function CreateSkillPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Query для получения школ скилов
     const { data: schools, isLoading: schoolsLoading } = trpc.skills.getSchools.useQuery();
-
-    // Query для получения типов масштабирования
     const { data: scaleTypes, isLoading: scaleTypesLoading } = trpc.skills.getScaleTypes.useQuery();
 
-    // Form setup
     const {
         register,
         handleSubmit,
@@ -50,7 +47,6 @@ export default function CreateSkillPage() {
         defaultValues: { isPassive: false },
     });
 
-    // Mutation для создания скила
     const createSkillMutation = trpc.skills.create.useMutation({
         onSuccess: () => {
             toast.success(t('skillCreated'));
@@ -67,59 +63,43 @@ export default function CreateSkillPage() {
         createSkillMutation.mutate(data);
     };
 
-    const handleBack = () => {
-        router.push('/skills');
-    };
+    const handleBack = () => router.push('/skills');
 
-    // Автогенерация slug из названия
-    const generateSlug = (name: string) => {
-        return name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    };
+    const generateSlug = (name: string) =>
+        name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const name = e.target.value;
-        const slug = generateSlug(name);
-        setValue('slug', slug);
+        setValue('slug', generateSlug(e.target.value));
     };
 
     if (schoolsLoading || scaleTypesLoading) {
         return (
             <div className="flex items-center justify-center p-8">
-                <div className="text-lg">{commonT('loading')}</div>
+                <div className="text-sm text-muted-foreground">{commonT('loading')}</div>
             </div>
         );
     }
 
     return (
         <div className="container mx-auto p-6 max-w-2xl">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" onClick={handleBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
+            <div className="flex items-center gap-3 mb-6">
+                <Button variant="ghost" size="sm" onClick={handleBack} className="h-8">
+                    <ArrowLeft className="h-4 w-4 mr-1.5" />
                     {commonT('back')}
                 </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">{t('createSkill')}</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Создание нового скила в системе
-                    </p>
-                </div>
+                <div className="h-4 w-px bg-border" />
+                <h1 className="text-sm font-semibold">{t('createSkill')}</h1>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('createSkill')}</CardTitle>
-                    <CardDescription>
-                        Заполните информацию о новом скиле
-                    </CardDescription>
+                    <CardTitle className="text-base">{t('createSkill')}</CardTitle>
+                    <CardDescription>{t('skillEditCardDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Name */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="name">{t('skillName')}</Label>
                             <Input
                                 id="name"
@@ -128,72 +108,102 @@ export default function CreateSkillPage() {
                                     register('name').onChange(e);
                                     handleNameChange(e);
                                 }}
-                                placeholder="Введите название скила"
+                                placeholder={t('skillNamePlaceholder')}
                             />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name.message}</p>
-                            )}
+                            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
+                        {/* Slug */}
+                        <div className="space-y-1.5">
                             <Label htmlFor="slug">{t('skillSlug')}</Label>
                             <Input
                                 id="slug"
                                 {...register('slug')}
                                 placeholder="skill-slug"
+                                className="font-mono text-sm"
                             />
-                            {errors.slug && (
-                                <p className="text-sm text-red-600">{errors.slug.message}</p>
-                            )}
+                            {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="schoolId">{t('skillSchool')}</Label>
-                            <select
-                                id="schoolId"
-                                {...register('schoolId', { valueAsNumber: true })}
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="">{t('selectSchool')}</option>
-                                {schools?.map((school) => (
-                                    <option key={school.id} value={school.id}>
-                                        {school.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.schoolId && (
-                                <p className="text-sm text-red-600">{t('schoolRequired')}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="scaleStatId">{t('skillScaleType')}</Label>
-                            <select
-                                id="scaleStatId"
-                                {...register('scaleStatId', { valueAsNumber: true })}
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="">{t('selectScaleType')}</option>
-                                {scaleTypes?.map((scaleType) => (
-                                    <option key={scaleType.id} value={scaleType.id}>
-                                        {scaleType.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.scaleStatId && (
-                                <p className="text-sm text-red-600">{t('scaleTypeRequired')}</p>
-                            )}
-                        </div>
-
-                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                            <div>
-                                <p className="text-sm font-medium">{t('isPassive')}</p>
+                        {/* School + Scale stat in a row */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label>{t('skillSchool')}</Label>
+                                <Controller
+                                    name="schoolId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            value={field.value ? String(field.value) : ''}
+                                            onValueChange={(v) => field.onChange(parseInt(v))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder={t('selectSchool')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {schools?.map((s) => (
+                                                    <SelectItem key={s.id} value={String(s.id)}>
+                                                        {s.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                {errors.schoolId && <p className="text-xs text-destructive">{t('schoolRequired')}</p>}
                             </div>
-                            <Controller name="isPassive" control={control}
-                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
+
+                            <div className="space-y-1.5">
+                                <Label>{t('skillScaleType')}</Label>
+                                <Controller
+                                    name="scaleStatId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Select
+                                            value={field.value ? String(field.value) : ''}
+                                            onValueChange={(v) => field.onChange(parseInt(v))}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder={t('selectScaleType')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {scaleTypes?.map((st) => (
+                                                    <SelectItem key={st.id} value={String(st.id)}>
+                                                        {st.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                />
+                                {errors.scaleStatId && <p className="text-xs text-destructive">{t('scaleTypeRequired')}</p>}
+                            </div>
                         </div>
 
-                        <div className="flex gap-4 pt-4">
+                        {/* Is Passive toggle */}
+                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                            <p className="text-sm font-medium">{t('isPassive')}</p>
+                            <Controller
+                                name="isPassive"
+                                control={control}
+                                render={({ field }) => (
+                                    <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                                )}
+                            />
+                        </div>
+
+                        {/* Animation Name */}
+                        <div className="space-y-1.5">
+                            <Label htmlFor="animationName">{t('animationName')}</Label>
+                            <Input
+                                id="animationName"
+                                {...register('animationName')}
+                                placeholder={t('animationNamePlaceholder')}
+                            />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-3 pt-1">
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? commonT('loading') : commonT('create')}
                             </Button>

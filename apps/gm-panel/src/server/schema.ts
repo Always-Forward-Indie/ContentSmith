@@ -440,3 +440,22 @@ export const gameConfig = pgTable('game_config', {
   description: text('description'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ─── Game Analytics (migration 058) ───────────────────────
+// Append-only event log written by Game Server via analytics_event packets.
+// Never updated or deleted manually.
+export const gameAnalytics = pgTable('game_analytics', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  eventType: varchar('event_type', { length: 64 }).notNull(),
+  characterId: bigint('character_id', { mode: 'number' }).references(() => characters.id, { onDelete: 'set null' }),
+  sessionId: varchar('session_id', { length: 128 }).notNull().default(''),
+  level: smallint('level').notNull().default(0),
+  zoneId: integer('zone_id').notNull().default(0),
+  payload: jsonb('payload').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  eventTypeIdx: index('idx_ga_event_type').on(t.eventType, t.createdAt),
+  characterIdx:  index('idx_ga_character').on(t.characterId, t.createdAt),
+  sessionIdx:    index('idx_ga_session').on(t.sessionId),
+  createdIdx:    index('idx_ga_created_at').on(t.createdAt),
+}));

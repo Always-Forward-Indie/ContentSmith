@@ -15,5 +15,10 @@
     "deleteConfirmDescription": "Delete emote {displayName}?",
     "createSuccess": "Emote created",
     "updateSuccess": "Emote updated",
-    "deleteSuccess": "Emote deleted"
+    "deleteSuccess": "Emote deleted",
+    "edit": "Edit Emote",
+    "deleteTitle": "Delete Emote",
+    "notFound": "Emote not found",
+    "noItemsFound": "No emotes found",
+    "id": "ID"
 }

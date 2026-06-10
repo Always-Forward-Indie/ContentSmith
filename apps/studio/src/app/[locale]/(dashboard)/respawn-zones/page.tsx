@@ -1,134 +1,154 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Plus, Edit, Trash2, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
+import { Map, Plus, Trash2, Edit, AlertCircle, Search, X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { trpc } from '@/lib/trpc'
+import { toast } from 'sonner'
 
-interface RespawnZone {
+interface RespawnZoneItem {
     id: number
     name: string
-    x?: number | null
-    y?: number | null
-    z?: number | null
-    zoneId?: number | null
-    isDefault?: boolean | null
-    zoneName?: string | null
-}
-
-function TableSkeleton() {
-    return (
-        <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4 px-4">
-                    <div className="h-4 bg-muted rounded animate-pulse flex-1" />
-                    <div className="h-8 bg-muted rounded animate-pulse w-20" />
-                </div>
-            ))}
-        </div>
-    )
+    x: number
+    y: number
+    z: number
+    zoneId: number
+    isDefault: boolean
+    zoneName: string | null
 }
 
 export default function RespawnZonesPage() {
-    const t = useTranslations('respawnZones')
-    const commonT = useTranslations('common')
     const locale = useLocale()
-    const router = useRouter()
+    const t = useTranslations('respawnZones')
+    const tc = useTranslations('common')
+    const [deleteTarget, setDeleteTarget] = useState<RespawnZoneItem | null>(null)
+    const [searchInput, setSearchInput] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
     const [page, setPage] = useState(1)
-    const [itemToDelete, setItemToDelete] = useState<RespawnZone | null>(null)
 
-    const { data, isLoading, error, refetch } = trpc.respawnZones.list.useQuery({ page, pageSize: 20 })
-    const deleteItem = trpc.respawnZones.delete.useMutation({ onSuccess: () => { refetch(); setItemToDelete(null) } })
-    const list: RespawnZone[] = data?.data ?? []
+    useEffect(() => {
+        const timer = setTimeout(() => { setSearchTerm(searchInput); setPage(1) }, 350)
+        return () => clearTimeout(timer)
+    }, [searchInput])
+
+    const { data, isLoading, error, refetch } = trpc.respawnZones.list.useQuery({
+        search: searchTerm || undefined,
+        page,
+        pageSize: 20,
+    })
+    const deleteRespawnZone = trpc.respawnZones.delete.useMutation({
+        onSuccess: () => { toast.success(t('deleteSuccess')); refetch(); setDeleteTarget(null) }
+    })
+
+    const respawnList = (data?.data ?? []) as RespawnZoneItem[]
+    const pag = data?.pagination
 
     if (error) return (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
             <AlertCircle className="h-10 w-10 text-destructive/70" />
-            <p className="text-destructive font-medium">{commonT('error')}: {error.message}</p>
+            <p className="text-destructive font-medium">Error: {error.message}</p>
         </div>
     )
 
     return (
-        <TooltipProvider delayDuration={300}>
-            <div className="space-y-6">
-                <div className="flex items-start justify-between">
+        <div className="space-y-6">
+            <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                        <Map className="h-5 w-5" />
+                    </div>
                     <div>
                         <div className="flex items-center gap-2">
                             <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-                            {!isLoading && <Badge variant="secondary" className="text-xs font-normal">{data?.pagination?.total ?? 0}</Badge>}
+                            {!isLoading && pag && <Badge variant="secondary" className="text-xs font-normal">{pag.total}</Badge>}
                         </div>
                         <p className="text-sm text-muted-foreground mt-0.5">{t('description')}</p>
                     </div>
-                    <Link href={`/${locale}/respawn-zones/create`}>
-                        <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" />{t('createNew')}</Button>
-                    </Link>
                 </div>
+                <Button size="sm" className="gap-1.5" asChild>
+                    <Link href={`/${locale}/respawn-zones/create`}><Plus className="h-4 w-4" />{t('createNew')}</Link>
+                </Button>
+            </div>
 
-                <div className="rounded-lg border bg-card">
-                    {isLoading ? <div className="p-6"><TableSkeleton /></div> : (
+            <div className="flex items-center gap-3">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                        placeholder={t('searchPlaceholder')}
+                        value={searchInput}
+                        onChange={e => setSearchInput(e.target.value)}
+                        className="pl-9 pr-8 w-64"
+                    />
+                    {searchInput && (
+                        <button onClick={() => setSearchInput('')}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+                </div>
+                {searchTerm && (
+                    <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground"
+                        onClick={() => { setSearchInput(''); setSearchTerm(''); setPage(1) }}>
+                        <X className="h-3.5 w-3.5" />{tc('reset')}
+                    </Button>
+                )}
+            </div>
+
+            <Card>
+                <CardContent className="p-0">
+                    {isLoading ? (
+                        <div className="space-y-3 p-4">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-9 bg-muted rounded animate-pulse" />)}</div>
+                    ) : respawnList.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+                            <Map className="h-10 w-10 opacity-30" />
+                            <p className="text-sm">{searchTerm ? tc('noResults') : t('noItemsFound')}</p>
+                            {!searchTerm && <Button size="sm" asChild><Link href={`/${locale}/respawn-zones/create`}>{t('createNew')}</Link></Button>}
+                        </div>
+                    ) : (
                         <Table>
                             <TableHeader>
-                                <TableRow className="hover:bg-transparent">
-                                    <TableHead className="pl-4">{t('id')}</TableHead>
+                                <TableRow>
                                     <TableHead>{t('name')}</TableHead>
                                     <TableHead>{t('zoneName')}</TableHead>
-                                    <TableHead>X</TableHead>
-                                    <TableHead>Y</TableHead>
-                                    <TableHead>Z</TableHead>
-                                    <TableHead>{t('isDefault')}</TableHead>
-                                    <TableHead className="text-right pr-4">{commonT('actions')}</TableHead>
+                                    <TableHead className="w-32 text-center">{t('positionX')}/{t('positionY')}/{t('positionZ')}</TableHead>
+                                    <TableHead className="w-24 text-center">{t('isDefault')}</TableHead>
+                                    <TableHead className="text-right w-32">{tc('actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {list.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={8} className="py-16">
-                                            <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                                                <p className="text-sm font-medium">{t('noItemsFound')}</p>
-                                                <Link href={`/${locale}/respawn-zones/create`}>
-                                                    <Button variant="outline" size="sm" className="mt-1 gap-1.5"><Plus className="h-3.5 w-3.5" />{t('createNew')}</Button>
-                                                </Link>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : list.map((item) => (
-                                    <TableRow key={item.id} className="group cursor-pointer" onClick={() => router.push(`/${locale}/respawn-zones/${item.id}`)}>
-                                        <TableCell className="pl-4 font-mono text-sm">{item.id}</TableCell>
-                                        <TableCell className="font-mono text-sm">{item.name}</TableCell>
-                                        <TableCell>{item.zoneName ?? '—'}</TableCell>
-                                        <TableCell>{item.x ?? '—'}</TableCell>
-                                        <TableCell>{item.y ?? '—'}</TableCell>
-                                        <TableCell>{item.z ?? '—'}</TableCell>
+                                {respawnList.map(rz => (
+                                    <TableRow key={rz.id}>
                                         <TableCell>
-                                            <Badge variant={item.isDefault ? 'default' : 'secondary'}>
-                                                {item.isDefault ? commonT('yes') : commonT('no')}
-                                            </Badge>
+                                            <Link href={`/${locale}/respawn-zones/${rz.id}`} className="font-medium hover:underline">{rz.name}</Link>
                                         </TableCell>
-                                        <TableCell className="pr-4" onClick={e => e.stopPropagation()}>
-                                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Link href={`/${locale}/respawn-zones/${item.id}`}>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
-                                                        </Link>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>{commonT('edit')}</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setItemToDelete(item)} disabled={deleteItem.isLoading}>
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>{commonT('delete')}</TooltipContent>
-                                                </Tooltip>
+                                        <TableCell className="text-muted-foreground text-sm">{rz.zoneName ?? '—'}</TableCell>
+                                        <TableCell className="text-center font-mono text-xs tabular-nums">
+                                            {rz.x}, {rz.y}, {rz.z}
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            {rz.isDefault ? <Badge variant="secondary" className="text-xs">Default</Badge> : <span className="text-muted-foreground text-xs">—</span>}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="View on map">
+                                                    <Link href={`/${locale}/maps?focus=respawn:${rz.id}`} target="_blank">
+                                                        <ExternalLink className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                                                    <Link href={`/${locale}/respawn-zones/${rz.id}`}><Edit className="h-4 w-4" /></Link>
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive"
+                                                    onClick={() => setDeleteTarget(rz)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -136,50 +156,49 @@ export default function RespawnZonesPage() {
                             </TableBody>
                         </Table>
                     )}
-                    {!isLoading && list.length > 0 && data?.pagination && (
+
+                    {!isLoading && respawnList.length > 0 && pag && (
                         <div className="flex items-center justify-between px-4 py-3 border-t">
-                            <p className="text-sm text-muted-foreground">{t('showingResults', {
-                                from: (data.pagination.page - 1) * data.pagination.pageSize + 1,
-                                to: Math.min(data.pagination.page * data.pagination.pageSize, data.pagination.total),
-                                total: data.pagination.total,
-                            })}</p>
-                            {data.pagination.totalPages > 1 && (
+                            <p className="text-sm text-muted-foreground">
+                                {tc('showing', {
+                                    from: (pag.page - 1) * pag.pageSize + 1,
+                                    to: Math.min(pag.page * pag.pageSize, pag.total),
+                                    total: pag.total,
+                                })}
+                            </p>
+                            {pag.totalPages > 1 && (
                                 <div className="flex items-center gap-1">
                                     <Button variant="outline" size="icon" className="h-8 w-8"
                                         onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
                                         <ChevronLeft className="h-4 w-4" />
                                     </Button>
-                                    <span className="text-sm font-medium px-2">{page}</span>
+                                    <span className="text-sm font-medium px-2">{page} / {pag.totalPages}</span>
                                     <Button variant="outline" size="icon" className="h-8 w-8"
-                                        onClick={() => setPage(p => p + 1)} disabled={page >= data.pagination.totalPages}>
+                                        onClick={() => setPage(p => p + 1)} disabled={page >= pag.totalPages}>
                                         <ChevronRight className="h-4 w-4" />
                                     </Button>
                                 </div>
                             )}
                         </div>
                     )}
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
-            <Dialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
-                <DialogContent className="max-w-md">
+            <Dialog open={!!deleteTarget} onOpenChange={open => { if (!open) setDeleteTarget(null) }}>
+                <DialogContent>
                     <DialogHeader>
-                        <div className="flex items-center gap-3 mb-1">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-destructive/10 text-destructive shrink-0">
-                                <Trash2 className="h-5 w-5" />
-                            </div>
-                            <DialogTitle className="text-lg">{t('deleteTitle')}</DialogTitle>
-                        </div>
-                        <DialogDescription className="pt-1">{t('deleteDescription', { name: itemToDelete?.name || '' })}</DialogDescription>
+                        <DialogTitle>{t('deleteConfirmDescription', { name: deleteTarget?.name ?? '' })}</DialogTitle>
+                        <DialogDescription>{tc('confirmDelete')}</DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button variant="outline" onClick={() => setItemToDelete(null)} disabled={deleteItem.isLoading}>{commonT('cancel')}</Button>
-                        <Button variant="destructive" onClick={() => itemToDelete && deleteItem.mutate({ id: itemToDelete.id })} disabled={deleteItem.isLoading}>
-                            {deleteItem.isLoading ? commonT('loading') : commonT('delete')}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteTarget(null)}>{tc('cancel')}</Button>
+                        <Button variant="destructive" disabled={deleteRespawnZone.isPending}
+                            onClick={() => deleteTarget && deleteRespawnZone.mutate({ id: deleteTarget.id })}>
+                            {deleteRespawnZone.isPending ? '…' : tc('delete')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </TooltipProvider>
+        </div>
     )
 }

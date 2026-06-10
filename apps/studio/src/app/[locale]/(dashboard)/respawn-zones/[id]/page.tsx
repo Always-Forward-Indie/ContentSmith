@@ -1,210 +1,221 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
-import { z } from 'zod';
+import { useState } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
+import { ArrowLeft, Map, Plus, Trash2, Edit, Pencil, Check, X, ExternalLink, AlertCircle } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
 
-const updateRespawnZoneFormSchema = z.object({
-    name: z.string().min(1, 'Name is required').max(64),
-    zoneId: z.number().optional(),
-    x: z.number().default(0),
-    y: z.number().default(0),
-    z: z.number().default(0),
-    isDefault: z.boolean().default(false),
-});
+export default function RespawnZoneDetailPage() {
+    const { id } = useParams<{ id: string }>()
+    const locale = useLocale()
+    const t = useTranslations('respawnZones')
+    const tc = useTranslations('common')
+    const respawnZoneId = Number(id)
 
-type UpdateRespawnZoneFormData = z.infer<typeof updateRespawnZoneFormSchema>;
+    const [editing, setEditing] = useState(false)
+    const [eName, setEName] = useState('')
+    const [eX, setEX] = useState('0')
+    const [eY, setEY] = useState('0')
+    const [eZ, setEZ] = useState('0')
+    const [eZoneId, setEZoneId] = useState<number>(1)
+    const [eIsDefault, setEIsDefault] = useState(false)
+    const [deleteConfirm, setDeleteConfirm] = useState(false)
 
-type ZoneOption = { id: number; slug: string; name?: string };
-
-interface RespawnZoneEditPageProps {
-    params: { id: string };
-}
-
-export default function RespawnZoneEditPage({ params }: RespawnZoneEditPageProps) {
-    const t = useTranslations('respawnZones');
-    const commonT = useTranslations('common');
-    const router = useRouter();
-    const locale = useLocale();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const zoneId = Number(params.id);
-
-    const { data: item, isLoading } = trpc.respawnZones.getById.useQuery(
-        { id: zoneId },
-        { enabled: !!zoneId }
-    );
-
-    const { data: zonesData } = trpc.zones.list.useQuery({ pageSize: 200 });
-    const zones: ZoneOption[] = (zonesData?.data ?? []) as ZoneOption[];
-
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors },
-    } = useForm<UpdateRespawnZoneFormData>({
-        resolver: zodResolver(updateRespawnZoneFormSchema),
-    });
-
-    useEffect(() => {
-        if (item) {
-            reset({
-                name: item.name,
-                zoneId: item.zoneId ?? undefined,
-                x: item.x ?? 0,
-                y: item.y ?? 0,
-                z: item.z ?? 0,
-                isDefault: item.isDefault ?? false,
-            });
-        }
-    }, [item, reset]);
+    const { data: rz, isLoading, error, refetch } = trpc.respawnZones.getById.useQuery({ id: respawnZoneId })
+    const { data: zonesData } = trpc.zones.list.useQuery({ page: 1, pageSize: 200 })
 
     const updateMutation = trpc.respawnZones.update.useMutation({
-        onSuccess: () => {
-            toast.success(t('updateSuccess'));
-            router.push(`/${locale}/respawn-zones`);
-        },
-        onError: (error) => {
-            toast.error(commonT('error'), error.message);
-            setIsSubmitting(false);
-        },
-    });
+        onSuccess: () => { toast.success(t('updateSuccess')); setEditing(false); refetch() },
+        onError: (e) => toast.error(e.message),
+    })
+    const deleteMutation = trpc.respawnZones.delete.useMutation({
+        onSuccess: () => { toast.success(t('deleteSuccess')); window.location.href = `/${locale}/respawn-zones` },
+        onError: (e) => toast.error(e.message),
+    })
 
-    const onSubmit = (data: UpdateRespawnZoneFormData) => {
-        setIsSubmitting(true);
-        updateMutation.mutate({ id: zoneId, ...data });
-    };
+    const zoneOptions = zonesData?.data ?? []
 
-    const handleBack = () => {
-        router.push(`/${locale}/respawn-zones`);
-    };
-
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <div className="text-lg">{commonT('loading')}</div>
-            </div>
-        );
+    function startEdit() {
+        if (!rz) return
+        setEName(rz.name)
+        setEX(String(rz.x))
+        setEY(String(rz.y))
+        setEZ(String(rz.z))
+        setEZoneId(rz.zoneId)
+        setEIsDefault(rz.isDefault)
+        setEditing(true)
     }
 
-    if (!item) {
-        return (
-            <div className="flex items-center justify-center p-8">
-                <div className="text-lg text-red-600">{t('notFound')}</div>
-            </div>
-        );
+    function handleSave() {
+        updateMutation.mutate({
+            id: respawnZoneId,
+            name: eName,
+            x: Number(eX),
+            y: Number(eY),
+            z: Number(eZ),
+            zoneId: eZoneId,
+            isDefault: eIsDefault,
+        })
     }
+
+    if (error) return (
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <AlertCircle className="h-10 w-10 text-destructive/70" />
+            <p className="text-destructive font-medium">Error: {error.message}</p>
+            <Button variant="outline" asChild><Link href={`/${locale}/respawn-zones`}><ArrowLeft className="h-4 w-4 mr-1" />{tc('back')}</Link></Button>
+        </div>
+    )
+
+    if (isLoading || !rz) return (
+        <div className="space-y-6 max-w-xl">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-48" />
+        </div>
+    )
 
     return (
-        <div className="container mx-auto p-6 max-w-2xl">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" onClick={handleBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    {commonT('back')}
+        <div className="space-y-6 max-w-xl">
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" asChild className="shrink-0">
+                    <Link href={`/${locale}/respawn-zones`}><ArrowLeft className="h-4 w-4" /></Link>
                 </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">{t('edit')}</h1>
-                    <p className="text-muted-foreground mt-1">ID: {zoneId}</p>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                        <Map className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold tracking-tight">{editing ? t('editZone') : rz.name}</h1>
+                        <p className="text-sm text-muted-foreground">
+                            {editing ? t('deleteTitle') : `ID: ${rz.id}${rz.isDefault ? ' · Default' : ''}`}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-1 ml-auto">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="View on map">
+                        <Link href={`/${locale}/maps?focus=respawn:${respawnZoneId}`} target="_blank">
+                            <ExternalLink className="h-4 w-4" />
+                        </Link>
+                    </Button>
+                    {!editing && (
+                        <Button variant="outline" size="sm" className="gap-1.5" onClick={startEdit}>
+                            <Pencil className="h-4 w-4" />{tc('edit')}
+                        </Button>
+                    )}
                 </div>
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('edit')}</CardTitle>
-                    <CardDescription>{item.name}</CardDescription>
+                <CardHeader className="pb-3 flex flex-row items-center justify-between">
+                    <CardTitle className="text-base">{t('editZone')}</CardTitle>
+                    {editing && (
+                        <div className="flex gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditing(false)}>
+                                <X className="h-3.5 w-3.5 mr-1" />{tc('cancel')}
+                            </Button>
+                            <Button size="sm" className="h-7 text-xs" onClick={handleSave} disabled={updateMutation.isPending}>
+                                <Check className="h-3.5 w-3.5 mr-1" />{tc('save')}
+                            </Button>
+                        </div>
+                    )}
                 </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">{t('name')}</Label>
-                            <Input id="name" {...register('name')} />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="zoneId">{t('zone')}</Label>
-                            <select
-                                id="zoneId"
-                                {...register('zoneId', { valueAsNumber: true })}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                <option value="">{t('selectZone')}</option>
-                                {zones.map((zone) => (
-                                    <option key={zone.id} value={zone.id}>
-                                        {zone.name ?? zone.slug}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="x">X</Label>
-                                <Input
-                                    id="x"
-                                    type="number"
-                                    {...register('x', { valueAsNumber: true })}
-                                />
-                                {errors.x && (
-                                    <p className="text-sm text-red-600">{errors.x.message}</p>
-                                )}
+                <CardContent className="space-y-4">
+                    {editing ? (
+                        <>
+                            <div className="space-y-1.5">
+                                <Label>{t('name')}</Label>
+                                <Input value={eName} onChange={e => setEName(e.target.value)} />
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="y">Y</Label>
-                                <Input
-                                    id="y"
-                                    type="number"
-                                    {...register('y', { valueAsNumber: true })}
-                                />
-                                {errors.y && (
-                                    <p className="text-sm text-red-600">{errors.y.message}</p>
-                                )}
+                            <div className="space-y-1.5">
+                                <Label>{t('zone')}</Label>
+                                <Select value={String(eZoneId)} onValueChange={v => setEZoneId(Number(v))}>
+                                    <SelectTrigger><SelectValue placeholder={t('selectZone')} /></SelectTrigger>
+                                    <SelectContent>
+                                        {zoneOptions.map(z => (
+                                            <SelectItem key={z.id} value={String(z.id)}>{z.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="z">Z</Label>
-                                <Input
-                                    id="z"
-                                    type="number"
-                                    {...register('z', { valueAsNumber: true })}
-                                />
+                            <div className="space-y-1.5">
+                                <Label>{t('positionX')} / {t('positionY')} / {t('positionZ')}</Label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Input type="number" step="any" placeholder="X" className="h-8 text-sm" value={eX} onChange={e => setEX(e.target.value)} />
+                                    <Input type="number" step="any" placeholder="Y" className="h-8 text-sm" value={eY} onChange={e => setEY(e.target.value)} />
+                                    <Input type="number" step="any" placeholder="Z" className="h-8 text-sm" value={eZ} onChange={e => setEZ(e.target.value)} />
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isDefault"
-                                {...register('isDefault')}
-                                className="h-4 w-4"
-                            />
-                            <Label htmlFor="isDefault">{t('isDefault')}</Label>
-                        </div>
+                            <div className="flex items-center gap-2 pt-1">
+                                <Switch checked={eIsDefault} onCheckedChange={setEIsDefault} id="default-switch" />
+                                <Label htmlFor="default-switch">{t('isDefault')}</Label>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <div>
+                                    <span className="text-muted-foreground">{t('name')}: </span>
+                                    <span className="font-medium">{rz.name}</span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">{t('zoneName')}: </span>
+                                    <span>{(rz as any).zoneName ?? t('zone') + ' #' + rz.zoneId}</span>
+                                </div>
+                                <div>
+                                    <span className="text-muted-foreground">{t('isDefault')}: </span>
+                                    {rz.isDefault ? <Badge variant="secondary" className="text-xs">Default</Badge> : <span className="text-muted-foreground">—</span>}
+                                </div>
+                            </div>
 
-                        <div className="flex gap-4 pt-4">
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? commonT('loading') : commonT('save')}
-                            </Button>
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                {commonT('cancel')}
-                            </Button>
-                        </div>
-                    </form>
+                            <div className="bg-muted/30 rounded p-3">
+                                <p className="text-xs text-muted-foreground mb-1">{t('positionX')} / {t('positionY')} / {t('positionZ')}:</p>
+                                <p className="font-mono text-sm tabular-nums">
+                                    X: {rz.x} &nbsp; Y: {rz.y} &nbsp; Z: {rz.z}
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
+
+            <div className="flex justify-between">
+                <Button variant="outline" size="sm" asChild>
+                    <Link href={`/${locale}/respawn-zones`}><ArrowLeft className="h-4 w-4 mr-1" />{tc('back')}</Link>
+                </Button>
+                <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setDeleteConfirm(true)}>
+                    <Trash2 className="h-4 w-4" />{tc('delete')}
+                </Button>
+            </div>
+
+            <Dialog open={deleteConfirm} onOpenChange={setDeleteConfirm}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('deleteConfirmDescription', { name: rz.name })}</DialogTitle>
+                        <DialogDescription>{tc('confirmDelete')}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteConfirm(false)}>{tc('cancel')}</Button>
+                        <Button variant="destructive" disabled={deleteMutation.isPending}
+                            onClick={() => deleteMutation.mutate({ id: respawnZoneId })}>
+                            {deleteMutation.isPending ? '…' : tc('delete')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
-    );
+    )
 }

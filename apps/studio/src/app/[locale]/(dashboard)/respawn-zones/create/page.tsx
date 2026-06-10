@@ -1,172 +1,114 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { trpc } from '@/lib/trpc';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
-import { ArrowLeft } from 'lucide-react';
-import { z } from 'zod';
-
-const createRespawnZoneFormSchema = z.object({
-    name: z.string().min(1, 'Name is required').max(64),
-    zoneId: z.number().optional(),
-    x: z.number().default(0),
-    y: z.number().default(0),
-    z: z.number().default(0),
-    isDefault: z.boolean().default(false),
-});
-
-type CreateRespawnZoneFormData = z.infer<typeof createRespawnZoneFormSchema>;
-
-type ZoneOption = { id: number; slug: string; name?: string };
+import { useState } from 'react'
+import Link from 'next/link'
+import { useTranslations, useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft, Map } from 'lucide-react'
+import { trpc } from '@/lib/trpc'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { toast } from 'sonner'
 
 export default function CreateRespawnZonePage() {
-    const t = useTranslations('respawnZones');
-    const commonT = useTranslations('common');
-    const router = useRouter();
-    const locale = useLocale();
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const locale = useLocale()
+    const router = useRouter()
+    const t = useTranslations('respawnZones')
+    const tc = useTranslations('common')
 
-    const { data: zonesData } = trpc.zones.list.useQuery({ pageSize: 200 });
-    const zones: ZoneOption[] = (zonesData?.data ?? []) as ZoneOption[];
+    const [name, setName] = useState('')
+    const [x, setX] = useState('0')
+    const [y, setY] = useState('0')
+    const [z, setZ] = useState('0')
+    const [zoneId, setZoneId] = useState<number | ''>(1)
+    const [isDefault, setIsDefault] = useState(false)
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<CreateRespawnZoneFormData>({
-        resolver: zodResolver(createRespawnZoneFormSchema),
-        defaultValues: {
-            isDefault: false,
+    const { data: zonesData } = trpc.zones.list.useQuery({ page: 1, pageSize: 200 })
+    const zoneOptions = zonesData?.data ?? []
+
+    const create = trpc.respawnZones.create.useMutation({
+        onSuccess: (data) => {
+            toast.success(t('createSuccess'))
+            router.push(`/${locale}/respawn-zones/${data.id}`)
         },
-    });
+        onError: (e) => toast.error(e.message),
+    })
 
-    const createMutation = trpc.respawnZones.create.useMutation({
-        onSuccess: () => {
-            toast.success(t('createSuccess'));
-            router.push(`/${locale}/respawn-zones`);
-        },
-        onError: (error) => {
-            toast.error(commonT('error'), error.message);
-            setIsSubmitting(false);
-        },
-    });
-
-    const onSubmit = (data: CreateRespawnZoneFormData) => {
-        setIsSubmitting(true);
-        createMutation.mutate(data);
-    };
-
-    const handleBack = () => {
-        router.push(`/${locale}/respawn-zones`);
-    };
+    function handleSubmit() {
+        if (!name.trim()) return
+        create.mutate({
+            name: name.trim(),
+            x: Number(x),
+            y: Number(y),
+            z: Number(z),
+            zoneId: zoneId === '' ? 1 : Number(zoneId),
+            isDefault,
+        })
+    }
 
     return (
-        <div className="container mx-auto p-6 max-w-2xl">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" onClick={handleBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    {commonT('back')}
+        <div className="space-y-6 max-w-xl">
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" asChild className="shrink-0">
+                    <Link href={`/${locale}/respawn-zones`}><ArrowLeft className="h-4 w-4" /></Link>
                 </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">{t('createNew')}</h1>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                        <Map className="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('createNew')}</h1>
+                        <p className="text-sm text-muted-foreground">{t('description')}</p>
+                    </div>
                 </div>
             </div>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>{t('createNew')}</CardTitle>
-                    <CardDescription>{t('createNew')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">{t('name')}</Label>
-                            <Input id="name" {...register('name')} />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name.message}</p>
-                            )}
-                        </div>
+                <CardHeader className="pb-3"><CardTitle className="text-base">{t('name')}</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="space-y-1.5">
+                        <Label>{t('name')}</Label>
+                        <Input value={name} onChange={e => setName(e.target.value)} placeholder="Graveyard" />
+                    </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="zoneId">{t('zone')}</Label>
-                            <select
-                                id="zoneId"
-                                {...register('zoneId', { valueAsNumber: true })}
-                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            >
-                                <option value="">{t('selectZone')}</option>
-                                {zones.map((zone) => (
-                                    <option key={zone.id} value={zone.id}>
-                                        {zone.name ?? zone.slug}
-                                    </option>
+                    <div className="space-y-1.5">
+                        <Label>{t('zone')}</Label>
+                        <Select value={zoneId === '' ? '' : String(zoneId)} onValueChange={v => setZoneId(v ? Number(v) : '')}>
+                            <SelectTrigger><SelectValue placeholder={t('selectZone')} /></SelectTrigger>
+                            <SelectContent>
+                                {zoneOptions.map(z => (
+                                    <SelectItem key={z.id} value={String(z.id)}>{z.name}</SelectItem>
                                 ))}
-                            </select>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <Label>{t('positionX')} / {t('positionY')} / {t('positionZ')}</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input type="number" step="any" placeholder="X" className="h-8 text-sm" value={x} onChange={e => setX(e.target.value)} />
+                            <Input type="number" step="any" placeholder="Y" className="h-8 text-sm" value={y} onChange={e => setY(e.target.value)} />
+                            <Input type="number" step="any" placeholder="Z" className="h-8 text-sm" value={z} onChange={e => setZ(e.target.value)} />
                         </div>
+                    </div>
 
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="x">X</Label>
-                                <Input
-                                    id="x"
-                                    type="number"
-                                    {...register('x', { valueAsNumber: true })}
-                                />
-                                {errors.x && (
-                                    <p className="text-sm text-red-600">{errors.x.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="y">Y</Label>
-                                <Input
-                                    id="y"
-                                    type="number"
-                                    {...register('y', { valueAsNumber: true })}
-                                />
-                                {errors.y && (
-                                    <p className="text-sm text-red-600">{errors.y.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="z">Z</Label>
-                                <Input
-                                    id="z"
-                                    type="number"
-                                    {...register('z', { valueAsNumber: true })}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id="isDefault"
-                                {...register('isDefault')}
-                                className="h-4 w-4"
-                            />
-                            <Label htmlFor="isDefault">{t('isDefault')}</Label>
-                        </div>
-
-                        <div className="flex gap-4 pt-4">
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? commonT('loading') : commonT('create')}
-                            </Button>
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                {commonT('cancel')}
-                            </Button>
-                        </div>
-                    </form>
+                    <div className="flex items-center gap-2 pt-1">
+                        <Switch checked={isDefault} onCheckedChange={setIsDefault} id="default-switch" />
+                        <Label htmlFor="default-switch">{t('isDefault')}</Label>
+                    </div>
                 </CardContent>
             </Card>
+
+            <div className="flex justify-end gap-2">
+                <Button variant="outline" asChild><Link href={`/${locale}/respawn-zones`}>{tc('cancel')}</Link></Button>
+                <Button disabled={!name.trim() || create.isPending} onClick={handleSubmit}>
+                    {create.isPending ? tc('saving') : tc('create')}
+                </Button>
+            </div>
         </div>
-    );
+    )
 }

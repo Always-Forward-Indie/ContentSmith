@@ -1,13 +1,30 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skills, skillSchool, skillScaleType, passiveSkillModifiers } from '@contentsmith/database';
-import { and, eq, like, count } from '@contentsmith/database';
+import {
+  skills,
+  skillSchool,
+  skillScaleType,
+  passiveSkillModifiers,
+  skillProperties,
+  skillPropertiesMapping,
+  targetType,
+  skillDamageFormulas,
+  skillDamageTypes,
+  skillEffectInstances,
+  skillEffectsMapping,
+  entityAttributes,
+} from '@contentsmith/database';
+import { and, eq, like, count, asc, inArray } from '@contentsmith/database';
 import {
   skillListQuerySchema,
   skillIdSchema,
   createSkillSchema,
   updateSkillSchema,
+  createSkillPropertyMappingSchema,
+  createSkillEffectInstanceSchema,
+  updateSkillEffectInstanceSchema,
+  createSkillEffectMappingSchema,
 } from '@contentsmith/validation';
 
 export const skillsRouter = createTRPCRouter({
@@ -80,6 +97,7 @@ export const skillsRouter = createTRPCRouter({
           scaleStatId: skills.scaleStatId,
           schoolId: skills.schoolId,
           isPassive: skills.isPassive,
+          animationName: skills.animationName,
           skillSchool: {
             id: skillSchool.id,
             name: skillSchool.name,
@@ -218,6 +236,223 @@ export const skillsRouter = createTRPCRouter({
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(async ({ input }) => {
       await db.delete(passiveSkillModifiers).where(eq(passiveSkillModifiers.id, input.id))
+      return { success: true }
+    }),
+
+  // ===== LOOKUP DATA FOR EDITOR =====
+
+  getProperties: publicProcedure
+    .query(async () => {
+      return await db.select().from(skillProperties).orderBy(skillProperties.id)
+    }),
+
+  getTargetTypes: publicProcedure
+    .query(async () => {
+      return await db.select().from(targetType).orderBy(targetType.id)
+    }),
+
+  getDamageFormulas: publicProcedure
+    .query(async () => {
+      return await db
+        .select({
+          id: skillDamageFormulas.id,
+          slug: skillDamageFormulas.slug,
+          effectTypeId: skillDamageFormulas.effectTypeId,
+          effectTypeSlug: skillDamageTypes.slug,
+        })
+        .from(skillDamageFormulas)
+        .leftJoin(skillDamageTypes, eq(skillDamageFormulas.effectTypeId, skillDamageTypes.id))
+        .orderBy(skillDamageFormulas.id)
+    }),
+
+  getEntityAttributes: publicProcedure
+    .query(async () => {
+      return await db.select().from(entityAttributes).orderBy(entityAttributes.id)
+    }),
+
+  // ===== SKILL PROPERTY MAPPINGS =====
+
+  getPropertyMappings: publicProcedure
+    .input(z.number().int().positive())
+    .query(async ({ input: skillId }) => {
+      return await db
+        .select({
+          id: skillPropertiesMapping.id,
+          skillId: skillPropertiesMapping.skillId,
+          skillLevel: skillPropertiesMapping.skillLevel,
+          propertyId: skillPropertiesMapping.propertyId,
+          propertyValue: skillPropertiesMapping.propertyValue,
+          propertySlug: skillProperties.slug,
+          propertyName: skillProperties.name,
+        })
+        .from(skillPropertiesMapping)
+        .leftJoin(skillProperties, eq(skillPropertiesMapping.propertyId, skillProperties.id))
+        .where(eq(skillPropertiesMapping.skillId, skillId))
+        .orderBy(skillPropertiesMapping.skillLevel, asc(skillPropertiesMapping.propertyId))
+    }),
+
+  upsertPropertyMapping: publicProcedure
+    .input(createSkillPropertyMappingSchema)
+    .mutation(async ({ input }) => {
+      const existing = await db
+        .select()
+        .from(skillPropertiesMapping)
+        .where(
+          and(
+            eq(skillPropertiesMapping.skillId, input.skillId),
+            eq(skillPropertiesMapping.skillLevel, input.skillLevel),
+            eq(skillPropertiesMapping.propertyId, input.propertyId),
+          ),
+        )
+        .limit(1)
+
+      if (existing.length > 0) {
+        const [result] = await db
+          .update(skillPropertiesMapping)
+          .set({ propertyValue: input.propertyValue })
+          .where(eq(skillPropertiesMapping.id, existing[0].id))
+          .returning()
+        return result
+      }
+
+      const [result] = await db
+        .insert(skillPropertiesMapping)
+        .values(input)
+        .returning()
+      return result
+    }),
+
+  deletePropertyMapping: publicProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(skillPropertiesMapping).where(eq(skillPropertiesMapping.id, input.id))
+      return { success: true }
+    }),
+
+  // ===== SKILL EFFECT INSTANCES =====
+
+  getEffectInstances: publicProcedure
+    .input(z.number().int().positive())
+    .query(async ({ input: skillId }) => {
+      const instances = await db
+        .select({
+          id: skillEffectInstances.id,
+          skillId: skillEffectInstances.skillId,
+          orderIdx: skillEffectInstances.orderIdx,
+          targetTypeId: skillEffectInstances.targetTypeId,
+          targetTypeSlug: targetType.slug,
+        })
+        .from(skillEffectInstances)
+        .leftJoin(targetType, eq(skillEffectInstances.targetTypeId, targetType.id))
+        .where(eq(skillEffectInstances.skillId, skillId))
+        .orderBy(skillEffectInstances.orderIdx)
+
+      if (instances.length === 0) return []
+
+      const instanceIds = instances.map((i) => i.id)
+      const mappings = await db
+        .select({
+          id: skillEffectsMapping.id,
+          effectInstanceId: skillEffectsMapping.effectInstanceId,
+          effectId: skillEffectsMapping.effectId,
+          value: skillEffectsMapping.value,
+          level: skillEffectsMapping.level,
+          tickMs: skillEffectsMapping.tickMs,
+          durationMs: skillEffectsMapping.durationMs,
+          attributeId: skillEffectsMapping.attributeId,
+          formulaSlug: skillDamageFormulas.slug,
+          attributeSlug: entityAttributes.slug,
+        })
+        .from(skillEffectsMapping)
+        .leftJoin(skillDamageFormulas, eq(skillEffectsMapping.effectId, skillDamageFormulas.id))
+        .leftJoin(entityAttributes, eq(skillEffectsMapping.attributeId, entityAttributes.id))
+        .where(inArray(skillEffectsMapping.effectInstanceId, instanceIds))
+        .orderBy(skillEffectsMapping.level, asc(skillEffectsMapping.effectId))
+
+      return instances.map((inst) => ({
+        ...inst,
+        mappings: mappings.filter((m) => m.effectInstanceId === inst.id),
+      }))
+    }),
+
+  createEffectInstance: publicProcedure
+    .input(createSkillEffectInstanceSchema)
+    .mutation(async ({ input }) => {
+      const [result] = await db
+        .insert(skillEffectInstances)
+        .values(input)
+        .returning()
+      return result
+    }),
+
+  updateEffectInstance: publicProcedure
+    .input(updateSkillEffectInstanceSchema)
+    .mutation(async ({ input }) => {
+      const { id, ...data } = input
+      const [result] = await db
+        .update(skillEffectInstances)
+        .set(data)
+        .where(eq(skillEffectInstances.id, id))
+        .returning()
+      if (!result) throw new Error('Effect instance not found')
+      return result
+    }),
+
+  deleteEffectInstance: publicProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(skillEffectsMapping).where(eq(skillEffectsMapping.effectInstanceId, input.id))
+      await db.delete(skillEffectInstances).where(eq(skillEffectInstances.id, input.id))
+      return { success: true }
+    }),
+
+  // ===== SKILL EFFECT MAPPINGS =====
+
+  upsertEffectMapping: publicProcedure
+    .input(createSkillEffectMappingSchema)
+    .mutation(async ({ input }) => {
+      const existing = await db
+        .select()
+        .from(skillEffectsMapping)
+        .where(
+          and(
+            eq(skillEffectsMapping.effectInstanceId, input.effectInstanceId),
+            eq(skillEffectsMapping.level, input.level),
+            eq(skillEffectsMapping.effectId, input.effectId),
+          ),
+        )
+        .limit(1)
+
+      const values = {
+        effectInstanceId: input.effectInstanceId,
+        effectId: input.effectId,
+        value: input.value,
+        level: input.level,
+        tickMs: input.tickMs,
+        durationMs: input.durationMs,
+        attributeId: input.attributeId ?? null,
+      }
+
+      if (existing.length > 0) {
+        const [result] = await db
+          .update(skillEffectsMapping)
+          .set(values)
+          .where(eq(skillEffectsMapping.id, existing[0].id))
+          .returning()
+        return result
+      }
+
+      const [result] = await db
+        .insert(skillEffectsMapping)
+        .values(values)
+        .returning()
+      return result
+    }),
+
+  deleteEffectMapping: publicProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ input }) => {
+      await db.delete(skillEffectsMapping).where(eq(skillEffectsMapping.id, input.id))
       return { success: true }
     }),
 });

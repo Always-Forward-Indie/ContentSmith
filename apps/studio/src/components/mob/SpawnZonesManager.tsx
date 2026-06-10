@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit3, MapPin, Check, X } from 'lucide-react'
+import { Plus, Trash2, Edit3, MapPin, Check, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ interface SpawnZonesManagerProps {
 
 export function SpawnZonesManager({ mobId }: SpawnZonesManagerProps) {
     const [addOpen, setAddOpen] = useState(false)
+    const [contentOpen, setContentOpen] = useState(true)
     const [addZoneId, setAddZoneId] = useState<string>('')
     const [addSpawnCount, setAddSpawnCount] = useState('1')
     const [addRespawnTime, setAddRespawnTime] = useState('00:05:00')
@@ -93,19 +94,26 @@ export function SpawnZonesManager({ mobId }: SpawnZonesManagerProps) {
     return (
         <Card>
             <CardHeader className="flex flex-row items-start justify-between pb-3">
-                <div>
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-primary" />
-                        {t('spawnZones')}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-0.5">{t('spawnZonesDescription')}</CardDescription>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => setContentOpen(v => !v)}
+                    className="flex items-start gap-2 text-left hover:opacity-80 transition-opacity"
+                >
+                    {contentOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+                    <div>
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            {t('spawnZones')}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">{t('spawnZonesDescription')}</CardDescription>
+                    </div>
+                </button>
                 <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8" onClick={() => setAddOpen(true)}>
                     <Plus className="h-3.5 w-3.5" />
                     {t('addSpawnZone')}
                 </Button>
             </CardHeader>
-            <CardContent>
+            {contentOpen && <CardContent>
                 {!memberships || memberships.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <MapPin className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -159,7 +167,7 @@ export function SpawnZonesManager({ mobId }: SpawnZonesManagerProps) {
                         ))}
                     </div>
                 )}
-            </CardContent>
+            </CardContent>}
 
             {/* Add dialog */}
             <Dialog open={addOpen} onOpenChange={setAddOpen}>

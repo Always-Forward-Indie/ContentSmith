@@ -34,8 +34,19 @@
         "minY": "Мин Y",
         "maxY": "Макс Y",
         "explorationXpReward": "XP за исследование",
-        "championThresholdKills": "Порог убийств (чемпион)"
+        "championThresholdKills": "Порог убийств (чемпион)",
+        "shapeType": "Тип формы",
+        "centerX": "Центр X",
+        "centerY": "Центр Y",
+        "innerRadius": "Внутренний радиус",
+        "outerRadius": "Внешний радиус"
     },
+    "shapes": {
+        "RECT": "Прямоугольник",
+        "CIRCLE": "Круг",
+        "ANNULUS": "Кольцо (аннулус)"
+    },
+    "shapeParams": "Параметры формы",
     "boundaries": "Границы зоны",
     "boundariesDescription": "Координаты границ зоны (опционально)",
     "badges": {

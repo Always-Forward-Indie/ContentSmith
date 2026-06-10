@@ -25,6 +25,7 @@ import {
   questStepTypeEnum,
   effectModifierTypeEnum,
   statusEffectCategoryEnum,
+  spawnZoneShapeEnum,
 } from './enums';
 
 // ===== DIALOGUES =====
@@ -496,6 +497,12 @@ export const spawnZones = pgTable('spawn_zones', {
   maxSpawnY: doublePrecision('max_spawn_y').notNull().default(0),
   maxSpawnZ: doublePrecision('max_spawn_z').notNull().default(0),
   gameZoneId: integer('game_zone_id').references(() => zones.id, { onDelete: 'set null' }),
+  shapeType: spawnZoneShapeEnum('shape_type').notNull().default('RECT'),
+  centerX: doublePrecision('center_x').notNull().default(0),
+  centerY: doublePrecision('center_y').notNull().default(0),
+  innerRadius: doublePrecision('inner_radius').notNull().default(0),
+  outerRadius: doublePrecision('outer_radius').notNull().default(0),
+  exclusionGameZoneId: integer('exclusion_game_zone_id').references(() => zones.id, { onDelete: 'set null' }),
 }, (table) => ({
   gameZoneIdx: index('idx_spawn_zones_game_zone').on(table.gameZoneId),
 }));
@@ -510,6 +517,26 @@ export const spawnZoneMobs = pgTable('spawn_zone_mobs', {
   zoneIdx: index('idx_spawn_zone_mobs_zone').on(table.spawnZoneId),
   mobIdx: index('idx_spawn_zone_mobs_mob').on(table.mobId),
   uniqueZoneMob: unique('uq_spawn_zone_mobs').on(table.spawnZoneId, table.mobId),
+}));
+
+export const classSpawnZones = pgTable('class_spawn_zones', {
+  id: serial('id').primaryKey(),
+  classId: integer('class_id').notNull().references(() => characterClass.id),
+  zoneId: integer('zone_id').references(() => zones.id),
+  minX: doublePrecision('min_x').notNull().default(0),
+  maxX: doublePrecision('max_x').notNull().default(0),
+  minY: doublePrecision('min_y').notNull().default(0),
+  maxY: doublePrecision('max_y').notNull().default(0),
+  minZ: doublePrecision('min_z').notNull().default(0),
+  maxZ: doublePrecision('max_z').notNull().default(0),
+  shapeType: spawnZoneShapeEnum('shape_type').notNull().default('RECT'),
+  centerX: doublePrecision('center_x').notNull().default(0),
+  centerY: doublePrecision('center_y').notNull().default(0),
+  innerRadius: doublePrecision('inner_radius').notNull().default(0),
+  outerRadius: doublePrecision('outer_radius').notNull().default(0),
+}, (table) => ({
+  classIdIdx: index('idx_class_spawn_zones_class').on(table.classId),
+  zoneIdIdx: index('idx_class_spawn_zones_zone').on(table.zoneId),
 }));
 
 // ─── Classes ───────────────────────────────────────────────────────────────────
@@ -594,6 +621,11 @@ export const zones = pgTable('zones', {
   maxY: doublePrecision('max_y').notNull().default(0),
   explorationXpReward: integer('exploration_xp_reward').notNull().default(100),
   championThresholdKills: integer('champion_threshold_kills').notNull().default(100),
+  shapeType: spawnZoneShapeEnum('shape_type').notNull().default('RECT'),
+  centerX: doublePrecision('center_x').notNull().default(0),
+  centerY: doublePrecision('center_y').notNull().default(0),
+  innerRadius: doublePrecision('inner_radius').notNull().default(0),
+  outerRadius: doublePrecision('outer_radius').notNull().default(0),
 });
 
 // ─── Reference Data ────────────────────────────────────────────────────────────
@@ -813,6 +845,17 @@ export const respawnZones = pgTable('respawn_zones', {
   z: doublePrecision('z').notNull().default(0),
   zoneId: integer('zone_id').notNull().default(1).references(() => zones.id),
   isDefault: boolean('is_default').notNull().default(false),
+  minX: doublePrecision('min_x').notNull().default(0),
+  maxX: doublePrecision('max_x').notNull().default(0),
+  minY: doublePrecision('min_y').notNull().default(0),
+  maxY: doublePrecision('max_y').notNull().default(0),
+  minZ: doublePrecision('min_z').notNull().default(0),
+  maxZ: doublePrecision('max_z').notNull().default(0),
+  shapeType: spawnZoneShapeEnum('shape_type').notNull().default('RECT'),
+  centerX: doublePrecision('center_x').notNull().default(0),
+  centerY: doublePrecision('center_y').notNull().default(0),
+  innerRadius: doublePrecision('inner_radius').notNull().default(0),
+  outerRadius: doublePrecision('outer_radius').notNull().default(0),
 }, (table) => ({
   zoneIdx: index('ix_respawn_zones_zone').on(table.zoneId),
 }));

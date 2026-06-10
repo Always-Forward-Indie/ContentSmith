@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+export const spawnZoneShapeSchema = z.enum(['RECT', 'CIRCLE', 'ANNULUS']);
+export type SpawnZoneShape = z.infer<typeof spawnZoneShapeSchema>;
+
 // ─── Zones ────────────────────────────────────────────────────────────────────
 
 export const createZoneSchema = z.object({
@@ -15,6 +18,12 @@ export const createZoneSchema = z.object({
   maxY: z.number().default(0),
   explorationXpReward: z.number().int().min(0).default(100),
   championThresholdKills: z.number().int().min(0).default(100),
+  shapeType: spawnZoneShapeSchema.default('RECT'),
+  /** For RECT: auto-computed from min/max if omitted. For CIRCLE/ANNULUS: required. */
+  centerX: z.number().optional(),
+  centerY: z.number().optional(),
+  innerRadius: z.number().min(0).default(0),
+  outerRadius: z.number().min(0).default(0),
 });
 
 export const updateZoneSchema = createZoneSchema.partial().extend({
@@ -31,13 +40,19 @@ const respawnTimeRegex = /^\d{2}:\d{2}:\d{2}$/;
 
 export const createSpawnZoneSchema = z.object({
   zoneName: z.string().min(1).max(100),
-  gameZoneId: z.number().int().positive().optional(),
+  gameZoneId: z.number().int().positive().nullable().optional(),
+  exclusionGameZoneId: z.number().int().positive().nullable().optional(),
   minSpawnX: z.number().default(0),
   minSpawnY: z.number().default(0),
   minSpawnZ: z.number().default(0),
   maxSpawnX: z.number().default(0),
   maxSpawnY: z.number().default(0),
   maxSpawnZ: z.number().default(0),
+  shapeType: spawnZoneShapeSchema.default('RECT'),
+  centerX: z.number().default(0),
+  centerY: z.number().default(0),
+  innerRadius: z.number().min(0).default(0),
+  outerRadius: z.number().min(0).default(0),
 });
 
 export const updateSpawnZoneSchema = createSpawnZoneSchema.partial().extend({

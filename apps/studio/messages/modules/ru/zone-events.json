@@ -20,5 +20,13 @@
     "deleteConfirmDescription": "Удалить событие {slug}?",
     "createSuccess": "Событие создано",
     "updateSuccess": "Событие обновлено",
-    "deleteSuccess": "Событие удалено"
+    "deleteSuccess": "Событие удалено",
+    "edit": "Редактировать событие зоны",
+    "deleteTitle": "Удалить событие зоны",
+    "create": "Создать событие",
+    "createDescription": "Создать новый шаблон события зоны",
+    "noItems": "События зон не найдены",
+    "search": "Поиск событий зон...",
+    "selectZone": "Выберите игровую зону...",
+    "zone": "Игровая зона"
 }

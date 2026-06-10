@@ -31,6 +31,17 @@ export const respawnZonesRouter = createTRPCRouter({
           zoneId: respawnZones.zoneId,
           isDefault: respawnZones.isDefault,
           zoneName: zones.name,
+          minX: respawnZones.minX,
+          maxX: respawnZones.maxX,
+          minY: respawnZones.minY,
+          maxY: respawnZones.maxY,
+          minZ: respawnZones.minZ,
+          maxZ: respawnZones.maxZ,
+          shapeType: respawnZones.shapeType,
+          centerX: respawnZones.centerX,
+          centerY: respawnZones.centerY,
+          innerRadius: respawnZones.innerRadius,
+          outerRadius: respawnZones.outerRadius,
         })
         .from(respawnZones)
         .leftJoin(zones, eq(respawnZones.zoneId, zones.id))
@@ -54,6 +65,17 @@ export const respawnZonesRouter = createTRPCRouter({
           zoneId: respawnZones.zoneId,
           isDefault: respawnZones.isDefault,
           zoneName: zones.name,
+          minX: respawnZones.minX,
+          maxX: respawnZones.maxX,
+          minY: respawnZones.minY,
+          maxY: respawnZones.maxY,
+          minZ: respawnZones.minZ,
+          maxZ: respawnZones.maxZ,
+          shapeType: respawnZones.shapeType,
+          centerX: respawnZones.centerX,
+          centerY: respawnZones.centerY,
+          innerRadius: respawnZones.innerRadius,
+          outerRadius: respawnZones.outerRadius,
         })
         .from(respawnZones)
         .leftJoin(zones, eq(respawnZones.zoneId, zones.id))

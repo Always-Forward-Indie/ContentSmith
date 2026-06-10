@@ -1,5 +1,43 @@
 # GM Panel — Changelog
 
+## [Unreleased] — 2026-06-10
+
+### Новые разделы
+
+- **Analytics** (`/analytics`) — сводная панель аналитики:
+  - Общая статистика: количество пользователей, персонажей, активных банов, сессий
+  - Квесты: активные треки квестов
+  - Логины за последние 24 часа
+  - Данные из таблиц: `users`, `user_bans`, `user_sessions`, `characters`, `character_class`, `race`, `player_quest`, `character_position`, `zones`, `currency_transactions`
+- **Game Analytics** (`/game-analytics`) — дашборд игровых событий:
+  - KPI метрики: total events, sessions, deaths, mob kills, level-ups, quest accepts/completes/abandons, items acquired, gold changes
+  - Фильтр по периоду (1–365 дней)
+  - Лог событий с пагинацией (50 записей на страницу)
+  - Сегментация по event type, character, zone level
+  - Использует новую таблицу `game_analytics` (аппенд-only лог от Game Server)
+
+### Новые роутеры
+
+- `analyticsRouter` — сводная статистика по пользователям и персонажам:
+  - `overview` — агрегированная статистика
+- `gameAnalyticsRouter` — аналитика игровых событий:
+  - `overview` — KPI за выбранный период
+  - `events` — список событий с пагинацией и фильтрацией
+
+### База данных
+
+- Новая таблица `game_analytics` (логи событий Game Server):
+  - Поля: `event_type`, `character_id`, `session_id`, `level`, `zone_id`, `payload (jsonb)`
+  - Индексы: `event_type + created_at`, `character_id + created_at`, `session_id`, `created_at`
+
+### Прочие изменения
+
+- Добавлена зависимость `recharts` (v3) — библиотека графиков для дашбордов
+- Обновлён `AppHeader` — добавлены ссылки на Analytics и Game Analytics
+- Расширен `schema.ts` — добавлена таблица `gameAnalytics`
+
+---
+
 ## [Unreleased] — 2026-04-17
 
 ### Новые разделы

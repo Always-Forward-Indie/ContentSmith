@@ -13,6 +13,11 @@
         "cc": "Crowd Control"
     },
     "durationSec": "Duration (sec)",
+    "durationMs": "Duration (ms)",
+    "nameKey": "Name Key",
+    "maxStacks": "Max Stacks",
+    "isDebuff": "Debuff",
+    "isPurgeable": "Purgeable",
     "modifiers": "Modifiers",
     "addModifier": "Add Modifier",
     "modifierType": "Modifier Type",
@@ -24,11 +29,19 @@
     "attribute": "Attribute",
     "value": "Value",
     "noEffects": "No status effects found",
+    "noItems": "No status effects found",
     "noModifiers": "No modifiers added",
     "searchPlaceholder": "Search status effects...",
     "deleteConfirmTitle": "Delete Status Effect",
     "deleteConfirmDescription": "Delete status effect {slug}?",
     "createSuccess": "Status effect created",
     "updateSuccess": "Status effect updated",
-    "deleteSuccess": "Status effect deleted"
+    "deleteSuccess": "Status effect deleted",
+    "edit": "Edit Status Effect",
+    "deleteTitle": "Delete Status Effect",
+    "create": "Create Status Effect",
+    "search": "Search status effects...",
+    "modifierAdded": "Modifier added",
+    "modifierRemoved": "Modifier removed",
+    "modifiersDescription": "Attribute modifiers applied by this status effect"
 }

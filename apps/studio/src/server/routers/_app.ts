@@ -35,6 +35,7 @@ import { respawnZonesRouter } from './respawn-zones';
 import { zoneEventsRouter } from './zone-events';
 import { timedChampionsRouter } from './timed-champions';
 import { worldObjectsRouter } from './world-objects';
+import { balanceRouter } from './balance';
 
 export const appRouter = createTRPCRouter({
   dialogue: dialogueRouter,
@@ -73,6 +74,7 @@ export const appRouter = createTRPCRouter({
   zoneEvents: zoneEventsRouter,
   timedChampions: timedChampionsRouter,
   worldObjects: worldObjectsRouter,
+  balance: balanceRouter,
 });
 
 export type AppRouter = typeof appRouter;

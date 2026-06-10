@@ -20,5 +20,13 @@
     "deleteConfirmDescription": "Delete zone event {slug}?",
     "createSuccess": "Zone event created",
     "updateSuccess": "Zone event updated",
-    "deleteSuccess": "Zone event deleted"
+    "deleteSuccess": "Zone event deleted",
+    "edit": "Edit Zone Event",
+    "deleteTitle": "Delete Zone Event",
+    "create": "Create Event",
+    "createDescription": "Define a new zone event template",
+    "noItems": "No zone events found",
+    "search": "Search zone events...",
+    "selectZone": "Select game zone...",
+    "zone": "Game Zone"
 }

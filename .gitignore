@@ -55,3 +55,4 @@ coverage/
 # Misc
 *.tsbuildinfo
 .eslintcache
+apps/studio/public/uploads/

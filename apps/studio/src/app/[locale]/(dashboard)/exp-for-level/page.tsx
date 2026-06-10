@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { TrendingUp, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ProgressionPanel } from '@/components/balance/ProgressionPanel'
+import { EquipmentLoadoutPanel } from '@/components/balance/EquipmentLoadoutPanel'
 import { useTranslations } from 'next-intl'
 import { trpc } from '@/lib/trpc'
 import { Button } from '@/components/ui/button'
@@ -182,6 +184,12 @@ export default function ExpForLevelPage() {
                     </div>
                 )}
             </Card>
+
+            {/* Progression analysis */}
+            <ProgressionPanel />
+
+            {/* Equipment Loadout Builder */}
+            <EquipmentLoadoutPanel />
         </div>
     )
 }

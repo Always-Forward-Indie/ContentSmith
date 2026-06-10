@@ -6,3 +6,4 @@ export const questStateEnum = pgEnum('quest_state', ['offered', 'active', 'compl
 export const questStepTypeEnum = pgEnum('quest_step_type', ['collect', 'kill', 'talk', 'reach', 'custom']);
 export const effectModifierTypeEnum = pgEnum('effect_modifier_type', ['flat', 'percent', 'percent_all']);
 export const statusEffectCategoryEnum = pgEnum('status_effect_category', ['buff', 'debuff', 'dot', 'hot', 'cc']);
+export const spawnZoneShapeEnum = pgEnum('spawn_zone_shape', ['RECT', 'CIRCLE', 'ANNULUS']);

@@ -297,10 +297,11 @@ export const mobsRouter = createTRPCRouter({
       const existing = await db.select().from(mobPosition).where(eq(mobPosition.mobId, mobId))
 
       if (existing.length > 0) {
-        const updateFields: Partial<{ x: number; y: number; z: number }> = {}
+        const updateFields: Partial<{ x: number; y: number; z: number; rotZ: number }> = {}
         if (positionData.x != null) updateFields.x = positionData.x
         if (positionData.y != null) updateFields.y = positionData.y
         if (positionData.z != null) updateFields.z = positionData.z
+        if (positionData.rotZ != null) updateFields.rotZ = positionData.rotZ
         const result = await db
           .update(mobPosition)
           .set(updateFields)
@@ -314,13 +315,6 @@ export const mobsRouter = createTRPCRouter({
           .returning()
         return result[0]
       }
-    }),
-
-  deletePosition: requirePerm('mob:delete')
-    .input(z.object({ mobId: z.number().int().positive() }))
-    .mutation(async ({ input }) => {
-      await db.delete(mobPosition).where(eq(mobPosition.mobId, input.mobId))
-      return { success: true }
     }),
 
   deletePosition: requirePerm('mob:delete')

@@ -11,17 +11,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Plus, X } from 'lucide-react';
+import { ArrowLeft, Plus, X, BookOpen, Zap } from 'lucide-react';
 import { z } from 'zod';
+import { SkillBalancePanel } from '@/components/balance/SkillBalancePanel';
+import { PropertyEditor } from '@/components/skills/PropertyEditor';
+import { EffectInstancesEditor } from '@/components/skills/EffectInstancesEditor';
 
-// Схема валидации для формы
 const updateSkillFormSchema = z.object({
     name: z.string().min(1, 'Name is required').max(255),
     slug: z.string().min(1, 'Slug is required').max(255),
     schoolId: z.number().int().positive('School is required'),
     scaleStatId: z.number().int().positive('Scale type is required'),
     isPassive: z.boolean().default(false),
+    animationName: z.string().max(100).nullable().optional(),
 });
 
 type UpdateSkillFormData = z.infer<typeof updateSkillFormSchema>;
@@ -39,31 +43,27 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const skillId = parseInt(params.id);
 
-    // Query для получения данных скила
     const { data: skill, isLoading: skillLoading } = trpc.skills.getById.useQuery(
         { id: skillId },
         { enabled: !!skillId }
     );
-
-    // Query для получения школ скилов
     const { data: schools, isLoading: schoolsLoading } = trpc.skills.getSchools.useQuery();
-
-    // Query для получения типов масштабирования
     const { data: scaleTypes, isLoading: scaleTypesLoading } = trpc.skills.getScaleTypes.useQuery();
 
-    // Form setup
     const {
         register,
         handleSubmit,
         setValue,
         reset,
         control,
+        watch,
         formState: { errors },
     } = useForm<UpdateSkillFormData>({
         resolver: zodResolver(updateSkillFormSchema),
     });
 
-    // Заполнение формы данными скила при загрузке
+    const isPassive = watch('isPassive', skill?.isPassive ?? false);
+
     useEffect(() => {
         if (skill) {
             reset({
@@ -72,11 +72,11 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
                 schoolId: skill.schoolId,
                 scaleStatId: skill.scaleStatId,
                 isPassive: skill.isPassive ?? false,
+                animationName: (skill as any).animationName ?? '',
             });
         }
     }, [skill, reset]);
 
-    // Mutation для обновления скила
     const updateSkillMutation = trpc.skills.update.useMutation({
         onSuccess: () => {
             toast.success(t('skillUpdated'));
@@ -90,36 +90,22 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
 
     const onSubmit = (data: UpdateSkillFormData) => {
         setIsSubmitting(true);
-        updateSkillMutation.mutate({
-            id: skillId,
-            ...data,
-        });
+        updateSkillMutation.mutate({ id: skillId, ...data });
     };
 
-    const handleBack = () => {
-        router.push('/skills');
-    };
+    const handleBack = () => router.push('/skills');
 
-    // Автогенерация slug из названия
-    const generateSlug = (name: string) => {
-        return name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    };
+    const generateSlug = (name: string) =>
+        name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const name = e.target.value;
-        const slug = generateSlug(name);
-        setValue('slug', slug);
+        setValue('slug', generateSlug(e.target.value));
     };
 
     if (skillLoading || schoolsLoading || scaleTypesLoading) {
         return (
             <div className="flex items-center justify-center p-8">
-                <div className="text-lg">{commonT('loading')}</div>
+                <div className="text-sm text-muted-foreground">{commonT('loading')}</div>
             </div>
         );
     }
@@ -127,127 +113,192 @@ export default function SkillEditPage({ params }: SkillEditPageProps) {
     if (!skill) {
         return (
             <div className="flex items-center justify-center p-8">
-                <div className="text-lg text-red-600">{t('skillNotFound')}</div>
+                <div className="text-sm text-destructive">{t('skillNotFound')}</div>
             </div>
         );
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-2xl">
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" onClick={handleBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
+        <div className="container mx-auto p-6 max-w-6xl space-y-6">
+            {/* Page header */}
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="sm" onClick={handleBack} className="h-8">
+                    <ArrowLeft className="h-4 w-4 mr-1.5" />
                     {commonT('back')}
                 </Button>
-                <div>
-                    <h1 className="text-3xl font-bold">{t('editSkill')}</h1>
-                    <p className="text-muted-foreground mt-1">
-                        Редактирование скила: {skill.name}
-                    </p>
+                <div className="h-4 w-px bg-border" />
+                <div className="flex items-center gap-2.5">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-md bg-muted">
+                        <Zap className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div>
+                        <h1 className="text-sm font-semibold leading-none">{t('editSkill')}</h1>
+                        <p className="text-xs text-muted-foreground mt-0.5">{t('skillEditSubtitle', { name: skill.name })}</p>
+                    </div>
                 </div>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('editSkill')}</CardTitle>
-                    <CardDescription>
-                        Обновите информацию о скиле
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">{t('skillName')}</Label>
-                            <Input
-                                id="name"
-                                {...register('name')}
-                                onChange={(e) => {
-                                    register('name').onChange(e);
-                                    handleNameChange(e);
-                                }}
-                                placeholder="Введите название скила"
-                            />
-                            {errors.name && (
-                                <p className="text-sm text-red-600">{errors.name.message}</p>
-                            )}
-                        </div>
+            {/* Two-column layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_440px] gap-6 items-start">
+                {/* Left — form */}
+                <div className="space-y-4">
+                    <Card>
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-base">{t('editSkill')}</CardTitle>
+                            <CardDescription>{t('skillEditCardDesc')}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                                {/* Name */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="name">{t('skillName')}</Label>
+                                    <Input
+                                        id="name"
+                                        {...register('name')}
+                                        onChange={(e) => { register('name').onChange(e); handleNameChange(e); }}
+                                        placeholder={t('skillNamePlaceholder')}
+                                    />
+                                    {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                                </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="slug">{t('skillSlug')}</Label>
-                            <Input
-                                id="slug"
-                                {...register('slug')}
-                                placeholder="skill-slug"
-                            />
-                            {errors.slug && (
-                                <p className="text-sm text-red-600">{errors.slug.message}</p>
-                            )}
-                        </div>
+                                {/* Slug */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="slug">{t('skillSlug')}</Label>
+                                    <Input
+                                        id="slug"
+                                        {...register('slug')}
+                                        placeholder="skill-slug"
+                                        className="font-mono text-sm"
+                                    />
+                                    {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+                                </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="schoolId">{t('skillSchool')}</Label>
-                            <select
-                                id="schoolId"
-                                {...register('schoolId', { valueAsNumber: true })}
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="">{t('selectSchool')}</option>
-                                {schools?.map((school) => (
-                                    <option key={school.id} value={school.id}>
-                                        {school.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.schoolId && (
-                                <p className="text-sm text-red-600">{t('schoolRequired')}</p>
-                            )}
-                        </div>
+                                {/* School + Scale stat in a row */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <Label>{t('skillSchool')}</Label>
+                                        <Controller
+                                            name="schoolId"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    key={`school-${schools?.length ?? 0}-${field.value}`}
+                                                    value={field.value ? String(field.value) : ''}
+                                                    onValueChange={(v) => field.onChange(parseInt(v))}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder={t('selectSchool')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {schools?.map((s) => (
+                                                            <SelectItem key={s.id} value={String(s.id)}>
+                                                                {s.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        {errors.schoolId && <p className="text-xs text-destructive">{t('schoolRequired')}</p>}
+                                    </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="scaleStatId">{t('skillScaleType')}</Label>
-                            <select
-                                id="scaleStatId"
-                                {...register('scaleStatId', { valueAsNumber: true })}
-                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <option value="">{t('selectScaleType')}</option>
-                                {scaleTypes?.map((scaleType) => (
-                                    <option key={scaleType.id} value={scaleType.id}>
-                                        {scaleType.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.scaleStatId && (
-                                <p className="text-sm text-red-600">{t('scaleTypeRequired')}</p>
-                            )}
-                        </div>
+                                    <div className="space-y-1.5">
+                                        <Label>{t('skillScaleType')}</Label>
+                                        <Controller
+                                            name="scaleStatId"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Select
+                                                    key={`scale-${scaleTypes?.length ?? 0}-${field.value}`}
+                                                    value={field.value ? String(field.value) : ''}
+                                                    onValueChange={(v) => field.onChange(parseInt(v))}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder={t('selectScaleType')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {scaleTypes?.map((st) => (
+                                                            <SelectItem key={st.id} value={String(st.id)}>
+                                                                {st.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
+                                        />
+                                        {errors.scaleStatId && <p className="text-xs text-destructive">{t('scaleTypeRequired')}</p>}
+                                    </div>
+                                </div>
 
-                        <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-                            <p className="text-sm font-medium">{t('isPassive')}</p>
-                            <Controller name="isPassive" control={control}
-                                render={({ field }) => <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />} />
-                        </div>
+                                {/* Is Passive toggle */}
+                                <div className="flex items-center justify-between rounded-lg border px-4 py-3">
+                                    <p className="text-sm font-medium">{t('isPassive')}</p>
+                                    <Controller
+                                        name="isPassive"
+                                        control={control}
+                                        render={({ field }) => (
+                                            <Switch checked={field.value ?? false} onCheckedChange={field.onChange} />
+                                        )}
+                                    />
+                                </div>
 
-                        <div className="flex gap-4 pt-4">
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting ? commonT('loading') : commonT('save')}
-                            </Button>
-                            <Button type="button" variant="outline" onClick={handleBack}>
-                                {commonT('cancel')}
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+                                {/* Animation Name */}
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="animationName">{t('animationName')}</Label>
+                                    <Input
+                                        id="animationName"
+                                        {...register('animationName')}
+                                        placeholder={t('animationNamePlaceholder')}
+                                    />
+                                </div>
 
-            {skill.isPassive && (
-                <PassiveModifiersManager skillId={skillId} />
-            )}
+                                {/* Actions */}
+                                <div className="flex gap-3 pt-1">
+                                    <Button type="submit" disabled={isSubmitting}>
+                                        {isSubmitting ? commonT('loading') : commonT('save')}
+                                    </Button>
+                                    <Button type="button" variant="outline" onClick={handleBack}>
+                                        {commonT('cancel')}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    {/* Passive modifiers inline under form */}
+                    {isPassive && <PassiveModifiersManager skillId={skillId} t={t} />}
+
+                    {/* Property mappings per level */}
+                    <PropertyEditor skillId={skillId} />
+
+                    {/* Effect instances with per-level mappings */}
+                    <EffectInstancesEditor skillId={skillId} />
+                </div>
+
+                {/* Right — live balance panel or passive info */}
+                <div className="lg:sticky lg:top-6">
+                    {!isPassive ? (
+                        <SkillBalancePanel skillId={skillId} />
+                    ) : (
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center gap-2">
+                                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                    <CardTitle className="text-sm">{t('passiveModifiers')}</CardTitle>
+                                </div>
+                                <CardDescription className="text-xs">
+                                    {t('passiveModifiersDesc')}
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
 
-function PassiveModifiersManager({ skillId }: { skillId: number }) {
+function PassiveModifiersManager({ skillId, t }: { skillId: number; t: ReturnType<typeof useTranslations<'skills'>> }) {
     const [attrSlug, setAttrSlug] = useState('');
     const [modType, setModType] = useState('flat');
     const [modValue, setModValue] = useState('');
@@ -268,9 +319,9 @@ function PassiveModifiersManager({ skillId }: { skillId: number }) {
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle className="text-base">Passive Modifiers</CardTitle>
-                <CardDescription>Attribute modifiers applied passively when this skill is learned</CardDescription>
+            <CardHeader className="pb-3">
+                <CardTitle className="text-base">{t('passiveModifiers')}</CardTitle>
+                <CardDescription>{t('passiveModifiersDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 {modifiers && modifiers.length > 0 && (
@@ -278,10 +329,10 @@ function PassiveModifiersManager({ skillId }: { skillId: number }) {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b bg-muted/50">
-                                    <th className="px-3 py-2 text-left font-medium text-xs">Attribute</th>
-                                    <th className="px-3 py-2 text-left font-medium text-xs">Type</th>
-                                    <th className="px-3 py-2 text-left font-medium text-xs">Value</th>
-                                    <th className="px-2 py-2"></th>
+                                    <th className="px-3 py-2 text-left font-medium text-xs">{t('colAttribute')}</th>
+                                    <th className="px-3 py-2 text-left font-medium text-xs">{t('colType')}</th>
+                                    <th className="px-3 py-2 text-left font-medium text-xs">{t('colValue')}</th>
+                                    <th className="px-2 py-2 w-8"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -308,24 +359,36 @@ function PassiveModifiersManager({ skillId }: { skillId: number }) {
                 )}
                 <div className="flex flex-wrap gap-2 items-end">
                     <div className="space-y-1">
-                        <Label className="text-xs">Attribute Slug</Label>
-                        <Input value={attrSlug} onChange={(e) => setAttrSlug(e.target.value)} placeholder="strength" className="h-8 w-36 text-sm" />
+                        <Label className="text-xs">{t('attrSlugLabel')}</Label>
+                        <Input
+                            value={attrSlug}
+                            onChange={(e) => setAttrSlug(e.target.value)}
+                            placeholder={t('attrSlugPlaceholder')}
+                            className="h-8 w-36 text-sm"
+                        />
                     </div>
                     <div className="space-y-1">
-                        <Label className="text-xs">Type</Label>
-                        <select
-                            value={modType}
-                            onChange={(e) => setModType(e.target.value)}
-                            className="flex h-8 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            <option value="flat">flat</option>
-                            <option value="percent">percent</option>
-                            <option value="percent_all">percent_all</option>
-                        </select>
+                        <Label className="text-xs">{t('colType')}</Label>
+                        <Select value={modType} onValueChange={setModType}>
+                            <SelectTrigger className="h-8 w-36">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="flat">flat</SelectItem>
+                                <SelectItem value="percent">percent</SelectItem>
+                                <SelectItem value="percent_all">percent_all</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                     <div className="space-y-1">
-                        <Label className="text-xs">Value</Label>
-                        <Input value={modValue} onChange={(e) => setModValue(e.target.value)} type="number" placeholder="0" className="h-8 w-24" />
+                        <Label className="text-xs">{t('colValue')}</Label>
+                        <Input
+                            value={modValue}
+                            onChange={(e) => setModValue(e.target.value)}
+                            type="number"
+                            placeholder="0"
+                            className="h-8 w-24"
+                        />
                     </div>
                     <Button
                         type="button"
@@ -336,7 +399,7 @@ function PassiveModifiersManager({ skillId }: { skillId: number }) {
                         onClick={handleAdd}
                     >
                         <Plus className="h-3.5 w-3.5 mr-1" />
-                        Add
+                        {t('addModifier')}
                     </Button>
                 </div>
             </CardContent>

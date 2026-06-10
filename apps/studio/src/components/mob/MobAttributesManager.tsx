@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit3, Activity } from 'lucide-react'
+import { Plus, Trash2, Edit3, Activity, ChevronDown, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -40,6 +40,7 @@ interface MobAttributesManagerProps {
 
 export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttributesManagerProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+    const [contentOpen, setContentOpen] = useState(false)
     const [editingAttribute, setEditingAttribute] = useState<MobAttribute | null>(null)
     const [deleteConfirmAttribute, setDeleteConfirmAttribute] = useState<MobAttribute | null>(null)
     const [selectedAttributeId, setSelectedAttributeId] = useState<string>('')
@@ -119,13 +120,19 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
     return (
         <Card>
             <CardHeader className="flex flex-row items-start justify-between pb-3">
-                <div>
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-primary" />
-                        {t('attributes')}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-0.5">{t('attributesDescription')}</CardDescription>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => setContentOpen(v => !v)}
+                    className="flex items-start gap-2 text-left hover:opacity-80 transition-opacity"
+                >
+                    {contentOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+                    <div>
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Activity className="h-4 w-4 text-primary" />
+                            {t('attributes')}
+                        </CardTitle>
+                    </div>
+                </button>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                         <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8">
@@ -174,7 +181,7 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
                     </DialogContent>
                 </Dialog>
             </CardHeader>
-            <CardContent>
+            {contentOpen && <CardContent>
                 {attributes.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <Activity className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -219,7 +226,7 @@ export function MobAttributesManager({ mobId, attributes, onUpdate }: MobAttribu
                         ))}
                     </div>
                 )}
-            </CardContent>
+            </CardContent>}
 
             {/* Edit dialog */}
             <Dialog open={!!editingAttribute} onOpenChange={(o) => { if (!o) setEditingAttribute(null) }}>

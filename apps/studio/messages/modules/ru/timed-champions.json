@@ -15,5 +15,13 @@
     "deleteConfirmDescription": "Удалить чемпиона {slug}?",
     "createSuccess": "Чемпион создан",
     "updateSuccess": "Чемпион обновлён",
-    "deleteSuccess": "Чемпион удалён"
+    "deleteSuccess": "Чемпион удалён",
+    "edit": "Редактировать чемпиона",
+    "deleteTitle": "Удалить чемпиона",
+    "create": "Создать чемпиона",
+    "createDescription": "Создать новый шаблон таймированного мирового босса",
+    "noItems": "Таймированные чемпионы не найдены",
+    "mob": "Моб-шаблон",
+    "selectZone": "Выберите зону...",
+    "selectMob": "Выберите моба..."
 }

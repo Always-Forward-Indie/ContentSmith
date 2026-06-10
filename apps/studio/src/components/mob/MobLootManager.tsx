@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit3, Package } from 'lucide-react'
+import { Plus, Trash2, Edit3, Package, ChevronDown, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,7 @@ const defaultForm = { itemId: '', dropChance: 10, isHarvestOnly: false, minQuant
 
 export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+    const [contentOpen, setContentOpen] = useState(false)
     const [editingEntry, setEditingEntry] = useState<MobLootEntry | null>(null)
     const [deleteConfirm, setDeleteConfirm] = useState<MobLootEntry | null>(null)
     const [form, setForm] = useState(defaultForm)
@@ -121,13 +122,20 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
     return (
         <Card>
             <CardHeader className="flex flex-row items-start justify-between pb-3">
-                <div>
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                        <Package className="h-4 w-4 text-primary" />
-                        {t('loot')}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-0.5">{t('lootDescription')}</CardDescription>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => setContentOpen(v => !v)}
+                    className="flex items-start gap-2 text-left hover:opacity-80 transition-opacity"
+                >
+                    {contentOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+                    <div>
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Package className="h-4 w-4 text-primary" />
+                            {t('loot')}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">{t('lootDescription')}</CardDescription>
+                    </div>
+                </button>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                         <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8">
@@ -185,7 +193,7 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
                     </DialogContent>
                 </Dialog>
             </CardHeader>
-            <CardContent>
+            {contentOpen && <CardContent>
                 {loot.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <Package className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -230,7 +238,7 @@ export function MobLootManager({ mobId, loot, onUpdate }: MobLootManagerProps) {
                         ))}
                     </div>
                 )}
-            </CardContent>
+            </CardContent>}
 
             {/* Edit dialog */}
             <Dialog open={!!editingEntry} onOpenChange={(o) => { if (!o) setEditingEntry(null) }}>

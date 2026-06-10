@@ -1,5 +1,6 @@
 {
     "title": "Titles",
+    "id": "ID",
     "description": "Manage character titles",
     "createNew": "Create Title",
     "editTitle": "Edit Title",
@@ -10,6 +11,7 @@
     "bonuses": "Bonuses (JSON)",
     "conditionParams": "Condition Params (JSON)",
     "noTitles": "No titles found",
+    "noItemsFound": "No titles found",
     "searchPlaceholder": "Search titles...",
     "deleteConfirmTitle": "Delete Title",
     "deleteConfirmDescription": "Delete title {displayName}?",

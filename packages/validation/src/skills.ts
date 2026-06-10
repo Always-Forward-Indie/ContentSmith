@@ -102,6 +102,58 @@ export const createSkillEffectSchema = z.object({
 
 export const updateSkillEffectSchema = createSkillEffectSchema.partial();
 
+// Skill Effect Instances
+export const skillEffectInstanceSchema = z.object({
+  id: z.number(),
+  skillId: z.number(),
+  orderIdx: z.number(),
+  targetTypeId: z.number(),
+});
+
+export const createSkillEffectInstanceSchema = z.object({
+  skillId: z.number().int().positive(),
+  orderIdx: z.number().int().min(1).default(1),
+  targetTypeId: z.number().int().positive(),
+});
+
+export const updateSkillEffectInstanceSchema = z.object({
+  id: z.number().int().positive(),
+  orderIdx: z.number().int().min(1).optional(),
+  targetTypeId: z.number().int().positive().optional(),
+});
+
+// Skill Effects Mapping (per-level effect values)
+export const skillEffectMappingSchema = z.object({
+  id: z.number(),
+  effectInstanceId: z.number(),
+  effectId: z.number(),
+  value: z.number(),
+  level: z.number(),
+  tickMs: z.number(),
+  durationMs: z.number(),
+  attributeId: z.number().nullable().optional(),
+});
+
+export const createSkillEffectMappingSchema = z.object({
+  effectInstanceId: z.number().int().positive(),
+  effectId: z.number().int().positive(),
+  value: z.number(),
+  level: z.number().int().min(1).default(1),
+  tickMs: z.number().int().min(0).default(0),
+  durationMs: z.number().int().min(0).default(0),
+  attributeId: z.number().int().positive().nullable().optional(),
+});
+
+export const updateSkillEffectMappingSchema = z.object({
+  id: z.number().int().positive(),
+  effectId: z.number().int().positive().optional(),
+  value: z.number().optional(),
+  level: z.number().int().min(1).optional(),
+  tickMs: z.number().int().min(0).optional(),
+  durationMs: z.number().int().min(0).optional(),
+  attributeId: z.number().int().positive().nullable().optional(),
+});
+
 // Общие схемы для списков и запросов
 export const skillListQuerySchema = z.object({
   search: z.string().optional(),
@@ -140,6 +192,14 @@ export type UpdateSkillEffectsTypeSchema = z.infer<typeof updateSkillEffectsType
 export type SkillEffectSchema = z.infer<typeof skillEffectSchema>;
 export type CreateSkillEffectSchema = z.infer<typeof createSkillEffectSchema>;
 export type UpdateSkillEffectSchema = z.infer<typeof updateSkillEffectSchema>;
+
+export type SkillEffectInstanceSchema = z.infer<typeof skillEffectInstanceSchema>;
+export type CreateSkillEffectInstanceSchema = z.infer<typeof createSkillEffectInstanceSchema>;
+export type UpdateSkillEffectInstanceSchema = z.infer<typeof updateSkillEffectInstanceSchema>;
+
+export type SkillEffectMappingSchema = z.infer<typeof skillEffectMappingSchema>;
+export type CreateSkillEffectMappingSchema = z.infer<typeof createSkillEffectMappingSchema>;
+export type UpdateSkillEffectMappingSchema = z.infer<typeof updateSkillEffectMappingSchema>;
 
 export type SkillListQuerySchema = z.infer<typeof skillListQuerySchema>;
 export type SkillIdSchema = z.infer<typeof skillIdSchema>;

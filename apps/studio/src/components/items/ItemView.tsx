@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import {
     Edit, Trash2, Package, Crown, Shield,
     Coins, Weight, Star, Layers, Zap, ScrollText, Sword,
-    ShoppingBag, AlertCircle, Box, ChevronRight,
+    ShoppingBag, AlertCircle, Box, ChevronRight, Sparkles, Clock, RefreshCw,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import {
 import { trpc } from '@/lib/trpc';
 import { getRarityStyle } from '@/lib/utils';
 import { useState } from 'react';
+import { ItemBalancePanel } from '@/components/balance/ItemBalancePanel';
 
 interface ItemViewProps {
     itemId: number;
@@ -87,6 +88,7 @@ export function ItemView({ itemId }: ItemViewProps) {
 
     const { data: item, isLoading } = trpc.items.getById.useQuery({ id: itemId });
     const { data: equipSlots } = trpc.equipSlots.all.useQuery();
+    const { data: useEffects } = trpc.items.getUseEffects.useQuery(itemId, { enabled: !!itemId });
 
     const deleteItemMutation = trpc.items.delete.useMutation({
         onSuccess: () => {
@@ -286,6 +288,75 @@ export function ItemView({ itemId }: ItemViewProps) {
                                 ))}
                             </div>
                         </div>
+                    )}
+
+                    {/* Use Effects */}
+                    {useEffects && useEffects.length > 0 && (
+                        <div className="rounded-lg border bg-card p-5">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Sparkles className="h-4 w-4 text-muted-foreground" />
+                                <h2 className="font-semibold text-sm">Use Effects</h2>
+                                <Badge variant="secondary" className="text-xs font-normal ml-auto">
+                                    {useEffects.length}
+                                </Badge>
+                            </div>
+                            <div className="space-y-2">
+                                {useEffects.map((effect) => (
+                                    <div
+                                        key={effect.id}
+                                        className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3 rounded-lg bg-muted/30 border border-transparent hover:border-border transition-colors"
+                                    >
+                                        <div className="flex items-center gap-1.5 min-w-0">
+                                            <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+                                            <span className="font-medium text-sm font-mono">{effect.effectSlug}</span>
+                                        </div>
+                                        {effect.attributeSlug && (
+                                            <Badge variant="outline" className="text-xs">
+                                                {effect.attributeSlug}: {effect.value > 0 ? '+' : ''}{effect.value}
+                                            </Badge>
+                                        )}
+                                        {effect.isInstant ? (
+                                            <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                                <Sparkles className="h-3 w-3" /> Instant
+                                            </span>
+                                        ) : (
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                {effect.durationSeconds > 0 && (
+                                                    <span className="flex items-center gap-1">
+                                                        <Clock className="h-3 w-3" />{effect.durationSeconds}s
+                                                    </span>
+                                                )}
+                                                {effect.tickMs > 0 && (
+                                                    <span className="flex items-center gap-1">
+                                                        <RefreshCw className="h-3 w-3" />tick {effect.tickMs}ms
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                        {effect.cooldownSeconds > 0 && (
+                                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <Clock className="h-3 w-3" />CD {effect.cooldownSeconds}s
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Balance Calculator */}
+                    {item.attributes && item.attributes.length > 0 && (
+                        <ItemBalancePanel item={{
+                            id: item.id,
+                            name: item.name,
+                            levelRequirement: item.levelRequirement,
+                            attributes: item.attributes.map((a: any) => ({
+                                attributeId: a.attributeId,
+                                attributeSlug: a.attributeSlug ?? '',
+                                attributeName: a.attributeName ?? '',
+                                value: a.value,
+                            })),
+                        }} />
                     )}
                 </div>
 

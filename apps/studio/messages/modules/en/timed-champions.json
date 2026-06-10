@@ -15,5 +15,13 @@
     "deleteConfirmDescription": "Delete champion {slug}?",
     "createSuccess": "Champion created",
     "updateSuccess": "Champion updated",
-    "deleteSuccess": "Champion deleted"
+    "deleteSuccess": "Champion deleted",
+    "edit": "Edit Champion",
+    "deleteTitle": "Delete Champion",
+    "create": "Create Champion",
+    "createDescription": "Define a new timed world boss template",
+    "noItems": "No timed champions found",
+    "mob": "Mob Template",
+    "selectZone": "Select zone...",
+    "selectMob": "Select mob..."
 }

@@ -15,5 +15,12 @@
     "deleteConfirmDescription": "Delete respawn zone {name}?",
     "createSuccess": "Respawn zone created",
     "updateSuccess": "Respawn zone updated",
-    "deleteSuccess": "Respawn zone deleted"
+    "deleteSuccess": "Respawn zone deleted",
+    "edit": "Edit Respawn Zone",
+    "deleteTitle": "Delete Respawn Zone",
+    "notFound": "Respawn zone not found",
+    "noItemsFound": "No respawn zones found",
+    "id": "ID",
+    "selectZone": "Select game zone...",
+    "zoneName": "Game Zone"
 }

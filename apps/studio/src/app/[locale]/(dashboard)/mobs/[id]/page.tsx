@@ -21,6 +21,8 @@ import { MobAttributesManager } from '@/components/mob/MobAttributesManager'
 import { MobSkillsManager } from '@/components/mob/MobSkillsManager'
 import { MobLootManager } from '@/components/mob/MobLootManager'
 import { SpawnZonesManager } from '@/components/mob/SpawnZonesManager'
+import { MobBalancePanel } from '@/components/balance/MobBalancePanel'
+import { LootEconomyPanel } from '@/components/balance/LootEconomyPanel'
 
 function DetailSkeleton() {
     return (
@@ -349,6 +351,37 @@ export default function MobDetailPage() {
 
             {/* Attributes */}
             <MobAttributesManager mobId={mob.id} attributes={mob.attributes} onUpdate={handleUpdate} />
+
+            {/* Balance Calculator */}
+            <MobBalancePanel mob={{
+                id: mob.id,
+                name: mob.name,
+                level: mob.level,
+                spawnHealth: mob.spawnHealth,
+                spawnMana: mob.spawnMana,
+                baseXp: mob.baseXp,
+                attackCooldown: mob.attackCooldown,
+                attributes: mob.attributes.map(a => ({
+                    attributeId: a.attributeId,
+                    attributeSlug: a.attributeSlug ?? '',
+                    attributeName: a.attributeName ?? '',
+                    flatValue: a.flatValue,
+                    multiplier: a.multiplier,
+                    exponent: a.exponent,
+                })),
+            }} />
+
+            {/* Loot & Gold Economy Calculator */}
+            <LootEconomyPanel mob={{
+                id: mob.id,
+                name: mob.name,
+                level: mob.level,
+                attributes: mob.attributes.map(a => ({
+                    attributeSlug: a.attributeSlug ?? '',
+                    flatValue: a.flatValue,
+                })),
+                attackCooldown: mob.attackCooldown,
+            }} />
 
             {/* Skills */}
             <MobSkillsManager mobId={mob.id} skills={mob.skills} onUpdate={handleUpdate} />

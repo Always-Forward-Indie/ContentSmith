@@ -1,5 +1,6 @@
 {
     "title": "Титулы",
+    "id": "ID",
     "description": "Управление титулами персонажей",
     "createNew": "Создать титул",
     "editTitle": "Редактировать титул",
@@ -10,6 +11,7 @@
     "bonuses": "Бонусы (JSON)",
     "conditionParams": "Параметры условий (JSON)",
     "noTitles": "Титулы не найдены",
+    "noItemsFound": "Титулы не найдены",
     "searchPlaceholder": "Поиск титулов...",
     "deleteConfirmTitle": "Удалить титул",
     "deleteConfirmDescription": "Удалить титул {displayName}?",

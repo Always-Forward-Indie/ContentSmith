@@ -15,5 +15,10 @@
     "deleteConfirmDescription": "Удалить эмоцию {displayName}?",
     "createSuccess": "Эмоция создана",
     "updateSuccess": "Эмоция обновлена",
-    "deleteSuccess": "Эмоция удалена"
+    "deleteSuccess": "Эмоция удалена",
+    "edit": "Редактировать эмоцию",
+    "deleteTitle": "Удалить эмоцию",
+    "notFound": "Эмоция не найдена",
+    "noItemsFound": "Эмоции не найдены",
+    "id": "ID"
 }

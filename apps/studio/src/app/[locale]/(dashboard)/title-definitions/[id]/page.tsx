@@ -33,7 +33,7 @@ type UpdateTitleDefinitionFormData = z.infer<typeof updateTitleDefinitionFormSch
 type TitleBonus = { attributeSlug: string; value: number };
 
 const EARN_CONDITION_OPTIONS = [
-    { value: '', label: '— не задано —' },
+    { value: '__none__', label: '— не задано —' },
     { value: 'bestiary', label: 'bestiary – убийства мобов' },
     { value: 'mastery', label: 'mastery – мастерство' },
     { value: 'reputation', label: 'reputation – репутация' },
@@ -276,8 +276,8 @@ export default function TitleDefinitionEditPage({ params }: TitleDefinitionEditP
                         <div className="space-y-2">
                             <Label htmlFor="earnCondition">Тип условия получения</Label>
                             <Select
-                                value={earnCondition}
-                                onValueChange={(v) => setValue('earnCondition', v === '' ? undefined : v)}
+                                value={earnCondition || '__none__'}
+                                onValueChange={(v) => setValue('earnCondition', v === '__none__' ? undefined : v)}
                             >
                                 <SelectTrigger id="earnCondition">
                                     <SelectValue placeholder="Выберите тип..." />

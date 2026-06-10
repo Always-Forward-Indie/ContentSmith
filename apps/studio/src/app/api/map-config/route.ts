@@ -16,11 +16,14 @@ export async function POST(req: NextRequest) {
 
   const current = await readMapConfig();
   const next: MapConfig = {
-    imageUrl:  body.imageUrl  !== undefined ? body.imageUrl  : current.imageUrl,
-    worldMinX: body.worldMinX !== undefined ? body.worldMinX : current.worldMinX,
-    worldMaxX: body.worldMaxX !== undefined ? body.worldMaxX : current.worldMaxX,
-    worldMinY: body.worldMinY !== undefined ? body.worldMinY : current.worldMinY,
-    worldMaxY: body.worldMaxY !== undefined ? body.worldMaxY : current.worldMaxY,
+    imageUrl:      body.imageUrl      !== undefined ? body.imageUrl      : current.imageUrl,
+    worldMinX:     body.worldMinX     !== undefined ? body.worldMinX     : current.worldMinX,
+    worldMaxX:     body.worldMaxX     !== undefined ? body.worldMaxX     : current.worldMaxX,
+    worldMinY:     body.worldMinY     !== undefined ? body.worldMinY     : current.worldMinY,
+    worldMaxY:     body.worldMaxY     !== undefined ? body.worldMaxY     : current.worldMaxY,
+    imageXAxis:    body.imageXAxis    !== undefined ? body.imageXAxis    : current.imageXAxis,
+    imageYAxis:    body.imageYAxis    !== undefined ? body.imageYAxis    : current.imageYAxis,
+    unitsPerPixel: body.unitsPerPixel !== undefined ? body.unitsPerPixel : current.unitsPerPixel,
   };
 
   await writeMapConfig(next);

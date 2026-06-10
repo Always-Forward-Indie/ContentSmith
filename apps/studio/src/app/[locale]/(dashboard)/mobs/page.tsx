@@ -206,7 +206,7 @@ export default function MobsPage() {
                         onClick={() => setShowFilters(v => !v)}
                     >
                         <SlidersHorizontal className="h-4 w-4" />
-                        Фильтры
+                        {t('filters')}
                         {activeFilterCount > 0 && (
                             <span className="ml-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-medium">
                                 {activeFilterCount}
@@ -216,7 +216,7 @@ export default function MobsPage() {
                     {activeFilterCount > 0 && (
                         <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground" onClick={clearFilters}>
                             <X className="h-3.5 w-3.5" />
-                            Сбросить
+                            {t('resetFilters')}
                         </Button>
                     )}
                 </div>
@@ -235,7 +235,7 @@ export default function MobsPage() {
                                         <SelectValue placeholder={t('race')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">Все расы</SelectItem>
+                                        <SelectItem value="all">{t('allRaces')}</SelectItem>
                                         {races?.map(r => (
                                             <SelectItem key={r.id} value={r.id.toString()}>{r.name}</SelectItem>
                                         ))}
@@ -252,7 +252,7 @@ export default function MobsPage() {
                                         <SelectValue placeholder={t('rank')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">Все ранги</SelectItem>
+                                        <SelectItem value="all">{t('allRanks')}</SelectItem>
                                         {ranks?.map(r => (
                                             <SelectItem key={r.rankId} value={r.rankId.toString()} className="capitalize">{r.code} ×{r.mult}</SelectItem>
                                         ))}
@@ -269,7 +269,7 @@ export default function MobsPage() {
                                         <SelectValue placeholder={t('behavior')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">Любое</SelectItem>
+                                        <SelectItem value="all">{t('allBehaviors')}</SelectItem>
                                         <SelectItem value="passive">{t('passive')}</SelectItem>
                                         <SelectItem value="aggressive">{t('aggressive')}</SelectItem>
                                     </SelectContent>
@@ -285,19 +285,19 @@ export default function MobsPage() {
                                         <SelectValue placeholder={t('status')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">Любой</SelectItem>
+                                        <SelectItem value="all">{t('allStatuses')}</SelectItem>
                                         <SelectItem value="alive">{t('alive')}</SelectItem>
                                         <SelectItem value="dead">{t('dead')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-1.5">
-                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Уровень</p>
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('levelRange')}</p>
                                 <div className="flex items-center gap-1.5">
                                     <Input
                                         type="number"
                                         min={1}
-                                        placeholder="от"
+                                        placeholder={t('levelFrom')}
                                         value={minLevelInput}
                                         onChange={e => setMinLevelInput(e.target.value)}
                                         className="h-8 w-full text-xs bg-background"
@@ -306,7 +306,7 @@ export default function MobsPage() {
                                     <Input
                                         type="number"
                                         min={1}
-                                        placeholder="до"
+                                        placeholder={t('levelTo')}
                                         value={maxLevelInput}
                                         onChange={e => setMaxLevelInput(e.target.value)}
                                         className="h-8 w-full text-xs bg-background"

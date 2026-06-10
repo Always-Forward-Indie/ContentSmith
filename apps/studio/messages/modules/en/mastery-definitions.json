@@ -13,5 +13,12 @@
     "deleteConfirmDescription": "Delete mastery {name}?",
     "createSuccess": "Mastery created",
     "updateSuccess": "Mastery updated",
-    "deleteSuccess": "Mastery deleted"
+    "deleteSuccess": "Mastery deleted",
+    "edit": "Edit Mastery",
+    "deleteTitle": "Delete Mastery",
+    "notFound": "Mastery not found",
+    "noItemsFound": "No masteries found",
+    "search": "Search masteries...",
+    "xpPerPoint": "XP per Point",
+    "maxPoints": "Max Points"
 }

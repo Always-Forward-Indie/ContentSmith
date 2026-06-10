@@ -1,0 +1,10 @@
+{
+  "imageUrl": "/uploads/maps/b035c3de-da5f-41b5-b3e0-d2a948cc962f.png",
+  "worldMinX": -42210,
+  "worldMaxX": 41610,
+  "worldMinY": -41910,
+  "worldMaxY": 41910,
+  "imageXAxis": "+Y",
+  "imageYAxis": "-X",
+  "unitsPerPixel": 20.4638671875
+}

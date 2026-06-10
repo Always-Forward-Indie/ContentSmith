@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit3, Zap } from 'lucide-react'
+import { Plus, Trash2, Edit3, Zap, ChevronDown, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,7 @@ interface MobSkillsManagerProps {
 
 export function MobSkillsManager({ mobId, skills, onUpdate }: MobSkillsManagerProps) {
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+    const [contentOpen, setContentOpen] = useState(false)
     const [editingSkill, setEditingSkill] = useState<MobSkill | null>(null)
     const [deleteConfirmSkill, setDeleteConfirmSkill] = useState<MobSkill | null>(null)
     const [selectedSkillId, setSelectedSkillId] = useState<string>('')
@@ -101,13 +102,20 @@ export function MobSkillsManager({ mobId, skills, onUpdate }: MobSkillsManagerPr
     return (
         <Card>
             <CardHeader className="flex flex-row items-start justify-between pb-3">
-                <div>
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-primary" />
-                        {t('skills')}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-0.5">{t('skillsDescription')}</CardDescription>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => setContentOpen(v => !v)}
+                    className="flex items-start gap-2 text-left hover:opacity-80 transition-opacity"
+                >
+                    {contentOpen ? <ChevronDown className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" /> : <ChevronRight className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />}
+                    <div>
+                        <CardTitle className="text-base font-semibold flex items-center gap-2">
+                            <Zap className="h-4 w-4 text-primary" />
+                            {t('skills')}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-0.5">{t('skillsDescription')}</CardDescription>
+                    </div>
+                </button>
                 <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                     <DialogTrigger asChild>
                         <Button size="sm" variant="outline" className="gap-1.5 text-xs h-8">
@@ -146,7 +154,7 @@ export function MobSkillsManager({ mobId, skills, onUpdate }: MobSkillsManagerPr
                     </DialogContent>
                 </Dialog>
             </CardHeader>
-            <CardContent>
+            {contentOpen && <CardContent>
                 {skills.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                         <Zap className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -188,7 +196,8 @@ export function MobSkillsManager({ mobId, skills, onUpdate }: MobSkillsManagerPr
                         ))}
                     </div>
                 )}
-            </CardContent>
+            </CardContent>}
+
 
             {/* Edit dialog */}
             <Dialog open={!!editingSkill} onOpenChange={(o) => { if (!o) setEditingSkill(null) }}>

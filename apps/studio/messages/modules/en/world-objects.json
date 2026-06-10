@@ -22,5 +22,13 @@
     "deleteConfirmDescription": "Delete object {slug}?",
     "createSuccess": "Object created",
     "updateSuccess": "Object updated",
-    "deleteSuccess": "Object deleted"
+    "deleteSuccess": "Object deleted",
+    "edit": "Edit World Object",
+    "deleteTitle": "Delete World Object",
+    "create": "Create Object",
+    "createDescription": "Define a new interactive world object",
+    "noItems": "No world objects found",
+    "filterByType": "Filter by type...",
+    "rotationZ": "Rotation Z",
+    "selectZone": "Select zone..."
 }

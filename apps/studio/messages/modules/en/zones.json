@@ -34,8 +34,19 @@
         "minY": "Min Y",
         "maxY": "Max Y",
         "explorationXpReward": "Exploration XP Reward",
-        "championThresholdKills": "Champion Threshold Kills"
+        "championThresholdKills": "Champion Threshold Kills",
+        "shapeType": "Shape Type",
+        "centerX": "Center X",
+        "centerY": "Center Y",
+        "innerRadius": "Inner Radius",
+        "outerRadius": "Outer Radius"
     },
+    "shapes": {
+        "RECT": "Rectangle",
+        "CIRCLE": "Circle",
+        "ANNULUS": "Ring (Annulus)"
+    },
+    "shapeParams": "Shape Parameters",
     "boundaries": "Zone Boundaries",
     "boundariesDescription": "Optional coordinate boundaries for the zone",
     "badges": {

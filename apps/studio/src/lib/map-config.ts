@@ -1,10 +1,15 @@
 /**
  * World map configuration stored in <appRoot>/config/world-map.json
  *
- * imageUrl  - path to the uploaded map image served from /public
+ * imageUrl      - path to the uploaded map image served from /public
  * worldMinX / worldMaxX / worldMinY / worldMaxY
- *   - manual override for world bounds when zone bounds don't cover the full map.
+ *   - world-space bounds (UE cm), overrides auto-computed bounds from zones.
  *     If null, bounds are computed automatically from all zones.
+ * imageXAxis    - which world axis drives image horizontal (+X/-X/+Y/-Y).
+ *                 UE top-down: '+Y'.  Standard: '+X'.
+ * imageYAxis    - which world axis drives image vertical (+X/-X/+Y/-Y).
+ *                 UE top-down: '-X'. Standard: '+Y'.
+ * unitsPerPixel - UE units (cm) per image pixel, informational.
  */
 
 import { readFile, writeFile, mkdir } from 'fs/promises';
@@ -16,17 +21,23 @@ export interface MapConfig {
   worldMaxX: number | null;
   worldMinY: number | null;
   worldMaxY: number | null;
+  imageXAxis: string | null;
+  imageYAxis: string | null;
+  unitsPerPixel: number | null;
 }
 
 const CONFIG_DIR  = join(process.cwd(), 'config');
 const CONFIG_PATH = join(CONFIG_DIR, 'world-map.json');
 
 const DEFAULT_CONFIG: MapConfig = {
-  imageUrl:  null,
-  worldMinX: null,
-  worldMaxX: null,
-  worldMinY: null,
-  worldMaxY: null,
+  imageUrl:      null,
+  worldMinX:     null,
+  worldMaxX:     null,
+  worldMinY:     null,
+  worldMaxY:     null,
+  imageXAxis:    null,
+  imageYAxis:    null,
+  unitsPerPixel: null,
 };
 
 export async function readMapConfig(): Promise<MapConfig> {
