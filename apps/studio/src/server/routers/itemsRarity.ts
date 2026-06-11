@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { itemsRarity, eq, desc, asc, like, and, sql } from '@contentsmith/database';
+import { itemsRarity, eq, desc, asc, like, and, sql } from '@/db';
 import { db } from '../db';
 
 // Temporary schemas until they are added to validation package

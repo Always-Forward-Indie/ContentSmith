@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { emoteDefinitions } from '@contentsmith/database';
-import { eq, like, count, asc } from '@contentsmith/database';
+import { emoteDefinitions } from '@/db';
+import { eq, like, count, asc } from '@/db';
 import {
   emoteDefinitionListQuerySchema,
   emoteDefinitionIdSchema,
   createEmoteDefinitionSchema,
   updateEmoteDefinitionSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const emoteDefinitionsRouter = createTRPCRouter({
   list: publicProcedure

@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { masteryDefinitions } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
+import { masteryDefinitions } from '@/db';
+import { eq, like, count } from '@/db';
 import {
   masteryDefinitionListQuerySchema,
   createMasteryDefinitionSchema,
   updateMasteryDefinitionSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const masteryDefinitionsRouter = createTRPCRouter({
   list: publicProcedure

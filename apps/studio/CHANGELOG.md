@@ -42,6 +42,7 @@
 - **`next.config.js`** — убран блок `env` (переменные передаются через Docker Compose runtime)
 - **Сессия** — `maxAge: 8h`, автовыход через 8 часов после входа
 - **Кнопка «Выйти»** — иконка `LogOut` в AppHeader, вызов `signOut()`
+- **Реструктуризация** — shared-пакеты (`@contentsmith/database`, `@contentsmith/validation`) перенесены внутрь `apps/studio/src/` как обычные директории (`@/db`, `@/validation`). Убран `transpilePackages` из `next.config.js`, удалены workspace-зависимости. Docker-сборка: одна команда `npm run build --workspace=@contentsmith/studio`
 
 ### Улучшения: Редактор карт
 

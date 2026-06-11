@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { worldObjects, zones, items } from '@contentsmith/database';
-import { eq, like, count, and } from '@contentsmith/database';
+import { worldObjects, zones, items } from '@/db';
+import { eq, like, count, and } from '@/db';
 import {
   worldObjectListQuerySchema,
   worldObjectIdSchema,
   createWorldObjectSchema,
   updateWorldObjectSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const worldObjectsRouter = createTRPCRouter({
   list: publicProcedure

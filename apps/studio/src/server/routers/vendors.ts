@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { eq, like, or, and, count } from '@contentsmith/database';
+import { eq, like, or, and, count } from '@/db';
 import { db } from '../db';
-import { vendorNpc, vendorInventory, npc, items } from '@contentsmith/database';
+import { vendorNpc, vendorInventory, npc, items } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import {
   createVendorSchema, updateVendorSchema, vendorIdSchema,
   addVendorItemSchema, updateVendorItemSchema, removeVendorItemSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const vendorsRouter = createTRPCRouter({
   // ─── Vendor NPCs ────────────────────────────────────────────────────────────

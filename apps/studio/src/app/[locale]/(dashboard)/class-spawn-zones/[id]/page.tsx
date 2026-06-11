@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
-import type { SpawnZoneShape } from '@contentsmith/validation'
+import type { SpawnZoneShape } from '@/validation'
 
 export default function ClassSpawnZoneDetailPage() {
     const { id } = useParams<{ id: string }>()

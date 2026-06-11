@@ -4,6 +4,14 @@
 
 ---
 
+### Реструктуризация
+
+- **`packages/validation`** — удалён. Zod-схемы перенесены в `apps/studio/src/validation/`.
+- **`packages/ui`** — удалён. Пакет не использовался.
+- **`packages/database`** — больше не является зависимостью studio. Drizzle-схема и `createDb()` перенесены в `apps/studio/src/db/`. Оставлен как standalone-инструмент для `drizzle-kit`.
+
+---
+
 ### `packages/database`
 
 #### Новый enum

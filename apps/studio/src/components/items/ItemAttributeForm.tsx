@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
     createItemAttributeSchema,
     updateItemAttributeSchema
-} from '@contentsmith/validation';
+} from '@/validation';
 
 interface ItemAttributeFormProps {
     initialData?: {

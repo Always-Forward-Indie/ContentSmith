@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { statusEffects, statusEffectModifiers, entityAttributes } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
+import { statusEffects, statusEffectModifiers, entityAttributes } from '@/db';
+import { eq, like, count } from '@/db';
 import {
   statusEffectListQuerySchema,
   statusEffectIdSchema,
@@ -10,7 +10,7 @@ import {
   updateStatusEffectSchema,
   createStatusEffectModifierSchema,
   updateStatusEffectModifierSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const statusEffectsRouter = createTRPCRouter({
   list: publicProcedure

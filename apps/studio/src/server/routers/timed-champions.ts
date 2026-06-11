@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { timedChampionTemplates, zones, mob } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
+import { timedChampionTemplates, zones, mob } from '@/db';
+import { eq, like, count } from '@/db';
 import {
   timedChampionTemplateListQuerySchema,
   timedChampionTemplateIdSchema,
   createTimedChampionTemplateSchema,
   updateTimedChampionTemplateSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const timedChampionsRouter = createTRPCRouter({
   list: publicProcedure

@@ -11,8 +11,8 @@ import {
   itemUseEffects,
   itemClassRestrictions,
   characterClass,
-} from '@contentsmith/database';
-import { like, or, desc, asc, eq, and, sql } from '@contentsmith/database';
+} from '@/db';
+import { like, or, desc, asc, eq, and, sql } from '@/db';
 import {
   itemsListQuerySchema,
   createItemSchema,
@@ -32,7 +32,7 @@ import {
   itemAttributeMappingIdSchema,
   itemWithAttributesSchema,
   updateItemWithAttributesSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 import { TRPCError } from '@trpc/server';
 
 // В режиме разработки используем dev процедуры

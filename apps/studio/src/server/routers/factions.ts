@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { factions } from '@contentsmith/database';
-import { eq, like, count, and } from '@contentsmith/database';
+import { factions } from '@/db';
+import { eq, like, count, and } from '@/db';
 import {
   factionListQuerySchema,
   factionIdSchema,
   createFactionSchema,
   updateFactionSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const factionsRouter = createTRPCRouter({
   list: publicProcedure

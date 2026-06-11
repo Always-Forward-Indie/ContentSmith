@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillScaleType } from '@contentsmith/database';
-import { and, eq, like, count } from '@contentsmith/database';
+import { skillScaleType } from '@/db';
+import { and, eq, like, count } from '@/db';
 import {
   skillScaleTypeListQuerySchema,
   skillScaleTypeIdSchema,
   createSkillScaleTypeSchema,
   updateSkillScaleTypeSchema,
-} from '@contentsmith/validation/src/skill-scale-types';
+} from '@/validation/skill-scale-types';
 
 export const skillScaleTypesRouter = createTRPCRouter({
   // Получить список типов масштабирования с поиском

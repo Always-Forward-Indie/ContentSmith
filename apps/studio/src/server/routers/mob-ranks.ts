@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { eq, like, count } from '@contentsmith/database';
+import { eq, like, count } from '@/db';
 import { db } from '../db';
-import { mobRanks } from '@contentsmith/database';
+import { mobRanks } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 
 export const mobRanksRouter = createTRPCRouter({

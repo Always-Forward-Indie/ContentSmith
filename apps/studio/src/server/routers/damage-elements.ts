@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { damageElements } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
-import { damageElementListQuerySchema, createDamageElementSchema } from '@contentsmith/validation';
+import { damageElements } from '@/db';
+import { eq, like, count } from '@/db';
+import { damageElementListQuerySchema, createDamageElementSchema } from '@/validation';
 
 export const damageElementsRouter = createTRPCRouter({
   list: publicProcedure

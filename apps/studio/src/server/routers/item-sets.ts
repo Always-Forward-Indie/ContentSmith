@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { itemSets, itemSetMembers, itemSetBonuses, items, entityAttributes } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
+import { itemSets, itemSetMembers, itemSetBonuses, items, entityAttributes } from '@/db';
+import { eq, like, count } from '@/db';
 import {
   itemSetListQuerySchema,
   itemSetIdSchema,
@@ -12,7 +12,7 @@ import {
   removeItemFromSetSchema,
   createItemSetBonusSchema,
   updateItemSetBonusSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const itemSetsRouter = createTRPCRouter({
   list: publicProcedure

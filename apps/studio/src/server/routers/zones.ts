@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { eq, like, or, count, asc, and, sql } from '@contentsmith/database';
+import { eq, like, or, count, asc, and, sql } from '@/db';
 import { db } from '../db';
-import { zones, spawnZones, spawnZoneMobs, classSpawnZones, npcPlacements, mobPosition, worldObjects, respawnZones, mob, npc, npcType, characterClass } from '@contentsmith/database';
+import { zones, spawnZones, spawnZoneMobs, classSpawnZones, npcPlacements, mobPosition, worldObjects, respawnZones, mob, npc, npcType, characterClass } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import {
   createZoneSchema, updateZoneSchema, zoneIdSchema,
   createSpawnZoneSchema, updateSpawnZoneSchema, spawnZoneIdSchema,
   createSpawnZoneMobSchema, updateSpawnZoneMobSchema, spawnZoneMobIdSchema,
   createNpcPlacementSchema, updateNpcPlacementSchema, npcPlacementIdSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const zonesRouter = createTRPCRouter({
   // ─── Zones ──────────────────────────────────────────────────────────────────

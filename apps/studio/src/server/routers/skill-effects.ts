@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillDamageFormulas, skillDamageTypes } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
+import { skillDamageFormulas, skillDamageTypes } from '@/db';
+import { eq, like, or, desc, asc, and, count } from '@/db';
 import {
   skillEffectSchema,
   createSkillEffectSchema,
   updateSkillEffectSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 const skillEffectListQuerySchema = z.object({
   search: z.string().optional(),

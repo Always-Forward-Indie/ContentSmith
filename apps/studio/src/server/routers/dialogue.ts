@@ -10,9 +10,9 @@ import {
   DialogueNodeBaseSchema,
   DialogueEdgeSchema,
   dialogueListQuerySchema,
-} from '@contentsmith/validation';
-import { dialogue, dialogueNode, dialogueEdge, npc, npcDialogue } from '@contentsmith/database';
-import { eq, desc, like, or, inArray, count, and, asc, sql } from '@contentsmith/database';
+} from '@/validation';
+import { dialogue, dialogueNode, dialogueEdge, npc, npcDialogue } from '@/db';
+import { eq, desc, like, or, inArray, count, and, asc, sql } from '@/db';
 
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development';

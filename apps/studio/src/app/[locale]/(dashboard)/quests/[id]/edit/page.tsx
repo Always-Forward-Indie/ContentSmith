@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import NPCSelect from '@/components/editors/NPCSelect'
 
 import { trpc } from '@/lib/trpc'
-import { UpdateQuestSchema } from '@contentsmith/validation'
+import { UpdateQuestSchema } from '@/validation'
 
 type UpdateQuestForm = z.infer<typeof UpdateQuestSchema>
 

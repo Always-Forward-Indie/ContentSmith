@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { itemTypes, eq, desc, asc, ilike, count, sql } from '@contentsmith/database';
+import { itemTypes, eq, desc, asc, ilike, count, sql } from '@/db';
 import { db } from '../db';
 import {
   createItemTypesSchema,
@@ -8,7 +8,7 @@ import {
   getItemTypesByIdSchema,
   deleteItemTypesSchema,
   listItemTypesSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const itemTypesRouter = createTRPCRouter({
   // List item types with pagination and search

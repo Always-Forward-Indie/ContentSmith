@@ -4,7 +4,6 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@contentsmith/database', '@contentsmith/validation', '@contentsmith/ui'],
   output: 'standalone',
   images: {
     domains: ['localhost'],

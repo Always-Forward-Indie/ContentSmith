@@ -7,9 +7,9 @@ import {
   UpdateQuestSchema,
   QuestStepSchema,
   questListQuerySchema,
-} from '@contentsmith/validation';
-import { quest, questStep, questReward, npc, items } from '@contentsmith/database';
-import { eq, desc, like, or, inArray, count, and, gte, lte, asc, sql } from '@contentsmith/database';
+} from '@/validation';
+import { quest, questStep, questReward, npc, items } from '@/db';
+import { eq, desc, like, or, inArray, count, and, gte, lte, asc, sql } from '@/db';
 
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development';

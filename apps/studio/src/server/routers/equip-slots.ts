@@ -1,13 +1,13 @@
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { equipSlot, eq, desc, asc, ilike, count } from '@contentsmith/database';
+import { equipSlot, eq, desc, asc, ilike, count } from '@/db';
 import {
   createEquipSlotSchema,
   updateEquipSlotSchema,
   getEquipSlotByIdSchema,
   deleteEquipSlotSchema,
   listEquipSlotsSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const equipSlotsRouter = createTRPCRouter({
   list: publicProcedure

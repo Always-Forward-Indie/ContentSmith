@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { eq, and, or, like, count } from '@contentsmith/database';
+import { eq, and, or, like, count } from '@/db';
 import { db } from '../db';
-import { characterClass, classStatFormula, classSkillTree, entityAttributes, skills } from '@contentsmith/database';
+import { characterClass, classStatFormula, classSkillTree, entityAttributes, skills } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import {
   createClassSchema, updateClassSchema, classIdSchema,
   upsertStatFormulaSchema, deleteStatFormulaSchema,
   addSkillToClassSchema, updateClassSkillSchema, removeSkillFromClassSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const classesRouter = createTRPCRouter({
   // ─── Classes ────────────────────────────────────────────────────────────────

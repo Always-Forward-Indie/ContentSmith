@@ -14,8 +14,8 @@ import {
   entityAttributes,
   skills,
   items,
-} from '@contentsmith/database'
-import { like, or, desc, eq, and, count, sql, gte, lte, asc } from '@contentsmith/database'
+} from '@/db'
+import { like, or, desc, eq, and, count, sql, gte, lte, asc } from '@/db'
 import {
   mobListQuerySchema,
   createMobSchema,
@@ -29,7 +29,7 @@ import {
   addMobLootSchema,
   updateMobLootSchema,
   removeMobLootSchema,
-} from '@contentsmith/validation'
+} from '@/validation'
 
 const isDev = process.env.NODE_ENV === 'development'
 const requirePerm = (permission: string) => 

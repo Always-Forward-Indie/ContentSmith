@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { race } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
+import { race } from '@/db';
+import { eq, like, or, desc, asc, and, count } from '@/db';
 import {
   raceSchema,
   createRaceSchema,
   updateRaceSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 const raceListQuerySchema = z.object({
   search: z.string().optional(),

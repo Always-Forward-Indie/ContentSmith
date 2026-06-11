@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { titleDefinitions } from '@contentsmith/database';
-import { eq, like, count } from '@contentsmith/database';
+import { titleDefinitions } from '@/db';
+import { eq, like, count } from '@/db';
 import {
   titleDefinitionListQuerySchema,
   titleDefinitionIdSchema,
   createTitleDefinitionSchema,
   updateTitleDefinitionSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const titleDefinitionsRouter = createTRPCRouter({
   list: publicProcedure

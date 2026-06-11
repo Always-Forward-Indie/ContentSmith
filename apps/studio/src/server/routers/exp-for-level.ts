@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { eq, asc, count } from '@contentsmith/database';
+import { eq, asc, count } from '@/db';
 import { db } from '../db';
-import { expForLevel } from '@contentsmith/database';
+import { expForLevel } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { bulkUpsertExpForLevelSchema, deleteExpForLevelSchema } from '@contentsmith/validation';
+import { bulkUpsertExpForLevelSchema, deleteExpForLevelSchema } from '@/validation';
 
 export const expForLevelRouter = createTRPCRouter({
   list: publicProcedure

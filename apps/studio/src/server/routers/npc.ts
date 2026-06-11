@@ -17,8 +17,8 @@ import {
   npcAmbientSpeechConfigs,
   npcAmbientSpeechLines,
   characterClass,
-} from '@contentsmith/database'
-import { like, or, desc, eq, and, count, gte, lte, asc } from '@contentsmith/database'
+} from '@/db'
+import { like, or, desc, eq, and, count, gte, lte, asc } from '@/db'
 import { 
   npcListQuerySchema, 
   createNpcSchema, 
@@ -38,7 +38,7 @@ import {
   addNpcSkillSchema,
   updateNpcSkillSchema,
   removeNpcSkillSchema
-} from '@contentsmith/validation'
+} from '@/validation'
 
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development'

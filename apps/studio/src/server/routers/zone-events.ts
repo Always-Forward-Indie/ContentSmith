@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { zoneEventTemplates, zones, mob } from '@contentsmith/database';
-import { eq, like, count, and } from '@contentsmith/database';
+import { zoneEventTemplates, zones, mob } from '@/db';
+import { eq, like, count, and } from '@/db';
 import {
   zoneEventTemplateListQuerySchema,
   zoneEventTemplateIdSchema,
   createZoneEventTemplateSchema,
   updateZoneEventTemplateSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const zoneEventsRouter = createTRPCRouter({
   list: publicProcedure

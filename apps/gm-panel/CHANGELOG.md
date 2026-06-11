@@ -28,7 +28,7 @@
 - **tRPC авторизация** — все роутеры переведены с `publicProcedure` на `gmProcedure`:
   - `gmProcedure` проверяет сессию + `isStaff`
   - `accounts`, `characters`, `sessions`, `bans`, `transactions`, `gmLog`, `characterExtras`, `gameConfig`, `effects`, `inventory`, `equipment`, `skills`, `flags`, `attributes`, `quests`, `analytics`, `gameAnalytics`
-- Новые зависимости: `next-auth`, `bcryptjs`, `@types/bcryptjs`
+- Новые зависимости: `next-auth`
 - `NEXTAUTH_URL`, `NEXTAUTH_SECRET` добавлены в `.env.local`
 
 ### Новые роутеры

@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillDamageTypes } from '@contentsmith/database';
-import { and, eq, like, count } from '@contentsmith/database';
+import { skillDamageTypes } from '@/db';
+import { and, eq, like, count } from '@/db';
 import {
   skillEffectsTypeSchema,
   createSkillEffectsTypeSchema,
   updateSkillEffectsTypeSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 // Создаем схемы для запросов (которых нет в skills.ts)
 const skillEffectsTypeListQuerySchema = z.object({

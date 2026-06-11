@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { eq, like, or, count } from '@contentsmith/database';
+import { eq, like, or, count } from '@/db';
 import { db } from '../db';
-import { characterGenders } from '@contentsmith/database';
+import { characterGenders } from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 
 export const characterGendersRouter = createTRPCRouter({

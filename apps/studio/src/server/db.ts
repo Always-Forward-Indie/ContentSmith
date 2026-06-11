@@ -1,4 +1,4 @@
-import { createDb } from '@contentsmith/database';
+import { createDb } from '@/db';
 
 // Database connection
 const connectionString = process.env.DATABASE_URL;

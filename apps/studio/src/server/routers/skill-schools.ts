@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillSchool } from '@contentsmith/database';
-import { and, eq, like, count } from '@contentsmith/database';
+import { skillSchool } from '@/db';
+import { and, eq, like, count } from '@/db';
 import {
   skillSchoolListQuerySchema,
   skillSchoolIdSchema,
   createSkillSchoolSchema,
   updateSkillSchoolSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const skillSchoolsRouter = createTRPCRouter({
   // Получить список школ скилов с поиском

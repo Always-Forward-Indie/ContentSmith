@@ -2,8 +2,8 @@ import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { createHash } from 'crypto';
 import { db } from '@/server/db';
-import { users, userRoles } from '@contentsmith/database';
-import { eq, and } from '@contentsmith/database';
+import { users, userRoles } from '@/db';
+import { eq, and } from '@/db';
 
 export const authOptions: NextAuthOptions = {
   providers: [

@@ -14,8 +14,8 @@ import {
   skillEffectInstances,
   skillEffectsMapping,
   entityAttributes,
-} from '@contentsmith/database';
-import { and, eq, like, count, asc, inArray } from '@contentsmith/database';
+} from '@/db';
+import { and, eq, like, count, asc, inArray } from '@/db';
 import {
   skillListQuerySchema,
   skillIdSchema,
@@ -25,7 +25,7 @@ import {
   createSkillEffectInstanceSchema,
   updateSkillEffectInstanceSchema,
   createSkillEffectMappingSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const skillsRouter = createTRPCRouter({
   // Получить список скилов с поиском и фильтрацией

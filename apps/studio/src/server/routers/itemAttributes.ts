@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
-import { entityAttributes, eq, desc, asc, like, and, sql } from '@contentsmith/database';
+import { entityAttributes, eq, desc, asc, like, and, sql } from '@/db';
 import { 
   createItemAttributeSchema, 
   updateItemAttributeSchema, 
   itemAttributeIdSchema
-} from '@contentsmith/validation';
+} from '@/validation';
 import { db } from '../db';
 
 const itemAttributesListQuerySchema = z.object({

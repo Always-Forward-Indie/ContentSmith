@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { eq, and, like, inArray, sql } from '@contentsmith/database';
+import { eq, and, like, inArray, sql } from '@/db';
 import { db } from '../db';
 import {
   characterClass,
@@ -34,7 +34,7 @@ import {
   itemSetMembers,
   itemSetBonuses,
   titleDefinitions,
-} from '@contentsmith/database';
+} from '@/db';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 
 // ---------------------------------------------------------------------------

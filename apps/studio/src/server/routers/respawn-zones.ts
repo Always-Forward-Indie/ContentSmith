@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { respawnZones, zones } from '@contentsmith/database';
-import { eq, like, count, and } from '@contentsmith/database';
+import { respawnZones, zones } from '@/db';
+import { eq, like, count, and } from '@/db';
 import {
   respawnZoneListQuerySchema,
   respawnZoneIdSchema,
   createRespawnZoneSchema,
   updateRespawnZoneSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 export const respawnZonesRouter = createTRPCRouter({
   list: publicProcedure

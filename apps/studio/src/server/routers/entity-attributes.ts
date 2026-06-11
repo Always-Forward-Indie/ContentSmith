@@ -1,13 +1,13 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { entityAttributes } from '@contentsmith/database';
-import { eq, like, or, desc, asc, and, count } from '@contentsmith/database';
+import { entityAttributes } from '@/db';
+import { eq, like, or, desc, asc, and, count } from '@/db';
 import {
   entityAttributesSchema,
   createEntityAttributesSchema,
   updateEntityAttributesSchema,
-} from '@contentsmith/validation';
+} from '@/validation';
 
 const entityAttributesListQuerySchema = z.object({
   search: z.string().optional(),

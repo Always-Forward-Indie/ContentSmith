@@ -1,14 +1,14 @@
 import { z } from 'zod';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { db } from '../db';
-import { skillProperties } from '@contentsmith/database';
-import { and, eq, like, count } from '@contentsmith/database';
+import { skillProperties } from '@/db';
+import { and, eq, like, count } from '@/db';
 import {
   skillPropertyTypeListQuerySchema,
   skillPropertyTypeIdSchema,
   createSkillPropertyTypeSchema,
   updateSkillPropertyTypeSchema,
-} from '@contentsmith/validation/src/skill-properties';
+} from '@/validation/skill-properties';
 
 export const skillPropertiesRouter = createTRPCRouter({
   // Получить список типов свойств с поиском

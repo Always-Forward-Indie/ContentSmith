@@ -1,4 +1,4 @@
-import { sql } from '@contentsmith/database';
+import { sql } from '@/db';
 
 /**
  * Embeds a value directly into a SQL literal with an explicit `::jsonb` cast.
