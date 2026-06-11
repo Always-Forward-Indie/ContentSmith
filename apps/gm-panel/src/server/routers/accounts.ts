@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq, ilike, or, and, isNotNull, isNull, count, gt, SQL } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState, userSessions } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
@@ -8,27 +8,27 @@ const PAGE_SIZE = 20;
 
 export const accountsRouter = createTRPCRouter({
   // Справочник ролей пользователей
-  allRoles: publicProcedure.query(async ({ ctx }) => {
+  allRoles: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select().from(userRoles).orderBy(userRoles.id);
   }),
 
   // Справочник пола персонажа
-  allGenders: publicProcedure.query(async ({ ctx }) => {
+  allGenders: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select().from(characterGenders).orderBy(characterGenders.id);
   }),
 
   // Справочник классов персонажа
-  allClasses: publicProcedure.query(async ({ ctx }) => {
+  allClasses: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select({ id: characterClass.id, name: characterClass.name }).from(characterClass).orderBy(characterClass.name);
   }),
 
   // Справочник рас
-  allRaces: publicProcedure.query(async ({ ctx }) => {
+  allRaces: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select({ id: race.id, name: race.name, slug: race.slug }).from(race).orderBy(race.name);
   }),
 
   // Список аккаунтов с пагинацией и фильтрами
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({
       page: z.number().int().min(1).default(1),
       pageSize: z.number().int().min(1).max(100).default(PAGE_SIZE),
@@ -83,7 +83,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Список персонажей с пагинацией и фильтрами
-  listCharacters: publicProcedure
+  listCharacters: gmProcedure
     .input(z.object({
       page: z.number().int().min(1).default(1),
       pageSize: z.number().int().min(1).max(100).default(PAGE_SIZE),
@@ -152,7 +152,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Один аккаунт по userId
-  byId: publicProcedure
+  byId: gmProcedure
     .input(z.object({ userId: z.number() }))
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db
@@ -184,7 +184,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Кик: инвалидировать session_key
-  kick: publicProcedure
+  kick: gmProcedure
     .input(z.object({ userId: z.number(), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -196,7 +196,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Изменить роль (0=player, 1=gm, 2=admin)
-  setRole: publicProcedure
+  setRole: gmProcedure
     .input(z.object({
       userId: z.number(),
       role: z.number().int().min(0).max(2),
@@ -214,7 +214,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Активировать / деактивировать аккаунт
-  setActive: publicProcedure
+  setActive: gmProcedure
     .input(z.object({
       userId: z.number(),
       isActive: z.boolean(),
@@ -231,7 +231,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Создать аккаунт
-  create: publicProcedure
+  create: gmProcedure
     .input(z.object({
       login: z.string().min(3).max(50),
       password: z.string().min(1).max(100),
@@ -251,7 +251,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Обновить логин / пароль
-  update: publicProcedure
+  update: gmProcedure
     .input(z.object({
       userId: z.number(),
       login: z.string().min(3).max(50).optional(),
@@ -270,7 +270,7 @@ export const accountsRouter = createTRPCRouter({
     }),
 
   // Удалить аккаунт (каскадно удалит персонажей)
-  delete: publicProcedure
+  delete: gmProcedure
     .input(z.object({ userId: z.number(), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
       const [old] = await ctx.db.select({ login: users.login }).from(users).where(eq(users.id, input.userId));

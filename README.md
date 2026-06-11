@@ -7,8 +7,8 @@ Professional web-based content editor for MMORPG games, built with modern web te
 - 🎭 **Dialogue System**: Visual graph editor for NPC dialogues with conditions and actions
 - 🗡️ **Quest Management**: Complete quest creation and management with step-by-step objectives
 - 🌍 **Localization**: Multi-language support with UE5 integration
-- 🔒 **RBAC Security**: Role-based access control with granular permissions
-- 🐳 **Docker Ready**: Containerized deployment with development and production configurations
+- 🔒 **RBAC Security**: Role-based access control with GM-only authentication
+- 🐳 **Docker Ready**: Single command production deployment
 - ⚡ **Real-time**: Live preview and collaborative editing capabilities
 
 ## Tech Stack
@@ -40,83 +40,53 @@ Professional web-based content editor for MMORPG games, built with modern web te
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` with your database credentials and secrets.
+   Edit `.env` with your database connection strings.
 
-3. **Start with Docker (Recommended)**
+3. **Install and run**
    ```bash
-   # Development environment with hot reload
-   npm run docker:dev
-   
-   # Or for production
-   npm run docker:prod
-   ```
-
-4. **Alternative: Local development**
-   ```bash
-   # Install dependencies
    npm install
-   
-   # Start PostgreSQL and Redis (adjust credentials in .env)
-   docker-compose -f docker-compose.dev.yml up postgres redis
-   
-   # Run database migrations
-   npm run db:migrate
-   
-   # Start development server
    npm run dev
    ```
-
-5. **Access the application**
-   - Web Interface: http://localhost:3000
-   - Database Studio: `npm run db:studio`
+   Studio runs on port 3000, GM Panel on port 3001.
 
 ### Production Deployment
 
-1. **Set environment variables**
+1. **Clone and configure**
    ```bash
-   # Required environment variables
-   DATABASE_URL=postgresql://user:password@host:port/database
-   NEXTAUTH_SECRET=your-secret-key
-   NEXTAUTH_URL=https://your-domain.com
+   git clone <repository-url>
+   cd ContentSmith
+   cp .env.example .env
    ```
+   Edit `.env` — point `DATABASE_URL` and `GAME_DATABASE_URL` to your game database,
+   set `STUDIO_NEXTAUTH_SECRET` and `GM_NEXTAUTH_SECRET` (random 32+ char strings).
 
-2. **Deploy with Docker**
+2. **Build and start**
    ```bash
-   docker-compose up -d
+   docker compose up --build -d
    ```
+   Builds and starts both containers — Studio on port 3000, GM Panel on port 3001.
+   Node.js / npm on the host are **not required** — everything is built inside Docker.
+
+3. **Access**
+   - Studio: `http://your-server:3000`
+   - GM Panel: `http://your-server:3001`
+   - Log in with any game database user that has a GM role (`user_roles.is_staff = true`)
 
 ## Project Structure
 
 ```
 ContentSmith/
 ├── apps/
-│   └── studio/                 # Next.js admin interface
-│       ├── src/
-│       │   ├── app/           # Next.js App Router pages
-│       │   ├── components/    # React components
-│       │   ├── lib/          # Utilities and configurations
-│       │   └── server/       # tRPC API routes
-│       ├── package.json
-│       └── next.config.js
+│   ├── studio/                 # Content editor (port 3000)
+│   └── gm-panel/               # GM/admin panel (port 3001)
 ├── packages/
-│   ├── database/              # Drizzle ORM schema and migrations
-│   │   ├── src/
-│   │   │   ├── schema/       # Database schema definitions
-│   │   │   ├── migrate.ts    # Migration runner
-│   │   │   └── index.ts      # Database connection
-│   │   └── drizzle.config.ts
-│   ├── validation/            # Zod schemas for validation
-│   │   └── src/
-│   │       ├── conditions.ts # Game condition schemas
-│   │       ├── actions.ts    # Game action schemas
-│   │       ├── dialogue.ts   # Dialogue validation
-│   │       ├── quest.ts      # Quest validation
-│   │       └── localization.ts # i18n schemas
-│   └── ui/                   # Shared UI components (future)
-├── docker-compose.yml        # Production deployment
-├── docker-compose.dev.yml    # Development environment
-├── Dockerfile               # Multi-stage build
-└── package.json            # Monorepo configuration
+│   ├── database/               # Drizzle ORM schema
+│   ├── validation/             # Zod schemas
+│   └── ui/                     # Shared UI components
+├── Dockerfile                  # Studio production image
+├── Dockerfile.gm               # GM Panel production image
+├── docker-compose.yml          # Production deployment
+└── package.json                # Monorepo root
 ```
 
 ## Database Schema

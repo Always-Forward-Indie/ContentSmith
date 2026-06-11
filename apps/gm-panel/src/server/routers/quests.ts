@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { playerQuest, quest } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const questsRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -26,7 +26,7 @@ export const questsRouter = createTRPCRouter({
     }),
 
   // Список всех квестов для выбора (assign)
-  allQuests: publicProcedure.query(async ({ ctx }) => {
+  allQuests: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({ id: quest.id, slug: quest.slug, clientQuestKey: quest.clientQuestKey })
       .from(quest)
@@ -34,7 +34,7 @@ export const questsRouter = createTRPCRouter({
   }),
 
   // Назначить квест персонажу
-  assignQuest: publicProcedure
+  assignQuest: gmProcedure
     .input(z.object({
       characterId: z.number(),
       questId: z.number(),
@@ -65,7 +65,7 @@ export const questsRouter = createTRPCRouter({
     }),
 
   // Изменить состояние квеста
-  setState: publicProcedure
+  setState: gmProcedure
     .input(z.object({
       characterId: z.number(),
       questId: z.number(),
@@ -81,7 +81,7 @@ export const questsRouter = createTRPCRouter({
     }),
 
   // Изменить шаг квеста
-  setStep: publicProcedure
+  setStep: gmProcedure
     .input(z.object({
       characterId: z.number(),
       questId: z.number(),
@@ -97,7 +97,7 @@ export const questsRouter = createTRPCRouter({
     }),
 
   // Сбросить один квест по questId
-  resetQuest: publicProcedure
+  resetQuest: gmProcedure
     .input(z.object({ characterId: z.number(), questId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -108,7 +108,7 @@ export const questsRouter = createTRPCRouter({
     }),
 
   // Завершить квест
-  completeQuest: publicProcedure
+  completeQuest: gmProcedure
     .input(z.object({ characterId: z.number(), questId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db

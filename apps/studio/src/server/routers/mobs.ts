@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createTRPCRouter, devRequirePermission } from '../trpc'
+import { createTRPCRouter, requirePermission, devRequirePermission } from '../trpc'
 import { db } from '../db'
 import {
   mob,
@@ -31,7 +31,9 @@ import {
   removeMobLootSchema,
 } from '@contentsmith/validation'
 
-const requirePerm = (permission: string) => devRequirePermission(permission)
+const isDev = process.env.NODE_ENV === 'development'
+const requirePerm = (permission: string) => 
+  isDev ? devRequirePermission(permission) : requirePermission(permission)
 
 export const mobsRouter = createTRPCRouter({
   // ===== MOB CRUD =====

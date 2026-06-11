@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq, desc, and, sql, gte } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { gameAnalytics, zones, characters, users } from '../schema';
 
 const PAGE_SIZE = 50;
@@ -19,7 +19,7 @@ function sinceDate(days: number): Date {
 
 export const gameAnalyticsRouter = createTRPCRouter({
   // ─── KPIs ──────────────────────────────────────────────────────────────────
-  overview: publicProcedure
+  overview: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -61,7 +61,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Daily event count for sparkline / timeline ────────────────────────────
-  timeline: publicProcedure
+  timeline: gmProcedure
     .input(
       z.object({
         days: z.number().int().min(1).max(365).default(30),
@@ -87,7 +87,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Session duration stats (join session_start ↔ session_end by session_id) ─
-  sessionStats: publicProcedure
+  sessionStats: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -121,7 +121,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Deaths by zone ────────────────────────────────────────────────────────
-  deathsByZone: publicProcedure
+  deathsByZone: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -145,7 +145,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Deaths by level ───────────────────────────────────────────────────────
-  deathsByLevel: publicProcedure
+  deathsByLevel: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -166,7 +166,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Quest funnel ──────────────────────────────────────────────────────────
-  questFunnel: publicProcedure
+  questFunnel: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -192,7 +192,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Level-up distribution ─────────────────────────────────────────────────
-  levelUpDistribution: publicProcedure
+  levelUpDistribution: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -213,7 +213,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Top mobs killed ───────────────────────────────────────────────────────
-  topMobsKilled: publicProcedure
+  topMobsKilled: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -238,7 +238,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Items acquired – top by slug ─────────────────────────────────────────
-  topItemsAcquired: publicProcedure
+  topItemsAcquired: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -263,7 +263,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Items by acquisition source ──────────────────────────────────────────
-  itemsBySource: publicProcedure
+  itemsBySource: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -286,7 +286,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Gold flow by source ───────────────────────────────────────────────────
-  goldBySource: publicProcedure
+  goldBySource: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -320,7 +320,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Activity Punch Card (hour × day-of-week heatmap) ─────────────────────
-  activityPunchCard: publicProcedure
+  activityPunchCard: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -342,7 +342,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Daily Active Users ────────────────────────────────────────────────────
-  dau: publicProcedure
+  dau: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -364,7 +364,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Session duration histogram ────────────────────────────────────────────
-  sessionHistogram: publicProcedure
+  sessionHistogram: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -408,7 +408,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Retention cohort (D1 / D3 / D7 / D30) ────────────────────────────────
-  retentionCohort: publicProcedure
+  retentionCohort: gmProcedure
     .input(z.object({ weeks: z.number().int().min(1).max(12).default(8) }).default({}))
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db.execute(sql`
@@ -452,7 +452,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Progression bottleneck (median time per level transition) ─────────────
-  progressionBottleneck: publicProcedure
+  progressionBottleneck: gmProcedure
     .input(daysInput)
     .query(async ({ ctx, input }) => {
       const since = sinceDate(input.days);
@@ -490,7 +490,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
     }),
 
   // ─── Raw event feed (paginated) ────────────────────────────────────────────
-  recentEvents: publicProcedure
+  recentEvents: gmProcedure
     .input(
       z.object({
         page: z.number().int().min(1).default(1),

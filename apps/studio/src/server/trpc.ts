@@ -1,7 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server';
-import { type CreateNextContextOptions } from '@trpc/server/adapters/next';
 import { getServerSession } from 'next-auth';
 import { db } from './db';
+import { authOptions } from '@/lib/auth';
 
 // RBAC Permission system
 export const permissions = {
@@ -42,13 +42,8 @@ export const roles = {
 } as const;
 
 // Context creation
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts;
-  
-  // Get session from NextAuth
-  const session = await getServerSession(req, res, {
-    // authOptions will be defined in auth config
-  });
+export const createTRPCContext = async () => {
+  const session = await getServerSession(authOptions);
 
   return {
     session,
@@ -100,10 +95,10 @@ const hasPermission = (permission: string) =>
       throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
-    // TODO: Check user permissions against database
-    // For now, assume all authenticated users have all permissions
-    // This should be replaced with actual permission checking
-    
+    if (!ctx.session.user.isStaff) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'GM access required' });
+    }
+
     return next({
       ctx: {
         session: ctx.session,

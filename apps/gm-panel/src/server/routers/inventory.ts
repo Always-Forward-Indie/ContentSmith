@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { playerInventory, items } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const inventoryRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -23,7 +23,7 @@ export const inventoryRouter = createTRPCRouter({
         .orderBy(items.name);
     }),
 
-  giveItem: publicProcedure
+  giveItem: gmProcedure
     .input(z.object({
       characterId: z.number(),
       itemId: z.number(),
@@ -53,7 +53,7 @@ export const inventoryRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  removeItem: publicProcedure
+  removeItem: gmProcedure
     .input(z.object({ inventoryId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const old = await ctx.db.select({ characterId: playerInventory.characterId, itemId: playerInventory.itemId, quantity: playerInventory.quantity }).from(playerInventory).where(eq(playerInventory.id, input.inventoryId)).then(r => r[0]);
@@ -65,7 +65,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Выдать конкретный предмет по inventoryId — уменьшить количество или удалить
-  updateQuantity: publicProcedure
+  updateQuantity: gmProcedure
     .input(z.object({ inventoryId: z.number(), quantity: z.number().min(1) }))
     .mutation(async ({ ctx, input }) => {
       const old = await ctx.db.select({ characterId: playerInventory.characterId, itemId: playerInventory.itemId, quantity: playerInventory.quantity }).from(playerInventory).where(eq(playerInventory.id, input.inventoryId)).then(r => r[0]);
@@ -78,7 +78,7 @@ export const inventoryRouter = createTRPCRouter({
     }),
 
   // Список всех предметов для поиска
-  allItems: publicProcedure.query(async ({ ctx }) => {
+  allItems: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({ id: items.id, name: items.name, slug: items.slug })
       .from(items)

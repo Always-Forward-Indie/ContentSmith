@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { characterSkills, skills } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const skillsRouter = createTRPCRouter({
   // Список скилов персонажа
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -24,7 +24,7 @@ export const skillsRouter = createTRPCRouter({
     }),
 
   // Справочник всех скилов
-  allSkills: publicProcedure.query(async ({ ctx }) => {
+  allSkills: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({ id: skills.id, name: skills.name, slug: skills.slug })
       .from(skills)
@@ -32,7 +32,7 @@ export const skillsRouter = createTRPCRouter({
   }),
 
   // Добавить скил персонажу (или обновить уровень если уже есть)
-  addSkill: publicProcedure
+  addSkill: gmProcedure
     .input(z.object({
       characterId: z.number(),
       skillId: z.number(),
@@ -65,7 +65,7 @@ export const skillsRouter = createTRPCRouter({
     }),
 
   // Изменить уровень скила
-  setLevel: publicProcedure
+  setLevel: gmProcedure
     .input(z.object({
       characterSkillId: z.number(),
       level: z.number().min(1),
@@ -81,7 +81,7 @@ export const skillsRouter = createTRPCRouter({
     }),
 
   // Удалить скил у персонажа
-  removeSkill: publicProcedure
+  removeSkill: gmProcedure
     .input(z.object({ characterSkillId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const old = await ctx.db.select({ characterId: characterSkills.characterId, skillId: characterSkills.skillId }).from(characterSkills).where(eq(characterSkills.id, input.characterSkillId)).then(r => r[0]);

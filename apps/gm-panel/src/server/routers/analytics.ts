@@ -1,5 +1,5 @@
 import { eq, isNull, desc, sql, gte, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import {
   users,
   userBans,
@@ -15,7 +15,7 @@ import {
 
 export const analyticsRouter = createTRPCRouter({
   // ─── Сводная статистика ───────────────────────────────────────────────────
-  overview: publicProcedure.query(async ({ ctx }) => {
+  overview: gmProcedure.query(async ({ ctx }) => {
     const [
       [totalUsersRow],
       [totalCharsRow],
@@ -64,7 +64,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Распределение по уровням ─────────────────────────────────────────────
-  levelDistribution: publicProcedure.query(async ({ ctx }) => {
+  levelDistribution: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         level: characters.level,
@@ -77,7 +77,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Популярность классов ─────────────────────────────────────────────────
-  classDistribution: publicProcedure.query(async ({ ctx }) => {
+  classDistribution: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         className: characterClass.name,
@@ -91,7 +91,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Популярность рас ─────────────────────────────────────────────────────
-  raceDistribution: publicProcedure.query(async ({ ctx }) => {
+  raceDistribution: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         raceName: race.name,
@@ -105,7 +105,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Статусы квестов ──────────────────────────────────────────────────────
-  questStateStats: publicProcedure.query(async ({ ctx }) => {
+  questStateStats: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         state: playerQuest.state,
@@ -117,7 +117,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Топ персонажей по времени в игре ────────────────────────────────────
-  topCharacters: publicProcedure.query(async ({ ctx }) => {
+  topCharacters: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         id: characters.id,
@@ -137,7 +137,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Население зон (текущие позиции) ─────────────────────────────────────
-  zonePopulation: publicProcedure.query(async ({ ctx }) => {
+  zonePopulation: gmProcedure.query(async ({ ctx }) => {
     return ctx.db
       .select({
         zoneId: zones.id,
@@ -164,7 +164,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Регистрации за последние 30 дней ────────────────────────────────────
-  registrationsByDay: publicProcedure.query(async ({ ctx }) => {
+  registrationsByDay: gmProcedure.query(async ({ ctx }) => {
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
     return ctx.db
       .select({
@@ -178,7 +178,7 @@ export const analyticsRouter = createTRPCRouter({
   }),
 
   // ─── Поток валюты за последние 14 дней ───────────────────────────────────
-  currencyFlowByDay: publicProcedure.query(async ({ ctx }) => {
+  currencyFlowByDay: gmProcedure.query(async ({ ctx }) => {
     const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
     return ctx.db
       .select({

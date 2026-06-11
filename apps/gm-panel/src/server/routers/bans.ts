@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq, and, desc, count } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { userBans, users } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
@@ -11,7 +11,7 @@ const bannedByUser = {
 
 export const bansRouter = createTRPCRouter({
   // Статус бана аккаунта (активный)
-  getStatus: publicProcedure
+  getStatus: gmProcedure
     .input(z.object({ userId: z.number() }))
     .query(async ({ ctx, input }) => {
       const ban = await ctx.db
@@ -25,7 +25,7 @@ export const bansRouter = createTRPCRouter({
     }),
 
   // История банов аккаунта
-  history: publicProcedure
+  history: gmProcedure
     .input(z.object({ userId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -44,7 +44,7 @@ export const bansRouter = createTRPCRouter({
     }),
 
   // Забанить аккаунт
-  ban: publicProcedure
+  ban: gmProcedure
     .input(z.object({
       userId: z.number(),
       reason: z.string().min(1).max(500),
@@ -84,7 +84,7 @@ export const bansRouter = createTRPCRouter({
     }),
 
   // Разбанить аккаунт
-  unban: publicProcedure
+  unban: gmProcedure
     .input(z.object({
       userId: z.number(),
       gmUserId: z.number().optional(),
@@ -111,7 +111,7 @@ export const bansRouter = createTRPCRouter({
     }),
 
   // Количество активных банов (для badge)
-  activeCount: publicProcedure.query(async ({ ctx }) => {
+  activeCount: gmProcedure.query(async ({ ctx }) => {
     const [row] = await ctx.db
       .select({ count: count() })
       .from(userBans)

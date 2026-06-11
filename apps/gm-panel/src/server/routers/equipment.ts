@@ -1,17 +1,17 @@
 import { z } from 'zod';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { and, eq } from 'drizzle-orm';
 import { characterEquipment, playerInventory, items, equipSlots } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const equipmentRouter = createTRPCRouter({
   // Список слотов экипировки
-  allSlots: publicProcedure.query(async ({ ctx }) => {
+  allSlots: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select({ id: equipSlots.id, name: equipSlots.name }).from(equipSlots).orderBy(equipSlots.id);
   }),
 
   // Надеть предмет из инвентаря в слот (один предмет на слот)
-  equip: publicProcedure
+  equip: gmProcedure
     .input(z.object({
       characterId: z.number(),
       inventoryItemId: z.number(),
@@ -61,7 +61,7 @@ export const equipmentRouter = createTRPCRouter({
     }),
 
   // Всё одето на персонаже
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -84,7 +84,7 @@ export const equipmentRouter = createTRPCRouter({
     }),
 
   // Снять предмет с конкретного слота
-  unequip: publicProcedure
+  unequip: gmProcedure
     .input(z.object({
       equipmentId: z.number(),
       characterId: z.number(),
@@ -114,7 +114,7 @@ export const equipmentRouter = createTRPCRouter({
     }),
 
   // Снять всю экипировку
-  unequipAll: publicProcedure
+  unequipAll: gmProcedure
     .input(z.object({
       characterId: z.number(),
       gmUserId: z.number().optional(),

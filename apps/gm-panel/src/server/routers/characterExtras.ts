@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import {
   characterTitles,
   characterReputation,
@@ -14,7 +14,7 @@ import { logGmAction } from '../utils/gmLog';
 
 export const characterExtrasRouter = createTRPCRouter({
   // ─── Titles ──────────────────────────────────────────────
-  listTitles: publicProcedure
+  listTitles: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -24,7 +24,7 @@ export const characterExtrasRouter = createTRPCRouter({
         .orderBy(characterTitles.titleSlug),
     ),
 
-  grantTitle: publicProcedure
+  grantTitle: gmProcedure
     .input(z.object({ characterId: z.number(), titleSlug: z.string().min(1).max(80) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -41,7 +41,7 @@ export const characterExtrasRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  revokeTitle: publicProcedure
+  revokeTitle: gmProcedure
     .input(z.object({ characterId: z.number(), titleSlug: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -60,7 +60,7 @@ export const characterExtrasRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  setTitleEquipped: publicProcedure
+  setTitleEquipped: gmProcedure
     .input(z.object({ characterId: z.number(), titleSlug: z.string(), equipped: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
       // Unequip all first if equipping
@@ -81,7 +81,7 @@ export const characterExtrasRouter = createTRPCRouter({
     }),
 
   // ─── Reputation ──────────────────────────────────────────
-  listReputation: publicProcedure
+  listReputation: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -91,7 +91,7 @@ export const characterExtrasRouter = createTRPCRouter({
         .orderBy(characterReputation.factionSlug),
     ),
 
-  setReputation: publicProcedure
+  setReputation: gmProcedure
     .input(z.object({ characterId: z.number(), factionSlug: z.string().min(1).max(60), value: z.number().int() }))
     .mutation(async ({ ctx, input }) => {
       const existing = await ctx.db
@@ -130,7 +130,7 @@ export const characterExtrasRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  resetReputation: publicProcedure
+  resetReputation: gmProcedure
     .input(z.object({ characterId: z.number(), factionSlug: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -150,7 +150,7 @@ export const characterExtrasRouter = createTRPCRouter({
     }),
 
   // ─── Pity (read-only) ────────────────────────────────────
-  listPity: publicProcedure
+  listPity: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -160,7 +160,7 @@ export const characterExtrasRouter = createTRPCRouter({
         .orderBy(characterPity.itemId),
     ),
 
-  resetPity: publicProcedure
+  resetPity: gmProcedure
     .input(z.object({ characterId: z.number(), itemId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -181,7 +181,7 @@ export const characterExtrasRouter = createTRPCRouter({
     }),
 
   // ─── Bestiary (read-only) ────────────────────────────────
-  listBestiary: publicProcedure
+  listBestiary: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -192,7 +192,7 @@ export const characterExtrasRouter = createTRPCRouter({
     ),
 
   // ─── Emotes ──────────────────────────────────────────────
-  listEmotes: publicProcedure
+  listEmotes: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -202,7 +202,7 @@ export const characterExtrasRouter = createTRPCRouter({
         .orderBy(characterEmotes.emoteSlug),
     ),
 
-  grantEmote: publicProcedure
+  grantEmote: gmProcedure
     .input(z.object({ characterId: z.number(), emoteSlug: z.string().min(1).max(64) }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -219,7 +219,7 @@ export const characterExtrasRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  revokeEmote: publicProcedure
+  revokeEmote: gmProcedure
     .input(z.object({ characterId: z.number(), emoteSlug: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -239,7 +239,7 @@ export const characterExtrasRouter = createTRPCRouter({
     }),
 
   // ─── Skill Mastery ───────────────────────────────────────
-  listMastery: publicProcedure
+  listMastery: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db
@@ -249,7 +249,7 @@ export const characterExtrasRouter = createTRPCRouter({
         .orderBy(characterSkillMastery.masterySlug),
     ),
 
-  setMastery: publicProcedure
+  setMastery: gmProcedure
     .input(z.object({ characterId: z.number(), masterySlug: z.string().min(1).max(60), value: z.number().min(0).max(200) }))
     .mutation(async ({ ctx, input }) => {
       const existing = await ctx.db
@@ -289,7 +289,7 @@ export const characterExtrasRouter = createTRPCRouter({
     }),
 
   // ─── Skill Bar (read-only) ───────────────────────────────
-  listSkillBar: publicProcedure
+  listSkillBar: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(({ ctx, input }) =>
       ctx.db

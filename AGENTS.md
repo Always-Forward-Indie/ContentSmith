@@ -10,7 +10,7 @@
   - `@contentsmith/database` — Drizzle ORM schema + `createDb()` factory. Migrations in `drizzle/`. Shared by `studio`.
   - `@contentsmith/validation` — Zod schemas. Must be built before `studio` (Turbo handles this).
   - `@contentsmith/ui` — shared UI components (consumed as source; no build output, `transpilePackages` in Next.js).
-- tRPC v10 everywhere. `studio` uses NextAuth with RBAC; `gm-panel` has no auth layer.
+- tRPC v10 everywhere. `studio` uses NextAuth with RBAC; `gm-panel` uses NextAuth with `gmProcedure` (isStaff check).
 
 ## Commands
 
@@ -19,7 +19,7 @@ npm run dev          # turbo dev (all apps + packages)
 npm run build        # turbo build
 npm run lint         # turbo lint (depends on ^build)
 npm run type-check   # turbo type-check (depends on ^build)
-npm run db:migrate   # run Drizzle migrations (packages/database)
+npm run docker:prod  # build and run production Docker containers
 npm run db:studio    # open Drizzle Studio
 ```
 
@@ -36,17 +36,15 @@ Run a single test: **no test framework configured** — there are no test script
 
 | Command | What it does |
 |---|---|
-| `npm run docker:dev` | Just the studio container (host network → uses local DB). Simplest way to dev with Docker. |
-| `npm run docker:dev-full` | studio + postgres + redis (everything containerized). |
-| `npm run docker:prod` | All services: postgres + redis + studio + gm-panel. Uses multi-stage `runner` target. |
+| `npm run docker:prod` | Alias for `docker compose up --build -d` |
 
-**Note:** `docker-compose.yml` references a `Dockerfile.gm` for gm-panel that does not exist in the repo.
+Both apps connect to the external game database (`DATABASE_URL` / `GAME_DATABASE_URL` from `.env`).
+No PostgreSQL/Redis containers — the database is external.
 
 ## Database & Migrations
 
 - Config: `packages/database/drizzle.config.ts` — reads `DATABASE_URL` from env, outputs to `./drizzle`.
 - Generate migrations: `cd packages/database && npm run generate` (drizzle-kit generate).
-- Apply migrations: `npm run db:migrate` (runs `tsx src/migrate.ts` which reads from `drizzle/` folder).
 - The GM panel's schema (`apps/gm-panel/src/server/schema.ts`) is a **partial mirror** of the game DB. It is not tied to `@contentsmith/database` and has no migration tooling — it is read-only introspection.
 
 ## Dev Auth Bypass
@@ -59,10 +57,12 @@ Copy `.env.example` → `.env`. Key vars:
 
 | Variable | Used by |
 |---|---|
-| `DATABASE_URL` | studio + database package |
-| `GAME_DATABASE_URL` | gm-panel (separate game DB) |
-| `NEXTAUTH_SECRET` | studio auth |
-| `NEXTAUTH_URL` | studio auth |
+| `DATABASE_URL` | studio content DB |
+| `GAME_DATABASE_URL` | gm-panel + studio auth |
+| `STUDIO_NEXTAUTH_SECRET` | studio auth |
+| `STUDIO_NEXTAUTH_URL` | studio auth |
+| `GM_NEXTAUTH_SECRET` | gm-panel auth |
+| `GM_NEXTAUTH_URL` | gm-panel auth |
 | `POSTGRES_*` | Docker compose services |
 
 ## Build Order

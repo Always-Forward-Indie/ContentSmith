@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { playerFlag } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const flagsRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -15,7 +15,7 @@ export const flagsRouter = createTRPCRouter({
         .orderBy(playerFlag.flagKey);
     }),
 
-  setFlag: publicProcedure
+  setFlag: gmProcedure
     .input(z.object({
       characterId: z.number(),
       flagKey: z.string().min(1),
@@ -55,7 +55,7 @@ export const flagsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  deleteFlag: publicProcedure
+  deleteFlag: gmProcedure
     .input(z.object({ characterId: z.number(), flagKey: z.string() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db

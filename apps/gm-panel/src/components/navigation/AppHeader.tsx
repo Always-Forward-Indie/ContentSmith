@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, Sword, Sun, Moon, ScrollText, Settings, BarChart2, Activity } from 'lucide-react';
+import { Shield, Users, Sword, Sun, Moon, ScrollText, Settings, BarChart2, Activity, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -52,6 +53,15 @@ export function AppHeader() {
 
                 <div className="ml-auto flex items-center gap-2">
                     <span className="text-xs text-muted-foreground font-mono">mmo_prototype</span>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => signOut({ callbackUrl: '/login' })}
+                        aria-label="Выйти"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </Button>
                     <Button
                         variant="ghost"
                         size="icon"

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createTRPCRouter, devRequirePermission } from '../trpc';
+import { createTRPCRouter, requirePermission, devRequirePermission } from '../trpc';
 import { db } from '../db';
 import {
   items,
@@ -38,7 +38,7 @@ import { TRPCError } from '@trpc/server';
 // В режиме разработки используем dev процедуры
 const isDev = process.env.NODE_ENV === 'development';
 const requirePerm = (permission: string) => 
-  isDev ? devRequirePermission(permission) : devRequirePermission(permission);
+  isDev ? devRequirePermission(permission) : requirePermission(permission);
 
 export const itemsRouter = createTRPCRouter({
   // ===== ITEMS =====

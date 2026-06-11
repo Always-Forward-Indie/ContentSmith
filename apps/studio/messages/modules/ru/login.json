@@ -1,0 +1,13 @@
+{
+    "title": "ContentSmith",
+    "subtitle": "Система управления контентом",
+    "loginLabel": "Логин",
+    "passwordLabel": "Пароль",
+    "submit": "Войти",
+    "signingIn": "Вход...",
+    "invalidCredentials": "Неверный логин или пароль",
+    "insufficientPermissions": "Недостаточно прав. Требуется доступ GM.",
+    "accountDeactivated": "Аккаунт деактивирован",
+    "accountLocked": "Аккаунт временно заблокирован. Попробуйте позже.",
+    "unknownError": "Произошла ошибка. Попробуйте ещё раз."
+}

@@ -8,7 +8,6 @@
         "build": "tsc",
         "dev": "tsc --watch",
         "generate": "drizzle-kit generate",
-        "migrate": "tsx src/migrate.ts",
         "studio": "drizzle-kit studio",
         "type-check": "tsc --noEmit"
     },

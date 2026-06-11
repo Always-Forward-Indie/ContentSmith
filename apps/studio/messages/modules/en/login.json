@@ -1,0 +1,13 @@
+{
+    "title": "ContentSmith",
+    "subtitle": "Content Management System",
+    "loginLabel": "Login",
+    "passwordLabel": "Password",
+    "submit": "Sign In",
+    "signingIn": "Signing in...",
+    "invalidCredentials": "Invalid login or password",
+    "insufficientPermissions": "Insufficient permissions. GM access required.",
+    "accountDeactivated": "Account is deactivated",
+    "accountLocked": "Account is temporarily locked. Try again later.",
+    "unknownError": "An error occurred. Please try again."
+}

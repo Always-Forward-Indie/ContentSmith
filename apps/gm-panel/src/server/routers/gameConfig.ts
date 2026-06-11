@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { eq, ilike, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { gameConfig } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const gameConfigRouter = createTRPCRouter({
   // Список всех конфигов с фильтрацией по группе/ключу
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ search: z.string().optional() }).default({}))
     .query(async ({ ctx, input }) => {
       const { search } = input;
@@ -19,7 +19,7 @@ export const gameConfigRouter = createTRPCRouter({
     }),
 
   // Получить один конфиг по ключу
-  byKey: publicProcedure
+  byKey: gmProcedure
     .input(z.object({ key: z.string() }))
     .query(async ({ ctx, input }) => {
       const [row] = await ctx.db
@@ -30,7 +30,7 @@ export const gameConfigRouter = createTRPCRouter({
     }),
 
   // Обновить значение конфига
-  update: publicProcedure
+  update: gmProcedure
     .input(z.object({
       key: z.string().min(1),
       value: z.string().min(0),
@@ -62,7 +62,7 @@ export const gameConfigRouter = createTRPCRouter({
     }),
 
   // Пакетное обновление нескольких конфигов (один запрос)
-  batchUpdate: publicProcedure
+  batchUpdate: gmProcedure
     .input(z.object({
       updates: z.array(z.object({ key: z.string(), value: z.string() })).min(1),
       gmUserId: z.number().optional(),

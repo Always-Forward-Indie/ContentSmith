@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { playerActiveEffect, statusEffects } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const effectsRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -29,7 +29,7 @@ export const effectsRouter = createTRPCRouter({
         .orderBy(playerActiveEffect.appliedAt);
     }),
 
-  removeEffect: publicProcedure
+  removeEffect: gmProcedure
     .input(z.object({ effectInstanceId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const old = await ctx.db.select({ playerId: playerActiveEffect.playerId, statusEffectId: playerActiveEffect.statusEffectId }).from(playerActiveEffect).where(eq(playerActiveEffect.id, input.effectInstanceId)).then(r => r[0]);
@@ -40,7 +40,7 @@ export const effectsRouter = createTRPCRouter({
       return { success: true };
     }),
 
-  clearAll: publicProcedure
+  clearAll: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -51,12 +51,12 @@ export const effectsRouter = createTRPCRouter({
     }),
 
   // Список всех статус-эффектов для выбора
-  allEffects: publicProcedure.query(async ({ ctx }) => {
+  allEffects: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select({ id: statusEffects.id, slug: statusEffects.slug, category: statusEffects.category, durationSec: statusEffects.durationSec }).from(statusEffects).orderBy(statusEffects.slug);
   }),
 
   // Добавить эффект
-  addEffect: publicProcedure
+  addEffect: gmProcedure
     .input(z.object({
       characterId: z.number(),
       statusEffectId: z.number(),

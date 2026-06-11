@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { eq, desc, ilike, and, count } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { gmActionLog, users } from '../schema';
 
 const PAGE_SIZE = 50;
 
 export const gmLogRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({
       page: z.number().int().min(1).default(1),
       actionType: z.string().optional(),
@@ -59,7 +59,7 @@ export const gmLogRouter = createTRPCRouter({
     }),
 
   // Уникальные типы действий для фильтра
-  actionTypes: publicProcedure.query(async ({ ctx }) => {
+  actionTypes: gmProcedure.query(async ({ ctx }) => {
     const rows = await ctx.db
       .selectDistinct({ actionType: gmActionLog.actionType })
       .from(gmActionLog)

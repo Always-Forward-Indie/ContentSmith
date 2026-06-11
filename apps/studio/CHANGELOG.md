@@ -20,6 +20,29 @@
 - Интегрирован в страницы мобов, скиллов и предметов
 - i18n: модуль `balance.json` (en + ru)
 
+### Аутентификация
+
+- **Login / Auth** — система входа в приложение:
+  - NextAuth v4 с CredentialsProvider — валидация логина/пароля через игровую БД
+  - Проверка прав: доступ только для пользователей с `isStaff = true` (GM+)
+  - JWT-стратегия сессий (без DB adapter)
+  - Страница логина (`/login`) с i18n (en/ru)
+  - `SessionProvider` в дереве компонентов
+  - Middleware: защита dashboard-роутов, редирект на `/login` без сессии
+- **tRPC авторизация** — починен контекст:
+  - `createTRPCContext` получает реальную сессию через `getServerSession(authOptions)`
+  - `hasPermission` проверяет `isStaff` (было заглушкой)
+  - Роутеры `items`, `npc`, `mobs` исправлены для продакшен-режима (`requirePermission` вместо `devRequirePermission`)
+
+### Производственные исправления
+
+- **Docker** — двух-стейджевая сборка (builder → runner), standalone Next.js, копирование `messages/` и `static/` в runner-образ
+- **Пароли** — алгоритм хэширования заменён с bcrypt на SHA-256 (соответствует игровому серверу), зависимость `bcryptjs` удалена
+- **Middleware** — переписан без `withAuth` (нестабилен в Docker standalone), прямая проверка куки `next-auth.session-token`
+- **`next.config.js`** — убран блок `env` (переменные передаются через Docker Compose runtime)
+- **Сессия** — `maxAge: 8h`, автовыход через 8 часов после входа
+- **Кнопка «Выйти»** — иконка `LogOut` в AppHeader, вызов `signOut()`
+
 ### Улучшения: Редактор карт
 
 - **i18n** — все строки редактора карт вынесены в переводы (`editors.mapEditor`, `editors.mapPanel`)

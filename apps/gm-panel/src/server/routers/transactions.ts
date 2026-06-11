@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { eq, desc, count, sum } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { currencyTransactions } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
@@ -8,7 +8,7 @@ const PAGE_SIZE = 30;
 
 export const transactionsRouter = createTRPCRouter({
   // История транзакций персонажа
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({
       characterId: z.number(),
       page: z.number().int().min(1).default(1),
@@ -41,7 +41,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   // Баланс (сумма всех транзакций)
-  balance: publicProcedure
+  balance: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       const [row] = await ctx.db
@@ -52,7 +52,7 @@ export const transactionsRouter = createTRPCRouter({
     }),
 
   // GM: выдать / забрать валюту
-  grant: publicProcedure
+  grant: gmProcedure
     .input(z.object({
       characterId: z.number(),
       amount: z.number().int().refine(v => v !== 0, 'Сумма не может быть 0'),

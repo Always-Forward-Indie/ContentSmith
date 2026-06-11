@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { eq, and } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { characterPermanentModifiers, entityAttributes } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const attributesRouter = createTRPCRouter({
-  list: publicProcedure
+  list: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -25,11 +25,11 @@ export const attributesRouter = createTRPCRouter({
     }),
 
   // Справочник всех атрибутов (для добавления)
-  allAttributes: publicProcedure.query(async ({ ctx }) => {
+  allAttributes: gmProcedure.query(async ({ ctx }) => {
     return ctx.db.select({ id: entityAttributes.id, name: entityAttributes.name, slug: entityAttributes.slug }).from(entityAttributes).orderBy(entityAttributes.name);
   }),
 
-  setValue: publicProcedure
+  setValue: gmProcedure
     .input(z.object({
       characterId: z.number(),
       attributeId: z.number(),
@@ -51,7 +51,7 @@ export const attributesRouter = createTRPCRouter({
     }),
 
   // Добавить атрибут персонажу (если ещё нет)
-  addAttribute: publicProcedure
+  addAttribute: gmProcedure
     .input(z.object({
       characterId: z.number(),
       attributeId: z.number(),
@@ -70,7 +70,7 @@ export const attributesRouter = createTRPCRouter({
     }),
 
   // Удалить атрибут персонажа
-  deleteAttribute: publicProcedure
+  deleteAttribute: gmProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const old = await ctx.db.select({ characterId: characterPermanentModifiers.characterId, attributeId: characterPermanentModifiers.attributeId, value: characterPermanentModifiers.value }).from(characterPermanentModifiers).where(eq(characterPermanentModifiers.id, input.id)).then(r => r[0]);

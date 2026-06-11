@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Wand2, Sun, Moon } from 'lucide-react'
+import { Menu, Wand2, Sun, Moon, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useTranslations, useLocale } from 'next-intl'
+import { signOut } from 'next-auth/react'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { NavigationSkillsDropdown } from '@/components/navigation/SkillsDropdown'
 import { NavigationItemsDropdown } from '@/components/navigation/ItemsDropdown'
@@ -100,6 +101,15 @@ export function AppHeader() {
                         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     </Button>
                     <LanguageSwitcher />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+                        aria-label="Sign out"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </Button>
 
                     {/* Mobile hamburger */}
                     <Sheet>

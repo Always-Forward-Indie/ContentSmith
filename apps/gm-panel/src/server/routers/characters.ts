@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { eq, and, sql } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { characters, characterClass, race, expForLevel, characterPermanentModifiers, entityAttributes, characterSkills, users, characterPosition, characterCurrentState, classStatFormula, classSkillTree, skills } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const charactersRouter = createTRPCRouter({
   // Полная карточка персонажа
-  byId: publicProcedure
+  byId: gmProcedure
     .input(z.object({ characterId: z.number() }))
     .query(async ({ ctx, input }) => {
       const rows = await ctx.db
@@ -57,7 +57,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Формула роста статов класса
-  classStatFormula: publicProcedure
+  classStatFormula: gmProcedure
     .input(z.object({ classId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -75,7 +75,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Древо скилов класса
-  classSkillTree: publicProcedure
+  classSkillTree: gmProcedure
     .input(z.object({ classId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -94,7 +94,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Воскресить персонажа (is_dead = false, HP/MP = текущий уровень × 10)
-  revive: publicProcedure
+  revive: gmProcedure
     .input(z.object({ characterId: z.number(), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
       const char = await ctx.db
@@ -116,7 +116,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Изменить уровень (пересчитывает experience_points по exp_for_level)
-  setLevel: publicProcedure
+  setLevel: gmProcedure
     .input(z.object({ characterId: z.number(), level: z.number().min(1), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
       const expRow = await ctx.db
@@ -136,7 +136,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Создать персонажа для аккаунта
-  create: publicProcedure
+  create: gmProcedure
     .input(z.object({
       ownerId: z.number(),
       name: z.string().min(1).max(20),
@@ -187,7 +187,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Обновить поля персонажа
-  update: publicProcedure
+  update: gmProcedure
     .input(z.object({
       characterId: z.number(),
       name: z.string().min(1).max(20).optional(),
@@ -266,7 +266,7 @@ export const charactersRouter = createTRPCRouter({
     }),
 
   // Удалить персонажа
-  delete: publicProcedure
+  delete: gmProcedure
     .input(z.object({ characterId: z.number(), gmUserId: z.number().optional() }))
     .mutation(async ({ ctx, input }) => {
       const [old] = await ctx.db.select({ name: characters.name }).from(characters).where(eq(characters.id, input.characterId));

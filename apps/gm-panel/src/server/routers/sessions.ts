@@ -1,12 +1,12 @@
 import { z } from 'zod';
 import { eq, desc, and, isNull } from 'drizzle-orm';
-import { createTRPCRouter, publicProcedure } from '../trpc';
+import { createTRPCRouter, gmProcedure } from '../trpc';
 import { userSessions, users } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const sessionsRouter = createTRPCRouter({
   // Активные сессии пользователя
-  listByUser: publicProcedure
+  listByUser: gmProcedure
     .input(z.object({ userId: z.number() }))
     .query(async ({ ctx, input }) => {
       return ctx.db
@@ -25,7 +25,7 @@ export const sessionsRouter = createTRPCRouter({
     }),
 
   // Отозвать одну сессию
-  revoke: publicProcedure
+  revoke: gmProcedure
     .input(z.object({
       sessionId: z.number(),
       gmUserId: z.number().optional(),
@@ -53,7 +53,7 @@ export const sessionsRouter = createTRPCRouter({
     }),
 
   // Отозвать все сессии пользователя (кик со всех устройств)
-  revokeAll: publicProcedure
+  revokeAll: gmProcedure
     .input(z.object({
       userId: z.number(),
       gmUserId: z.number().optional(),
