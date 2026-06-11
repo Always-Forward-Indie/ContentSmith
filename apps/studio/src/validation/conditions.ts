@@ -38,13 +38,7 @@ export const ConditionSchema = z.discriminatedUnion('type', [
   })
 ]);
 
-export const ConditionGroupSchema: z.ZodType<{
-  op: 'AND' | 'OR' | 'NOT';
-  items: Array<z.infer<typeof ConditionSchema> | {
-    op: 'AND' | 'OR' | 'NOT';
-    items: any[];
-  }>;
-}> = z.object({
+export const ConditionGroupSchema = z.object({
   op: z.enum(['AND', 'OR', 'NOT']),
   items: z.array(z.union([
     ConditionSchema,

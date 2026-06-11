@@ -55,7 +55,7 @@ export const npcRouter = createTRPCRouter({
       const { search, page, limit, raceId, npcType: npcTypeFilter, minLevel, maxLevel, isInteractable, isDead, sortBy, sortOrder } = input;
       const offset = (page - 1) * limit;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(or(like(npc.name, `%${search}%`), like(npc.slug, `%${search}%`)));
       if (raceId) conditions.push(eq(npc.raceId, raceId));
       if (npcTypeFilter) conditions.push(eq(npc.npcType, npcTypeFilter));

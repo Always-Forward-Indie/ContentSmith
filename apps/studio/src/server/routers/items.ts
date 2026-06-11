@@ -49,7 +49,7 @@ export const itemsRouter = createTRPCRouter({
       const offset = (page - 1) * limit;
 
       // Build where conditions
-      const conditions = [];
+      const conditions: any[] = [];
       
       if (search) {
         conditions.push(

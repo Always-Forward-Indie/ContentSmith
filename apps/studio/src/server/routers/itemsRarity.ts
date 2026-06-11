@@ -32,7 +32,7 @@ export const itemsRarityRouter = createTRPCRouter({
       const offset = (page - 1) * limit;
 
       // Build where conditions
-      const whereConditions = [];
+      const whereConditions: any[] = [];
       if (search) {
         whereConditions.push(like(itemsRarity.name, `%${search}%`));
       }

@@ -35,7 +35,7 @@ export const skillsRouter = createTRPCRouter({
       const { search, schoolId, scaleStatId, page, limit } = input;
       const offset = (page - 1) * limit;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(skills.name, `%${search}%`));
       if (schoolId) conditions.push(eq(skills.schoolId, schoolId));
       if (scaleStatId) conditions.push(eq(skills.scaleStatId, scaleStatId));

@@ -18,7 +18,7 @@ export const skillPropertiesRouter = createTRPCRouter({
       const { search, page, pageSize } = input;
       const offset = (page - 1) * pageSize;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(skillProperties.name, `%${search}%`));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 

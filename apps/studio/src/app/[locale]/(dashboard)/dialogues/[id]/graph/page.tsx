@@ -110,7 +110,7 @@ export default function DialogueGraphPage() {
                 <CardContent className="p-0">
                     <DialogueGraphEditor
                         dialogueId={dialogueId}
-                        graphData={graphData}
+                        graphData={graphData as any}
                         readOnly={false}
                     />
                 </CardContent>

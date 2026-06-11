@@ -16,7 +16,7 @@ export const zoneEventsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { search, page, pageSize, gameZoneId } = input;
       const offset = (page - 1) * pageSize;
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(zoneEventTemplates.slug, `%${search}%`));
       if (gameZoneId) conditions.push(eq(zoneEventTemplates.gameZoneId, gameZoneId));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

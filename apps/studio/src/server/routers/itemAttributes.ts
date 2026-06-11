@@ -23,7 +23,7 @@ export const itemAttributesRouter = createTRPCRouter({
       const { search, page, limit, sortBy, sortOrder } = input;
       const offset = (page - 1) * limit;
 
-      const whereConditions = [];
+      const whereConditions: any[] = [];
       if (search) {
         whereConditions.push(like(entityAttributes.name, `%${search}%`));
       }

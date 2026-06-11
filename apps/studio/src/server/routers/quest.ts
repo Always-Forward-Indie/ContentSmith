@@ -24,7 +24,7 @@ export const questRouter = createTRPCRouter({
       const { search, page, limit, repeatable, minLevel, maxLevel, giverNpcId, turninNpcId, sortBy, sortOrder } = input;
       const offset = (page - 1) * limit;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(quest.slug, `%${search}%`));
       if (repeatable !== undefined) conditions.push(eq(quest.repeatable, repeatable));
       if (minLevel) conditions.push(gte(quest.minLevel, minLevel));

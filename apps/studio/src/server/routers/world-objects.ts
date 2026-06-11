@@ -16,7 +16,7 @@ export const worldObjectsRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { search, page, pageSize, zoneId, objectType } = input;
       const offset = (page - 1) * pageSize;
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(worldObjects.slug, `%${search}%`));
       if (zoneId) conditions.push(eq(worldObjects.zoneId, zoneId));
       if (objectType) conditions.push(eq(worldObjects.objectType, objectType));

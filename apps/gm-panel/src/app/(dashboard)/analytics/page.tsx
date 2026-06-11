@@ -66,14 +66,14 @@ function ChartTooltip({ active, payload, label }: {
 
 // ─── Overview Cards ───────────────────────────────────────────────────────────
 
-type OverviewData = {
+type OverviewData = Partial<{
     totalUsers: number;
     totalCharacters: number;
     activeBans: number;
     activeSessions: number;
     totalQuestTracks: number;
     loginLast24h: number;
-};
+}>;
 
 function StatCard({
     icon: Icon,

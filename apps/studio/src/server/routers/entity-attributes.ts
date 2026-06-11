@@ -27,7 +27,7 @@ export const entityAttributesRouter = createTRPCRouter({
       const { search, page, pageSize } = input;
       const offset = (page - 1) * pageSize;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) {
         conditions.push(or(like(entityAttributes.name, `%${search}%`), like(entityAttributes.slug, `%${search}%`)));
       }

@@ -16,7 +16,7 @@ export const respawnZonesRouter = createTRPCRouter({
     .query(async ({ input }) => {
       const { search, page, pageSize, zoneId } = input;
       const offset = (page - 1) * pageSize;
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(respawnZones.name, `%${search}%`));
       if (zoneId) conditions.push(eq(respawnZones.zoneId, zoneId));
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

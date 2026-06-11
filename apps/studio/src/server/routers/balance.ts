@@ -41,7 +41,25 @@ import { createTRPCRouter, publicProcedure } from '../trpc';
 // Shared helper: batch-fetch skill calc data (eliminates N+1)
 // ---------------------------------------------------------------------------
 
-async function fetchSkillCalcData(skillIds: number[], level: number) {
+interface SkillCalcData {
+  id: number;
+  name: string;
+  slug: string;
+  schoolSlug: string;
+  scaleStatSlug: string;
+  isPassive: boolean | null;
+  castMs: number;
+  swingMs: number;
+  cooldownMs: number;
+  costMp: number;
+  gcdMs: number;
+  maxRange: number;
+  areaRadius: number;
+  flatAdd: number;
+  coeff: number;
+}
+
+async function fetchSkillCalcData(skillIds: number[], level: number): Promise<SkillCalcData[]> {
   if (skillIds.length === 0) return [];
 
   const skillRows = await db
@@ -226,12 +244,13 @@ export const balanceRouter = createTRPCRouter({
             .where(inArray(mobSkills.mobId, mobIds))
         : [];
 
-    const uniqueSkillIds = Array.from(new Set(allMobSkillLinks.map((l) => l.skillId)));
+    const uniqueSkillIds: number[] = Array.from(new Set(allMobSkillLinks.map((l: any) => l.skillId)));
     const skillCalcDataList = await fetchSkillCalcData(uniqueSkillIds, 1);
     const skillCalcMap = new Map(skillCalcDataList.map((s) => [s.id, s]));
 
     const ranks = await db.select().from(mobRanks);
-    const rankMap = new Map(ranks.map((r) => [r.rankId, { code: r.code, mult: Number(r.mult) }]));
+    type RankInfo = { code: string; mult: number };
+    const rankMap = new Map<number, RankInfo>(ranks.map((r: any) => [r.rankId, { code: r.code, mult: Number(r.mult) }]));
 
     return mobs.map((m) => {
       const rank = rankMap.get(m.rankId ?? 1);

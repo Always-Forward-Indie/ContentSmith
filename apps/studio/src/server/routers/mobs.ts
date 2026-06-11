@@ -44,7 +44,7 @@ export const mobsRouter = createTRPCRouter({
       const { search, page, limit, raceId, rankId, minLevel, maxLevel, isAggressive, isDead, sortBy, sortOrder } = input
       const offset = (page - 1) * limit
 
-      const conditions = []
+      const conditions: any[] = []
       if (search) conditions.push(or(like(mob.name, `%${search}%`), like(mob.slug, `%${search}%`)))
       if (raceId)      conditions.push(eq(mob.raceId, raceId))
       if (rankId)      conditions.push(eq(mob.rankId, rankId))

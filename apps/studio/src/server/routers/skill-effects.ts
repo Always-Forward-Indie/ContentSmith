@@ -28,7 +28,7 @@ export const skillEffectRouter = createTRPCRouter({
       const { search, effectTypeId, page, pageSize } = input;
       const offset = (page - 1) * pageSize;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) {
         conditions.push(
           or(

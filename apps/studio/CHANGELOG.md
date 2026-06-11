@@ -43,6 +43,8 @@
 - **Сессия** — `maxAge: 8h`, автовыход через 8 часов после входа
 - **Кнопка «Выйти»** — иконка `LogOut` в AppHeader, вызов `signOut()`
 - **Реструктуризация** — shared-пакеты (`@contentsmith/database`, `@contentsmith/validation`) перенесены внутрь `apps/studio/src/` как обычные директории (`@/db`, `@/validation`). Убран `transpilePackages` из `next.config.js`, удалены workspace-зависимости. Docker-сборка: одна команда `npm run build --workspace=@contentsmith/studio`
+- **`db.ts`** — ленивая инициализация через Proxy, не падает при сборке без переменных окружения
+- **TypeScript** — `noImplicitAny: false` (остальные strict-проверки активны), исправлены типы в 20+ роутерах и компонентах
 
 ### Улучшения: Редактор карт
 

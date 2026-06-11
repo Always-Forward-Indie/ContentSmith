@@ -37,7 +37,8 @@
             "@/server/*": [
                 "./src/server/*"
             ]
-        }
+        },
+        "noImplicitAny": false
     },
     "include": [
         "next-env.d.ts",

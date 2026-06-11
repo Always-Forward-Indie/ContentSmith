@@ -27,7 +27,7 @@ export const dialogueRouter = createTRPCRouter({
       const { search, page, limit, npcId, sortBy, sortOrder } = input;
       const offset = (page - 1) * limit;
 
-      const conditions = [];
+      const conditions: any[] = [];
       if (search) conditions.push(like(dialogue.slug, `%${search}%`));
       if (npcId) conditions.push(
         sql`EXISTS (SELECT 1 FROM npc_dialogue nd WHERE nd.dialogue_id = ${dialogue.id} AND nd.npc_id = ${npcId})`
