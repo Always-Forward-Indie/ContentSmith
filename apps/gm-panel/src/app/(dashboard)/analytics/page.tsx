@@ -482,7 +482,7 @@ function TopCharactersTable({ data, isLoading }: { data?: TopCharRow[]; isLoadin
                 char.className ?? '—',
                 char.raceName ?? '—',
                 formatPlayTime(char.totalPlayTimeSec),
-                char.lastOnlineAt ? formatDate(char.lastOnlineAt.toISOString()) : '—',
+                char.lastOnlineAt ? formatDate(char.lastOnlineAt) : '—',
             ]),
         );
     }
@@ -539,7 +539,7 @@ function TopCharactersTable({ data, isLoading }: { data?: TopCharRow[]; isLoadin
                                         {formatPlayTime(char.totalPlayTimeSec)}
                                     </TableCell>
                                     <TableCell className="text-right text-xs text-muted-foreground">
-                                        {char.lastOnlineAt ? formatDate(char.lastOnlineAt.toISOString()) : '—'}
+                                        {char.lastOnlineAt ? formatDate(char.lastOnlineAt) : '—'}
                                     </TableCell>
                                 </TableRow>
                             ))}
