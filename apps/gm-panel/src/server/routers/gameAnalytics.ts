@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { eq, desc, and, sql, gte } from 'drizzle-orm';
+import { eq, desc, and, sql, gte, lte } from 'drizzle-orm';
 import { createTRPCRouter, gmProcedure } from '../trpc';
 import { gameAnalytics, zones, characters, users } from '../schema';
+import { logGmAction } from '../utils/gmLog';
 
 const PAGE_SIZE = 50;
 
@@ -11,8 +12,39 @@ const daysInput = z.object({
   days: z.number().int().min(1).max(365).default(30),
 }).default({});
 
+const periodInput = z.object({
+  days: z.number().int().min(1).max(365).default(30).optional(),
+  from: z.date().optional(),
+  to: z.date().optional(),
+}).default({});
+
+function periodWhere({ days, from, to }: { days?: number; from?: Date; to?: Date }) {
+  if (from || to) {
+    const conditions = [];
+    if (from) conditions.push(gte(gameAnalytics.createdAt, from));
+    if (to) conditions.push(lte(gameAnalytics.createdAt, to));
+    return and(...conditions);
+  }
+  return gte(gameAnalytics.createdAt, sinceDate(days ?? 30));
+}
+
 function sinceDate(days: number): Date {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+}
+
+function periodDates(input: { days?: number; from?: Date; to?: Date }): { since: Date; until?: Date } {
+  if (input.from || input.to) {
+    return { since: input.from ?? new Date(0), until: input.to };
+  }
+  return { since: sinceDate(input.days ?? 30) };
+}
+
+function periodDateSql(input: { days?: number; from?: Date; to?: Date }) {
+  const { since, until } = periodDates(input);
+  if (until) {
+    return sql`created_at >= ${since} AND created_at <= ${until}`;
+  }
+  return sql`created_at >= ${since}`;
 }
 
 // ─── Router ───────────────────────────────────────────────────────────────────
@@ -20,9 +52,9 @@ function sinceDate(days: number): Date {
 export const gameAnalyticsRouter = createTRPCRouter({
   // ─── KPIs ──────────────────────────────────────────────────────────────────
   overview: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const where = periodWhere(input);
 
       const rows = await ctx.db
         .select({
@@ -30,7 +62,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           count: sql<number>`COUNT(*)::int`.as('count'),
         })
         .from(gameAnalytics)
-        .where(gte(gameAnalytics.createdAt, since))
+        .where(where)
         .groupBy(gameAnalytics.eventType);
 
       const byType = Object.fromEntries(rows.map((r) => [r.eventType, r.count]));
@@ -40,7 +72,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
         .from(gameAnalytics)
         .where(
           and(
-            gte(gameAnalytics.createdAt, since),
+            where,
             eq(gameAnalytics.eventType, 'session_start'),
           ),
         );
@@ -64,16 +96,18 @@ export const gameAnalyticsRouter = createTRPCRouter({
   timeline: gmProcedure
     .input(
       z.object({
-        days: z.number().int().min(1).max(365).default(30),
+        days: z.number().int().min(1).max(365).default(30).optional(),
+        from: z.date().optional(),
+        to: z.date().optional(),
         eventType: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const where = periodWhere(input);
 
       const conditions = input.eventType
-        ? and(gte(gameAnalytics.createdAt, since), eq(gameAnalytics.eventType, input.eventType))
-        : gte(gameAnalytics.createdAt, since);
+        ? and(where, eq(gameAnalytics.eventType, input.eventType))
+        : where;
 
       return ctx.db
         .select({
@@ -88,9 +122,10 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Session duration stats (join session_start ↔ session_end by session_id) ─
   sessionStats: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const { since, until } = periodDates(input);
+      const untilCond = until ? sql`AND s.created_at <= ${until}` : sql``;
       const [row] = await ctx.db.execute(sql`
         SELECT
           COUNT(*)::int                                                         AS total,
@@ -108,6 +143,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
                AND e.event_type   = 'session_end'
         WHERE  s.event_type       = 'session_start'
           AND  s.created_at      >= ${since}
+          ${untilCond}
           AND  EXTRACT(EPOCH FROM (e.created_at - s.created_at)) BETWEEN 10 AND 86400
       `);
 
@@ -122,9 +158,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Deaths by zone ────────────────────────────────────────────────────────
   deathsByZone: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const where = periodWhere(input);
       return ctx.db
         .select({
           zoneId:   gameAnalytics.zoneId,
@@ -135,7 +171,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
         .leftJoin(zones, eq(zones.id, gameAnalytics.zoneId))
         .where(
           and(
-            gte(gameAnalytics.createdAt, since),
+            where,
             eq(gameAnalytics.eventType, 'player_death'),
           ),
         )
@@ -146,9 +182,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Deaths by level ───────────────────────────────────────────────────────
   deathsByLevel: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const where = periodWhere(input);
       return ctx.db
         .select({
           level: gameAnalytics.level,
@@ -157,7 +193,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
         .from(gameAnalytics)
         .where(
           and(
-            gte(gameAnalytics.createdAt, since),
+            where,
             eq(gameAnalytics.eventType, 'player_death'),
           ),
         )
@@ -167,9 +203,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Quest funnel ──────────────────────────────────────────────────────────
   questFunnel: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           payload->>'questSlug'                                             AS quest_slug,
@@ -178,7 +214,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           COUNT(*) FILTER (WHERE event_type = 'quest_abandon')::int        AS abandon
         FROM   game_analytics
         WHERE  event_type IN ('quest_accept', 'quest_complete', 'quest_abandon')
-          AND  created_at >= ${since}
+          AND  ${dateCond}
         GROUP  BY payload->>'questSlug'
         ORDER  BY accept DESC
         LIMIT  25
@@ -193,9 +229,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Level-up distribution ─────────────────────────────────────────────────
   levelUpDistribution: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const where = periodWhere(input);
       return ctx.db
         .select({
           level: gameAnalytics.level,
@@ -204,7 +240,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
         .from(gameAnalytics)
         .where(
           and(
-            gte(gameAnalytics.createdAt, since),
+            where,
             eq(gameAnalytics.eventType, 'level_up'),
           ),
         )
@@ -214,9 +250,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Top mobs killed ───────────────────────────────────────────────────────
   topMobsKilled: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           payload->>'mobSlug'   AS mob_slug,
@@ -224,7 +260,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           COUNT(*)::int         AS count
         FROM   game_analytics
         WHERE  event_type = 'mob_killed'
-          AND  created_at >= ${since}
+          AND  ${dateCond}
           AND  payload->>'mobSlug' IS NOT NULL
         GROUP  BY payload->>'mobSlug', (payload->>'mobLevel')::int
         ORDER  BY count DESC
@@ -239,9 +275,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Items acquired – top by slug ─────────────────────────────────────────
   topItemsAcquired: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           payload->>'itemSlug'           AS item_slug,
@@ -249,7 +285,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           COUNT(*)::int                  AS event_count
         FROM   game_analytics
         WHERE  event_type = 'item_acquired'
-          AND  created_at >= ${since}
+          AND  ${dateCond}
           AND  payload->>'itemSlug' IS NOT NULL
         GROUP  BY payload->>'itemSlug'
         ORDER  BY total_qty DESC
@@ -264,9 +300,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Items by acquisition source ──────────────────────────────────────────
   itemsBySource: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           payload->>'source'            AS source,
@@ -274,7 +310,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           SUM((payload->>'quantity')::int)::int AS total_qty
         FROM   game_analytics
         WHERE  event_type = 'item_acquired'
-          AND  created_at >= ${since}
+          AND  ${dateCond}
         GROUP  BY payload->>'source'
         ORDER  BY total_qty DESC
       `);
@@ -287,9 +323,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Gold flow by source ───────────────────────────────────────────────────
   goldBySource: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           payload->>'source'                AS source,
@@ -305,7 +341,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
           )                                 AS spending
         FROM   game_analytics
         WHERE  event_type = 'gold_change'
-          AND  created_at >= ${since}
+          AND  ${dateCond}
           AND  payload->>'delta' IS NOT NULL
         GROUP  BY payload->>'source'
         ORDER  BY count DESC
@@ -321,16 +357,16 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Activity Punch Card (hour × day-of-week heatmap) ─────────────────────
   activityPunchCard: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           EXTRACT(DOW  FROM created_at)::int  AS dow,
           EXTRACT(HOUR FROM created_at)::int  AS hour,
           COUNT(*)::int                       AS count
         FROM   game_analytics
-        WHERE  created_at >= ${since}
+        WHERE  ${dateCond}
         GROUP  BY dow, hour
         ORDER  BY dow, hour
       `);
@@ -343,16 +379,16 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Daily Active Users ────────────────────────────────────────────────────
   dau: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         SELECT
           to_char(created_at, 'YYYY-MM-DD') AS date,
           COUNT(DISTINCT character_id)::int  AS dau
         FROM   game_analytics
         WHERE  event_type   = 'session_start'
-          AND  created_at  >= ${since}
+          AND  ${dateCond}
           AND  character_id IS NOT NULL
         GROUP  BY to_char(created_at, 'YYYY-MM-DD')
         ORDER  BY date
@@ -365,9 +401,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Session duration histogram ────────────────────────────────────────────
   sessionHistogram: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         WITH durations AS (
           SELECT EXTRACT(EPOCH FROM (e.created_at - s.created_at)) AS sec
@@ -376,7 +412,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
                  ON  e.session_id = s.session_id
                  AND e.event_type = 'session_end'
           WHERE  s.event_type = 'session_start'
-            AND  s.created_at >= ${since}
+            AND  s.created_at >= ${periodDates(input).since}
             AND  EXTRACT(EPOCH FROM (e.created_at - s.created_at)) BETWEEN 10 AND 86400
         )
         SELECT
@@ -421,22 +457,22 @@ export const gameAnalyticsRouter = createTRPCRouter({
         ),
         activity AS (
           SELECT DISTINCT
-            c.user_id,
+            c.owner_id,
             DATE(ga.created_at) AS activity_date
           FROM   game_analytics ga
           JOIN   characters c ON c.id = ga.character_id
           WHERE  ga.event_type = 'session_start'
-            AND  c.user_id IS NOT NULL
+            AND  c.owner_id IS NOT NULL
         )
         SELECT
           co.cohort_week,
           COUNT(DISTINCT co.user_id)::int                                      AS cohort_size,
-          COUNT(DISTINCT CASE WHEN a.activity_date = co.cohort_week + 1  THEN co.user_id END)::int AS d1,
-          COUNT(DISTINCT CASE WHEN a.activity_date = co.cohort_week + 3  THEN co.user_id END)::int AS d3,
-          COUNT(DISTINCT CASE WHEN a.activity_date = co.cohort_week + 7  THEN co.user_id END)::int AS d7,
-          COUNT(DISTINCT CASE WHEN a.activity_date = co.cohort_week + 30 THEN co.user_id END)::int AS d30
+           COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN co.cohort_week + 7  AND co.cohort_week + 9  THEN co.user_id END)::int AS d1,
+           COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN co.cohort_week + 9  AND co.cohort_week + 11 THEN co.user_id END)::int AS d3,
+           COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN co.cohort_week + 13 AND co.cohort_week + 15 THEN co.user_id END)::int AS d7,
+           COUNT(DISTINCT CASE WHEN a.activity_date BETWEEN co.cohort_week + 36 AND co.cohort_week + 38 THEN co.user_id END)::int AS d30
         FROM   cohorts co
-        LEFT   JOIN activity a ON a.user_id = co.user_id
+        LEFT   JOIN activity a ON a.owner_id = co.user_id
         GROUP  BY co.cohort_week
         ORDER  BY co.cohort_week DESC
         LIMIT  ${input.weeks}
@@ -453,9 +489,9 @@ export const gameAnalyticsRouter = createTRPCRouter({
 
   // ─── Progression bottleneck (median time per level transition) ─────────────
   progressionBottleneck: gmProcedure
-    .input(daysInput)
+    .input(periodInput)
     .query(async ({ ctx, input }) => {
-      const since = sinceDate(input.days);
+      const dateCond = periodDateSql(input);
       const rows = await ctx.db.execute(sql`
         WITH level_ups AS (
           SELECT
@@ -465,7 +501,7 @@ export const gameAnalyticsRouter = createTRPCRouter({
             LAG(created_at) OVER (PARTITION BY character_id ORDER BY created_at) AS prev_at
           FROM   game_analytics
           WHERE  event_type    = 'level_up'
-            AND  created_at   >= ${since}
+            AND  ${dateCond}
             AND  character_id IS NOT NULL
         )
         SELECT
@@ -544,5 +580,44 @@ export const gameAnalyticsRouter = createTRPCRouter({
           totalPages: Math.max(1, Math.ceil((totalRow?.total ?? 0) / input.pageSize)),
         },
       };
+    }),
+
+  // ─── Clear events (truncate or targeted delete) ────────────────────────────
+  clearEvents: gmProcedure
+    .input(z.object({
+      characterId: z.number().optional(),
+      eventType: z.string().optional(),
+      from: z.date().optional(),
+      to: z.date().optional(),
+      gmUserId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const conditions = [];
+      if (input.characterId) conditions.push(eq(gameAnalytics.characterId, input.characterId));
+      if (input.eventType) conditions.push(eq(gameAnalytics.eventType, input.eventType));
+      if (input.from) conditions.push(gte(gameAnalytics.createdAt, input.from));
+      if (input.to) conditions.push(lte(gameAnalytics.createdAt, input.to));
+
+      let deleted = 0;
+      if (conditions.length > 0) {
+        const result = await ctx.db
+          .delete(gameAnalytics)
+          .where(and(...conditions))
+          .returning({ id: gameAnalytics.id });
+        deleted = result.length;
+      } else {
+        const result = await ctx.db
+          .delete(gameAnalytics)
+          .returning({ id: gameAnalytics.id });
+        deleted = result.length;
+      }
+
+      await logGmAction({
+        actionType: 'clear_events',
+        targetType: 'game_analytics',
+        oldValue: { deleted, ...(input.characterId ? { characterId: input.characterId } : {}), ...(input.eventType ? { eventType: input.eventType } : {}), ...(input.from ? { from: input.from.toISOString() } : {}), ...(input.to ? { to: input.to.toISOString() } : {}) },
+        gmUserId: input.gmUserId ?? null,
+      });
+      return { success: true, deleted };
     }),
 });

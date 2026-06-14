@@ -7,7 +7,11 @@ FROM node:18-alpine AS runner
 WORKDIR /app
 COPY --from=builder /app/apps/gm-panel/.next/standalone /app
 COPY --from=builder /app/apps/gm-panel/.next/static /app/apps/gm-panel/.next/static
+RUN mkdir -p /app/data/map-uploads /app/config
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV HOSTNAME=0.0.0.0
+ENV MAP_UPLOAD_DIR=/app/data/map-uploads
+ENV NODE_NO_WARNINGS=1
 EXPOSE 3001
 CMD ["node", "apps/gm-panel/server.js"]

@@ -8,9 +8,11 @@ import {
 import {
     Skull, Swords, Trophy, Scroll, Package, Coins,
     Activity, Clock, BarChart2, ChevronLeft, ChevronRight, Filter,
-    TrendingUp, Users,
+    TrendingUp, Users, Trash2, Calendar, Download,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import { downloadCsv } from '@/lib/utils';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,6 +20,15 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -147,24 +158,45 @@ function KpiCard({
 
 // ─── Days selector ────────────────────────────────────────────────────────────
 
-function DaysFilter({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-    return (
-        <div className="flex items-center gap-2">
-            <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-            <Select value={value} onValueChange={onChange}>
-                <SelectTrigger className="h-8 w-28 text-xs">
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    {DAYS_OPTIONS.map((o) => (
-                        <SelectItem key={o.value} value={o.value} className="text-xs">
-                            {o.label}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+function DaysFilter({ value, onChange, from, to, onFromChange, onToChange, showCustom, onToggleCustom }: {
+  value: string;
+  onChange: (v: string) => void;
+  from: string;
+  to: string;
+  onFromChange: (v: string) => void;
+  onToChange: (v: string) => void;
+  showCustom: boolean;
+  onToggleCustom: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+      {!showCustom ? (
+        <Select value={value} onValueChange={onChange}>
+          <SelectTrigger className="h-8 w-28 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DAYS_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value} className="text-xs">
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <div className="flex items-center gap-1.5">
+          <Input type="date" className="h-8 w-36 text-xs" value={from} onChange={e => onFromChange(e.target.value)} />
+          <span className="text-xs text-muted-foreground">–</span>
+          <Input type="date" className="h-8 w-36 text-xs" value={to} onChange={e => onToChange(e.target.value)} />
         </div>
-    );
+      )}
+      <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" onClick={onToggleCustom}>
+        <Calendar className="h-3 w-3" />
+        {showCustom ? 'Пресеты' : 'Диапазон'}
+      </Button>
+    </div>
+  );
 }
 
 // ─── Activity Punch Card grid ────────────────────────────────────────────────
@@ -539,14 +571,35 @@ function TabPlayers({ days }: { days: number }) {
 function TabQuests({ days }: { days: number }) {
     const { data, isLoading } = trpc.gameAnalytics.questFunnel.useQuery({ days });
 
+    function handleExport() {
+        if (!data?.length) return;
+        downloadCsv(
+            'quest-funnel.csv',
+            ['Квест (slug)', 'Взято', 'Выполнено', 'Брошено', '% сдачи'],
+            data.map((q) => {
+                const pct = q.accept > 0 ? Math.round((q.complete / q.accept) * 100) : 0;
+                return [q.questSlug, String(q.accept), String(q.complete), String(q.abandon), `${pct}%`];
+            }),
+        );
+    }
+
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <Scroll className="h-4 w-4 text-primary" />
-                    Воронка квестов
-                </CardTitle>
-                <CardDescription>Взято → выполнено → брошено по слагу квеста</CardDescription>
+                <div className="flex items-start justify-between gap-2">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                            <Scroll className="h-4 w-4 text-primary" />
+                            Воронка квестов
+                        </CardTitle>
+                        <CardDescription>Взято → выполнено → брошено по слагу квеста</CardDescription>
+                    </div>
+                    {!!data?.length && (
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleExport}>
+                            <Download className="mr-1 h-3 w-3" />CSV
+                        </Button>
+                    )}
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 {isLoading ? (
@@ -615,14 +668,32 @@ function TabQuests({ days }: { days: number }) {
 function TabCombat({ days }: { days: number }) {
     const { data, isLoading } = trpc.gameAnalytics.topMobsKilled.useQuery({ days });
 
+    function handleExport() {
+        if (!data?.length) return;
+        downloadCsv(
+            'top-mobs.csv',
+            ['#', 'Моб (slug)', 'Уровень', 'Убийств'],
+            data.map((m, i) => [String(i + 1), m.mobSlug, String(m.mobLevel), String(m.count)]),
+        );
+    }
+
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <Swords className="h-4 w-4 text-amber-500" />
-                    Топ убитых мобов
-                </CardTitle>
-                <CardDescription>Самые часто убиваемые мобы</CardDescription>
+                <div className="flex items-start justify-between gap-2">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                            <Swords className="h-4 w-4 text-amber-500" />
+                            Топ убитых мобов
+                        </CardTitle>
+                        <CardDescription>Самые часто убиваемые мобы</CardDescription>
+                    </div>
+                    {!!data?.length && (
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleExport}>
+                            <Download className="mr-1 h-3 w-3" />CSV
+                        </Button>
+                    )}
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 {isLoading ? (
@@ -677,17 +748,35 @@ function TabEconomy({ days }: { days: number }) {
         [sources.data],
     );
 
+    function handleExportItems() {
+        if (!items.data?.length) return;
+        downloadCsv(
+            'top-items.csv',
+            ['#', 'Предмет (slug)', 'Кол-во', 'Событий'],
+            items.data.map((d, i) => [String(i + 1), d.itemSlug, String(d.totalQty), String(d.eventCount)]),
+        );
+    }
+
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                 {/* Top items */}
                 <Card className="lg:col-span-7">
                     <CardHeader className="pb-3">
-                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                            <Package className="h-4 w-4 text-violet-500" />
-                            Топ предметов
-                        </CardTitle>
-                        <CardDescription>По суммарному кол-ву полученных штук</CardDescription>
+                        <div className="flex items-start justify-between gap-2">
+                            <div>
+                                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                                    <Package className="h-4 w-4 text-violet-500" />
+                                    Топ предметов
+                                </CardTitle>
+                                <CardDescription>По суммарному кол-ву полученных штук</CardDescription>
+                            </div>
+                            {!!items.data?.length && (
+                                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleExportItems}>
+                                    <Download className="mr-1 h-3 w-3" />CSV
+                                </Button>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="p-0">
                         {items.isLoading ? (
@@ -817,6 +906,23 @@ function TabEventLog() {
         setPage(1);
     }
 
+    function handleExport() {
+        if (!data?.data.length) return;
+        downloadCsv(
+            'event-log.csv',
+            ['ID', 'Тип', 'Персонаж', 'Уровень', 'Зона', 'Payload', 'Время'],
+            data.data.map((e) => [
+                String(e.id),
+                EVENT_TYPE_META[e.eventType]?.label ?? e.eventType,
+                e.characterName ?? (e.characterId ? `#${e.characterId}` : '—'),
+                String(e.level),
+                e.zoneName ?? (e.zoneId ? `#${e.zoneId}` : '—'),
+                JSON.stringify(e.payload),
+                e.createdAt ? new Date(e.createdAt).toLocaleString('ru-RU') : '—',
+            ]),
+        );
+    }
+
     return (
         <div className="space-y-3">
             {/* Filters */}
@@ -839,6 +945,11 @@ function TabEventLog() {
                     <span className="text-xs text-muted-foreground">
                         {fmtNum(data.pagination.total)} событий
                     </span>
+                )}
+                {!!data?.data.length && (
+                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs ml-auto" onClick={handleExport}>
+                        <Download className="mr-1 h-3 w-3" />CSV
+                    </Button>
                 )}
             </div>
 
@@ -926,13 +1037,31 @@ function TabEventLog() {
 
 function TabRetention() {
     const [weeks, setWeeks] = useState(8);
-    const { data, isLoading } = trpc.gameAnalytics.retentionCohort.useQuery({ weeks });
+    const { data, isLoading, error } = trpc.gameAnalytics.retentionCohort.useQuery({ weeks });
 
     function retentionColor(pct: number): string {
         if (pct >= 50) return 'text-emerald-400';
         if (pct >= 25) return 'text-yellow-400';
         if (pct >= 10) return 'text-orange-400';
         return 'text-muted-foreground';
+    }
+
+    function handleExport() {
+        if (!data?.length) return;
+        const pct = (row: typeof data[0], n: number) =>
+            row.cohortSize > 0 ? Math.round((n / row.cohortSize) * 100) : 0;
+        downloadCsv(
+            'retention-cohorts.csv',
+            ['Неделя', 'Игроков', 'D+1 %', 'D+1', 'D+3 %', 'D+3', 'D+7 %', 'D+7', 'D+30 %', 'D+30'],
+            data.map((row) => [
+                row.cohortWeek,
+                String(row.cohortSize),
+                `${pct(row, row.d1)}%`, String(row.d1),
+                `${pct(row, row.d3)}%`, String(row.d3),
+                `${pct(row, row.d7)}%`, String(row.d7),
+                `${pct(row, row.d30)}%`, String(row.d30),
+            ]),
+        );
     }
 
     return (
@@ -949,6 +1078,11 @@ function TabRetention() {
                         ))}
                     </SelectContent>
                 </Select>
+                {!!data?.length && (
+                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleExport}>
+                        <Download className="mr-1 h-3 w-3" />CSV
+                    </Button>
+                )}
             </div>
 
             <Card>
@@ -958,13 +1092,17 @@ function TabRetention() {
                         Когортный анализ удержания
                     </CardTitle>
                     <CardDescription>
-                        % пользователей из когорты, вернувшихся через N дней после недели регистрации.
+                        % пользователей, вернувшихся в указанный день после недели регистрации (±1 день).
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                     {isLoading ? (
                         <div className="space-y-2 px-6 pb-4">
                             {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+                        </div>
+                    ) : error ? (
+                        <div className="px-6 pb-4 text-center py-8 text-destructive text-sm">
+                            Ошибка загрузки: {error.message}
                         </div>
                     ) : !data?.length ? (
                         <div className="px-6 pb-4"><EmptyState /></div>
@@ -1020,6 +1158,32 @@ function TabRetention() {
 export default function GameAnalyticsPage() {
     const [daysStr, setDaysStr] = useState('30');
     const days = Number(daysStr);
+    const [customFrom, setCustomFrom] = useState('');
+    const [customTo, setCustomTo] = useState('');
+    const [showCustomRange, setShowCustomRange] = useState(false);
+    const [clearDialogOpen, setClearDialogOpen] = useState(false);
+    const [clearEventType, setClearEventType] = useState('all');
+    const [clearCharId, setClearCharId] = useState('');
+    const utils = trpc.useContext();
+
+    const period = useMemo(() => {
+      if (showCustomRange && (customFrom || customTo)) {
+        const p: Record<string, Date | undefined> = { days: undefined };
+        if (customFrom) p.from = new Date(customFrom);
+        if (customTo) p.to = new Date(customTo + 'T23:59:59.999Z');
+        return p as { from?: Date; to?: Date };
+      }
+      return { days };
+    }, [days, customFrom, customTo, showCustomRange]);
+
+    const clearEvents = trpc.gameAnalytics.clearEvents.useMutation({
+      onSuccess: (data) => {
+        toast.success(`Удалено ${data.deleted} событий`);
+        utils.gameAnalytics.invalidate();
+        setClearDialogOpen(false);
+      },
+      onError: (e) => toast.error(e.message),
+    });
 
     return (
         <div className="space-y-5">
@@ -1031,7 +1195,60 @@ export default function GameAnalyticsPage() {
                         Игровые события сервера · таблица <code className="font-mono text-xs bg-muted px-1 rounded">game_analytics</code>
                     </p>
                 </div>
-                <DaysFilter value={daysStr} onChange={setDaysStr} />
+                <div className="flex items-center gap-2">
+                    <DaysFilter
+                      value={daysStr} onChange={setDaysStr}
+                      from={customFrom} to={customTo}
+                      onFromChange={setCustomFrom} onToChange={setCustomTo}
+                      showCustom={showCustomRange} onToggleCustom={() => setShowCustomRange(!showCustomRange)}
+                    />
+
+                    <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+                        <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="h-8 gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10">
+                                <Trash2 className="h-3.5 w-3.5" />Очистить
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Очистить события</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Выберите фильтры для очистки. Без фильтров — удаляются все события.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <div className="space-y-3 py-2">
+                                <div className="space-y-1.5">
+                                    <Label>Тип события</Label>
+                                    <Select value={clearEventType} onValueChange={setClearEventType}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">Все типы</SelectItem>
+                                            {Object.entries(EVENT_TYPE_META).map(([k, v]) => (
+                                                <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label>ID персонажа (опционально)</Label>
+                                    <Input placeholder="Оставьте пустым для всех" value={clearCharId} onChange={e => setClearCharId(e.target.value)} />
+                                </div>
+                                {clearEvents.error && <p className="text-xs text-destructive">{clearEvents.error.message}</p>}
+                            </div>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={() => clearEvents.mutate({
+                                        eventType: clearEventType !== 'all' ? clearEventType : undefined,
+                                        characterId: clearCharId ? Number(clearCharId) : undefined,
+                                    })}
+                                    disabled={clearEvents.isLoading}>
+                                    {clearEvents.isLoading ? 'Удаление...' : 'Очистить'}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </div>
 
             <Tabs defaultValue="overview">

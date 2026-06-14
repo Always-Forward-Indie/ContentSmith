@@ -40,13 +40,16 @@ export async function POST(req: NextRequest) {
   const ext = extname(file.name).toLowerCase() || '.bin';
   const filename = `${randomUUID()}${ext}`;
 
-  const uploadDir = join(process.cwd(), 'public', 'uploads', 'maps');
+  const uploadDir = process.env.MAP_UPLOAD_DIR || join(process.cwd(), 'public', 'uploads', 'maps');
   await mkdir(uploadDir, { recursive: true });
 
   const bytes = await file.arrayBuffer();
-  await writeFile(join(uploadDir, filename), Buffer.from(bytes));
+  const filePath = join(uploadDir, filename);
+  await writeFile(filePath, Buffer.from(bytes));
 
-  const url = `/uploads/maps/${filename}`;
+  console.log(`[studio:upload] Saved image to ${filePath}`);
+
+  const url = `/api/map-image/${filename}`;
 
   // Persist the new image URL to the map config
   const config = await readMapConfig();

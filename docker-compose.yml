@@ -4,14 +4,18 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${STUDIO_PORT:-3000}:3000"
+      - "${STUDIO_PORT}:3000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - GAME_DATABASE_URL=${GAME_DATABASE_URL}
-      - NEXTAUTH_URL=${STUDIO_NEXTAUTH_URL:-http://localhost:3000}
-      - NEXTAUTH_SECRET=${STUDIO_NEXTAUTH_SECRET:-change_me_in_production}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - NEXTAUTH_URL=${STUDIO_NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${STUDIO_NEXTAUTH_SECRET}
+    volumes:
+      - studio_uploads:/app/data/map-uploads
+      - studio_config:/app/config
+    networks:
+      - default
+      - mmo_network
     restart: unless-stopped
 
   gm-panel:
@@ -19,11 +23,25 @@ services:
       context: .
       dockerfile: Dockerfile.gm
     ports:
-      - "${GM_PANEL_PORT:-3001}:3001"
+      - "${GM_PANEL_PORT}:3001"
     environment:
       - GAME_DATABASE_URL=${GAME_DATABASE_URL}
-      - NEXTAUTH_URL=${GM_NEXTAUTH_URL:-http://localhost:3001}
-      - NEXTAUTH_SECRET=${GM_NEXTAUTH_SECRET:-change_me_in_production}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - NEXTAUTH_URL=${GM_NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${GM_NEXTAUTH_SECRET}
+    volumes:
+      - gm_uploads:/app/data/map-uploads
+      - gm_config:/app/config
+    networks:
+      - default
+      - mmo_network
     restart: unless-stopped
+
+volumes:
+  studio_uploads:
+  studio_config:
+  gm_uploads:
+  gm_config:
+
+networks:
+  mmo_network:
+    external: true

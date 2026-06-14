@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { eq, ilike, or, and, isNotNull, isNull, count, gt, SQL } from 'drizzle-orm';
+import { eq, ilike, or, and, isNotNull, isNull, count, gt, inArray, SQL, sql } from 'drizzle-orm';
 import { createTRPCRouter, gmProcedure } from '../trpc';
-import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState, userSessions } from '../schema';
+import { users, characters, characterClass, race, userRoles, characterGenders, characterCurrentState, userSessions, userBans, characterPermanentModifiers, characterSkills, playerInventory, characterEquipment, playerQuest, playerFlag, playerActiveEffect, characterTitles, characterReputation, characterPity, characterBestiary, characterEmotes, characterSkillMastery, characterSkillBar, currencyTransactions, gameAnalytics, characterPosition } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 const PAGE_SIZE = 20;
@@ -132,6 +132,7 @@ export const accountsRouter = createTRPCRouter({
           raceId: characters.raceId,
           raceName: race.name,
           isDead: characterCurrentState.isDead,
+          isOnline: characters.isOnline,
           createdAt: characters.createdAt,
           lastOnlineAt: characters.lastOnlineAt,
         })
@@ -277,5 +278,147 @@ export const accountsRouter = createTRPCRouter({
       await ctx.db.delete(users).where(eq(users.id, input.userId));
       await logGmAction({ actionType: 'delete_user', targetType: 'user', targetId: input.userId, oldValue: { login: old?.login }, gmUserId: input.gmUserId ?? null });
       return { success: true };
+    }),
+
+  // Удалить аккаунт вместе со всеми персонажами и их данными (явная очистка)
+  deleteWithCharacters: gmProcedure
+    .input(z.object({ userId: z.number(), gmUserId: z.number().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = input;
+      const [user] = await ctx.db.select({ login: users.login }).from(users).where(eq(users.id, userId));
+      if (!user) throw new Error('Account not found');
+
+      const chars = await ctx.db.select({ id: characters.id }).from(characters).where(eq(characters.ownerId, userId));
+      const charIds = chars.map((c) => c.id);
+
+      await ctx.db.transaction(async (tx) => {
+        if (charIds.length > 0) {
+          await tx.delete(characterPermanentModifiers).where(inArray(characterPermanentModifiers.characterId, charIds));
+          await tx.delete(characterSkills).where(inArray(characterSkills.characterId, charIds));
+          await tx.delete(playerInventory).where(inArray(playerInventory.characterId, charIds));
+          await tx.delete(characterEquipment).where(inArray(characterEquipment.characterId, charIds));
+          await tx.delete(playerQuest).where(inArray(playerQuest.playerId, charIds));
+          await tx.delete(playerFlag).where(inArray(playerFlag.playerId, charIds));
+          await tx.delete(playerActiveEffect).where(inArray(playerActiveEffect.playerId, charIds));
+          await tx.delete(characterTitles).where(inArray(characterTitles.characterId, charIds));
+          await tx.delete(characterReputation).where(inArray(characterReputation.characterId, charIds));
+          await tx.delete(characterPity).where(inArray(characterPity.characterId, charIds));
+          await tx.delete(characterBestiary).where(inArray(characterBestiary.characterId, charIds));
+          await tx.delete(characterEmotes).where(inArray(characterEmotes.characterId, charIds));
+          await tx.delete(characterSkillMastery).where(inArray(characterSkillMastery.characterId, charIds));
+          await tx.delete(characterSkillBar).where(inArray(characterSkillBar.characterId, charIds));
+          await tx.delete(currencyTransactions).where(inArray(currencyTransactions.characterId, charIds));
+          await tx.delete(gameAnalytics).where(inArray(gameAnalytics.characterId, charIds));
+          await tx.delete(characterCurrentState).where(inArray(characterCurrentState.characterId, charIds));
+          await tx.delete(characterPosition).where(inArray(characterPosition.characterId, charIds));
+          await tx.delete(characters).where(eq(characters.ownerId, userId));
+        }
+        await tx.delete(userSessions).where(eq(userSessions.userId, userId));
+        await tx.delete(userBans).where(eq(userBans.userId, userId));
+        await tx.delete(users).where(eq(users.id, userId));
+      });
+
+      await logGmAction({ actionType: 'delete_user_with_characters', targetType: 'user', targetId: userId, oldValue: { login: user.login, charactersDeleted: charIds.length }, gmUserId: input.gmUserId ?? null });
+      return { success: true, charactersDeleted: charIds.length };
+    }),
+
+  // Полная очистка аккаунта (все персонажи очищаются, сессии и баны удаляются)
+  wipe: gmProcedure
+    .input(z.object({ userId: z.number(), gmUserId: z.number().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { userId } = input;
+      const [user] = await ctx.db.select({ login: users.login }).from(users).where(eq(users.id, userId));
+      if (!user) throw new Error('Account not found');
+
+      const chars = await ctx.db.select({ id: characters.id, level: characters.level, bindZoneId: characters.bindZoneId, bindX: characters.bindX, bindY: characters.bindY, bindZ: characters.bindZ }).from(characters).where(eq(characters.ownerId, userId));
+      const charIds = chars.map((c) => c.id);
+
+      await ctx.db.transaction(async (tx) => {
+        if (charIds.length > 0) {
+          await tx.delete(characterPermanentModifiers).where(inArray(characterPermanentModifiers.characterId, charIds));
+          await tx.delete(characterSkills).where(inArray(characterSkills.characterId, charIds));
+          await tx.delete(playerInventory).where(inArray(playerInventory.characterId, charIds));
+          await tx.delete(characterEquipment).where(inArray(characterEquipment.characterId, charIds));
+          await tx.delete(playerQuest).where(inArray(playerQuest.playerId, charIds));
+          await tx.delete(playerFlag).where(inArray(playerFlag.playerId, charIds));
+          await tx.delete(playerActiveEffect).where(inArray(playerActiveEffect.playerId, charIds));
+          await tx.delete(characterTitles).where(inArray(characterTitles.characterId, charIds));
+          await tx.delete(characterReputation).where(inArray(characterReputation.characterId, charIds));
+          await tx.delete(characterPity).where(inArray(characterPity.characterId, charIds));
+          await tx.delete(characterBestiary).where(inArray(characterBestiary.characterId, charIds));
+          await tx.delete(characterEmotes).where(inArray(characterEmotes.characterId, charIds));
+          await tx.delete(characterSkillMastery).where(inArray(characterSkillMastery.characterId, charIds));
+          await tx.delete(characterSkillBar).where(inArray(characterSkillBar.characterId, charIds));
+          await tx.delete(currencyTransactions).where(inArray(currencyTransactions.characterId, charIds));
+          await tx.delete(gameAnalytics).where(inArray(gameAnalytics.characterId, charIds));
+
+          for (const char of chars) {
+            const hp = char.level * 10;
+            await tx
+              .insert(characterCurrentState)
+              .values({ characterId: char.id, currentHealth: hp, currentMana: hp, isDead: false })
+              .onConflictDoUpdate({
+                target: characterCurrentState.characterId,
+                set: { currentHealth: hp, currentMana: hp, isDead: false, updatedAt: new Date() },
+              });
+            if (char.bindZoneId != null && char.bindX != null && char.bindY != null && char.bindZ != null) {
+              await tx
+                .update(characterPosition)
+                .set({ zoneId: char.bindZoneId, x: char.bindX, y: char.bindY, z: char.bindZ })
+                .where(eq(characterPosition.characterId, char.id));
+            }
+          }
+        }
+        await tx.update(userSessions).set({ revokedAt: new Date() }).where(and(eq(userSessions.userId, userId), isNull(userSessions.revokedAt)));
+        await tx.delete(userBans).where(eq(userBans.userId, userId));
+      });
+
+      await logGmAction({ actionType: 'wipe_account', targetType: 'user', targetId: userId, oldValue: { login: user.login, charactersWiped: charIds.length }, gmUserId: input.gmUserId ?? null });
+      return { success: true, charactersWiped: charIds.length };
+    }),
+
+  // Массовая очистка ВСЕХ аккаунтов (все персонажи + данные + сессии + баны)
+  wipeAll: gmProcedure
+    .input(z.object({ gmUserId: z.number().optional() }).default({}))
+    .mutation(async ({ ctx, input }) => {
+      const [totalUsers] = await ctx.db.select({ v: sql<number>`COUNT(*)::int`.as('v') }).from(users);
+      const userCount = totalUsers?.v ?? 0;
+
+      await ctx.db.transaction(async (tx) => {
+        await tx.delete(characterPermanentModifiers);
+        await tx.delete(characterSkills);
+        await tx.delete(playerInventory);
+        await tx.delete(characterEquipment);
+        await tx.delete(playerQuest);
+        await tx.delete(playerFlag);
+        await tx.delete(playerActiveEffect);
+        await tx.delete(characterTitles);
+        await tx.delete(characterReputation);
+        await tx.delete(characterPity);
+        await tx.delete(characterBestiary);
+        await tx.delete(characterEmotes);
+        await tx.delete(characterSkillMastery);
+        await tx.delete(characterSkillBar);
+        await tx.delete(currencyTransactions);
+        await tx.delete(gameAnalytics);
+
+        // Reset character_current_state for all characters
+        await tx.execute(sql`
+          INSERT INTO character_current_state (character_id, current_health, current_mana, is_dead, updated_at)
+          SELECT c.id, c.level * 10, c.level * 10, false, now()
+          FROM characters c
+          ON CONFLICT (character_id) DO UPDATE
+          SET current_health = EXCLUDED.current_health,
+              current_mana   = EXCLUDED.current_mana,
+              is_dead        = EXCLUDED.is_dead,
+              updated_at     = EXCLUDED.updated_at
+        `);
+
+        await tx.update(userSessions).set({ revokedAt: new Date() }).where(isNull(userSessions.revokedAt));
+        await tx.delete(userBans);
+      });
+
+      await logGmAction({ actionType: 'wipe_all_accounts', targetType: 'all', oldValue: { totalUsers: userCount }, gmUserId: input.gmUserId ?? null });
+      return { success: true, totalUsers: userCount };
     }),
 });

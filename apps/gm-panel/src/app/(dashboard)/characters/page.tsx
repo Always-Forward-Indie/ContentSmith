@@ -131,6 +131,10 @@ export default function CharactersPage() {
         onSuccess: () => { refetch(); toast.success('Персонаж удалён'); },
         onError: (e) => toast.error(e.message),
     });
+    const wipeAllM = trpc.characters.wipeAll.useMutation({
+        onSuccess: (data) => { refetch(); toast.success(`Все персонажи очищены (${data.totalCharacters} шт.)`); },
+        onError: (e) => toast.error(e.message),
+    });
 
     const rows = data?.data ?? [];
     const pagination = data?.pagination;
@@ -159,6 +163,25 @@ export default function CharactersPage() {
                         {pagination ? `${pagination.total} персонажей` : ''}
                     </span>
                     <CreateCharacterDialog onSuccess={() => refetch()} />
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={wipeAllM.isLoading}>
+                                <Trash2 className="h-3.5 w-3.5" />Очистить всё
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Очистить ВСЕХ персонажей?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Все данные всех персонажей будут удалены (скилы, инвентарь, квесты, эффекты, титулы и т.д.). Персонажи останутся в слотах. Это действие НЕОБРАТИМО.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => wipeAllM.mutate({})}>Очистить всё</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 
@@ -252,6 +275,7 @@ export default function CharactersPage() {
                                 <TableHead>Раса</TableHead>
                                 <TableHead className="text-center">Уровень</TableHead>
                                 <TableHead>Статус</TableHead>
+                                <TableHead>Онлайн</TableHead>
                                 <TableHead>Создан</TableHead>
                                 <TableHead>Активность</TableHead>
                                 <TableHead className="w-12 text-right">Удалить</TableHead>
@@ -261,14 +285,14 @@ export default function CharactersPage() {
                             {isLoading ? (
                                 Array.from({ length: 3 }).map((_, i) => (
                                     <TableRow key={i}>
-                                        {Array.from({ length: 10 }).map((_, j) => (
+                                        {Array.from({ length: 11 }).map((_, j) => (
                                             <TableCell key={j}><Skeleton className="h-4 w-full" /></TableCell>
                                         ))}
                                     </TableRow>
                                 ))
                             ) : rows.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                                    <TableCell colSpan={11} className="text-center py-8 text-muted-foreground">
                                         Персонажи не найдены
                                     </TableCell>
                                 </TableRow>
@@ -300,6 +324,13 @@ export default function CharactersPage() {
                                                 </Badge>
                                             ) : (
                                                 <Badge variant="success">Живой</Badge>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            {row.isOnline ? (
+                                                <Badge className="text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Онлайн</Badge>
+                                            ) : (
+                                                <Badge variant="outline" className="text-xs text-muted-foreground">Оффлайн</Badge>
                                             )}
                                         </TableCell>
                                         <TableCell className="text-xs text-muted-foreground whitespace-nowrap">

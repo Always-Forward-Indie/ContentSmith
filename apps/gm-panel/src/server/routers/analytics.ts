@@ -10,7 +10,7 @@ import {
   playerQuest,
   characterPosition,
   zones,
-  currencyTransactions,
+  gameAnalytics,
 } from '../schema';
 
 export const analyticsRouter = createTRPCRouter({
@@ -23,6 +23,9 @@ export const analyticsRouter = createTRPCRouter({
       [activeSessionsRow],
       [questTracksRow],
       [loginLast24hRow],
+      [onlineRow],
+      [mauRow],
+      [wauRow],
     ] = await Promise.all([
       ctx.db
         .select({ v: sql<number>`COUNT(*)::int`.as('v') })
@@ -51,6 +54,30 @@ export const analyticsRouter = createTRPCRouter({
         .select({ v: sql<number>`COUNT(DISTINCT ${userSessions.userId})::int`.as('v') })
         .from(userSessions)
         .where(sql`${userSessions.createdAt} > NOW() - INTERVAL '24 hours'`),
+      ctx.db
+        .select({ v: sql<number>`COUNT(*)::int`.as('v') })
+        .from(characters)
+        .where(and(isNull(characters.deletedAt), eq(characters.isOnline, true))),
+      ctx.db
+        .select({ v: sql<number>`COUNT(DISTINCT ${gameAnalytics.characterId})::int`.as('v') })
+        .from(gameAnalytics)
+        .where(
+          and(
+            eq(gameAnalytics.eventType, 'session_start'),
+            sql`${gameAnalytics.characterId} IS NOT NULL`,
+            sql`${gameAnalytics.createdAt} > NOW() - INTERVAL '30 days'`,
+          ),
+        ),
+      ctx.db
+        .select({ v: sql<number>`COUNT(DISTINCT ${gameAnalytics.characterId})::int`.as('v') })
+        .from(gameAnalytics)
+        .where(
+          and(
+            eq(gameAnalytics.eventType, 'session_start'),
+            sql`${gameAnalytics.characterId} IS NOT NULL`,
+            sql`${gameAnalytics.createdAt} > NOW() - INTERVAL '7 days'`,
+          ),
+        ),
     ]);
 
     return {
@@ -60,6 +87,9 @@ export const analyticsRouter = createTRPCRouter({
       activeSessions: activeSessionsRow?.v ?? 0,
       totalQuestTracks: questTracksRow?.v ?? 0,
       loginLast24h: loginLast24hRow?.v ?? 0,
+      onlinePlayers: onlineRow?.v ?? 0,
+      mau: mauRow?.v ?? 0,
+      wau: wauRow?.v ?? 0,
     };
   }),
 
@@ -125,14 +155,14 @@ export const analyticsRouter = createTRPCRouter({
         level: characters.level,
         className: characterClass.name,
         raceName: race.name,
-        playTimeSec: characters.playTimeSec,
+        totalPlayTimeSec: characters.totalPlayTimeSec,
         lastOnlineAt: characters.lastOnlineAt,
       })
       .from(characters)
       .leftJoin(characterClass, eq(characterClass.id, characters.classId))
       .leftJoin(race, eq(race.id, characters.raceId))
       .where(isNull(characters.deletedAt))
-      .orderBy(desc(characters.playTimeSec))
+      .orderBy(desc(characters.totalPlayTimeSec))
       .limit(10);
   }),
 
@@ -177,18 +207,66 @@ export const analyticsRouter = createTRPCRouter({
       .orderBy(sql`to_char(${users.createdAt}, 'YYYY-MM-DD')`);
   }),
 
-  // ─── Поток валюты за последние 14 дней ───────────────────────────────────
+  // ─── Поток валюты за последние 14 дней (из game_analytics gold_change) ────
   currencyFlowByDay: gmProcedure.query(async ({ ctx }) => {
     const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    return ctx.db
-      .select({
-        date: sql<string>`to_char(${currencyTransactions.createdAt}, 'YYYY-MM-DD')`.as('date'),
-        income: sql<number>`COALESCE(SUM(CASE WHEN ${currencyTransactions.amount} > 0 THEN ${currencyTransactions.amount}::bigint ELSE 0 END), 0)::bigint`.as('income'),
-        spending: sql<number>`COALESCE(SUM(CASE WHEN ${currencyTransactions.amount} < 0 THEN ABS(${currencyTransactions.amount}::bigint) ELSE 0 END), 0)::bigint`.as('spending'),
-      })
-      .from(currencyTransactions)
-      .where(gte(currencyTransactions.createdAt, since))
-      .groupBy(sql`to_char(${currencyTransactions.createdAt}, 'YYYY-MM-DD')`)
-      .orderBy(sql`to_char(${currencyTransactions.createdAt}, 'YYYY-MM-DD')`);
+    const rows = await ctx.db.execute(sql`
+      SELECT
+        to_char(created_at, 'YYYY-MM-DD')                                     AS date,
+        COALESCE(SUM(CASE WHEN (payload->>'delta')::bigint > 0
+                          THEN (payload->>'delta')::bigint ELSE 0 END), 0)   AS income,
+        COALESCE(SUM(CASE WHEN (payload->>'delta')::bigint < 0
+                          THEN ABS((payload->>'delta')::bigint) ELSE 0 END), 0) AS spending
+      FROM   game_analytics
+      WHERE  event_type = 'gold_change'
+        AND  created_at >= ${since}
+        AND  payload->>'delta' IS NOT NULL
+      GROUP  BY to_char(created_at, 'YYYY-MM-DD')
+      ORDER  BY date
+    `);
+    return rows.map((r) => ({
+      date: String(r.date),
+      income: Number(r.income),
+      spending: Number(r.spending),
+    }));
+  }),
+
+  // ─── Онлайн по часам (из session_start / session_end) ──────────────────────
+  onlineTimeline: gmProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.execute(sql`
+      WITH sessions AS (
+        SELECT
+          s.character_id,
+          s.created_at AS started_at,
+          e.created_at AS ended_at
+        FROM   game_analytics s
+        JOIN   game_analytics e
+               ON e.session_id = s.session_id
+              AND e.event_type = 'session_end'
+        WHERE  s.event_type = 'session_start'
+          AND  s.created_at >= NOW() - INTERVAL '7 days'
+          AND  EXTRACT(EPOCH FROM (e.created_at - s.created_at)) < 86400
+      ),
+      hours AS (
+        SELECT generate_series(
+          date_trunc('hour', NOW()) - INTERVAL '7 days',
+          date_trunc('hour', NOW()),
+          INTERVAL '1 hour'
+        ) AS hour
+      )
+      SELECT
+        h.hour,
+        COUNT(DISTINCT s.character_id)::int AS online
+      FROM   hours h
+      LEFT   JOIN sessions s
+             ON  s.started_at <= h.hour + INTERVAL '1 hour'
+             AND s.ended_at  >= h.hour
+      GROUP  BY h.hour
+      ORDER  BY h.hour
+    `);
+    return rows.map((r) => ({
+      hour: (r.hour as Date).toISOString(),
+      online: Number(r.online),
+    }));
   }),
 });

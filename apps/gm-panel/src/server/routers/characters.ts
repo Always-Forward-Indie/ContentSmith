@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, or, ilike, isNull } from 'drizzle-orm';
 import { createTRPCRouter, gmProcedure } from '../trpc';
-import { characters, characterClass, race, expForLevel, characterPermanentModifiers, entityAttributes, characterSkills, users, characterPosition, characterCurrentState, classStatFormula, classSkillTree, skills } from '../schema';
+import { characters, characterClass, race, expForLevel, characterPermanentModifiers, entityAttributes, characterSkills, users, characterPosition, characterCurrentState, classStatFormula, classSkillTree, skills, playerInventory, characterEquipment, playerQuest, playerFlag, playerActiveEffect, characterTitles, characterReputation, characterPity, characterBestiary, characterEmotes, characterSkillMastery, characterSkillBar, currencyTransactions, gameAnalytics } from '../schema';
 import { logGmAction } from '../utils/gmLog';
 
 export const charactersRouter = createTRPCRouter({
@@ -27,7 +27,7 @@ export const charactersRouter = createTRPCRouter({
           isDead: characterCurrentState.isDead,
           gender: characters.gender,
           freeSkillPoints: characters.freeSkillPoints,
-          playTimeSec: characters.playTimeSec,
+          totalPlayTimeSec: characters.totalPlayTimeSec,
           accountSlot: characters.accountSlot,
           createdAt: characters.createdAt,
           lastOnlineAt: characters.lastOnlineAt,
@@ -273,5 +273,270 @@ export const charactersRouter = createTRPCRouter({
       await ctx.db.delete(characters).where(eq(characters.id, input.characterId));
       await logGmAction({ actionType: 'delete_character', targetType: 'character', targetId: input.characterId, oldValue: { name: old?.name }, gmUserId: input.gmUserId ?? null });
       return { success: true };
+    }),
+
+  // Полная очистка персонажа (удаление всех связанных данных, персонаж остаётся в слоте)
+  wipe: gmProcedure
+    .input(z.object({ characterId: z.number(), gmUserId: z.number().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { characterId } = input;
+      const [char] = await ctx.db.select({ name: characters.name, level: characters.level }).from(characters).where(eq(characters.id, characterId));
+      if (!char) throw new Error('Character not found');
+
+      await ctx.db.transaction(async (tx) => {
+        await tx.delete(characterPermanentModifiers).where(eq(characterPermanentModifiers.characterId, characterId));
+        await tx.delete(characterSkills).where(eq(characterSkills.characterId, characterId));
+        await tx.delete(playerInventory).where(eq(playerInventory.characterId, characterId));
+        await tx.delete(characterEquipment).where(eq(characterEquipment.characterId, characterId));
+        await tx.delete(playerQuest).where(eq(playerQuest.playerId, characterId));
+        await tx.delete(playerFlag).where(eq(playerFlag.playerId, characterId));
+        await tx.delete(playerActiveEffect).where(eq(playerActiveEffect.playerId, characterId));
+        await tx.delete(characterTitles).where(eq(characterTitles.characterId, characterId));
+        await tx.delete(characterReputation).where(eq(characterReputation.characterId, characterId));
+        await tx.delete(characterPity).where(eq(characterPity.characterId, characterId));
+        await tx.delete(characterBestiary).where(eq(characterBestiary.characterId, characterId));
+        await tx.delete(characterEmotes).where(eq(characterEmotes.characterId, characterId));
+        await tx.delete(characterSkillMastery).where(eq(characterSkillMastery.characterId, characterId));
+        await tx.delete(characterSkillBar).where(eq(characterSkillBar.characterId, characterId));
+        await tx.delete(currencyTransactions).where(eq(currencyTransactions.characterId, characterId));
+        await tx.delete(gameAnalytics).where(eq(gameAnalytics.characterId, characterId));
+
+        const hp = char.level * 10;
+        await tx
+          .insert(characterCurrentState)
+          .values({ characterId, currentHealth: hp, currentMana: hp, isDead: false })
+          .onConflictDoUpdate({
+            target: characterCurrentState.characterId,
+            set: { currentHealth: hp, currentMana: hp, isDead: false, updatedAt: new Date() },
+          });
+      });
+
+      await logGmAction({ actionType: 'wipe_character', targetType: 'character', targetId: characterId, oldValue: { name: char.name }, gmUserId: input.gmUserId ?? null });
+      return { success: true };
+    }),
+
+  // Сброс персонажа до уровня 1 (очистка всех данных + сброс статов)
+  reset: gmProcedure
+    .input(z.object({ characterId: z.number(), gmUserId: z.number().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const { characterId } = input;
+      const [char] = await ctx.db
+        .select({ name: characters.name, bindZoneId: characters.bindZoneId, bindX: characters.bindX, bindY: characters.bindY, bindZ: characters.bindZ })
+        .from(characters)
+        .where(eq(characters.id, characterId));
+      if (!char) throw new Error('Character not found');
+
+      const [lvl1exp] = await ctx.db
+        .select({ experiencePoints: expForLevel.experiencePoints })
+        .from(expForLevel)
+        .where(eq(expForLevel.level, 1));
+
+      await ctx.db.transaction(async (tx) => {
+        await tx.delete(characterPermanentModifiers).where(eq(characterPermanentModifiers.characterId, characterId));
+        await tx.delete(characterSkills).where(eq(characterSkills.characterId, characterId));
+        await tx.delete(playerInventory).where(eq(playerInventory.characterId, characterId));
+        await tx.delete(characterEquipment).where(eq(characterEquipment.characterId, characterId));
+        await tx.delete(playerQuest).where(eq(playerQuest.playerId, characterId));
+        await tx.delete(playerFlag).where(eq(playerFlag.playerId, characterId));
+        await tx.delete(playerActiveEffect).where(eq(playerActiveEffect.playerId, characterId));
+        await tx.delete(characterTitles).where(eq(characterTitles.characterId, characterId));
+        await tx.delete(characterReputation).where(eq(characterReputation.characterId, characterId));
+        await tx.delete(characterPity).where(eq(characterPity.characterId, characterId));
+        await tx.delete(characterBestiary).where(eq(characterBestiary.characterId, characterId));
+        await tx.delete(characterEmotes).where(eq(characterEmotes.characterId, characterId));
+        await tx.delete(characterSkillMastery).where(eq(characterSkillMastery.characterId, characterId));
+        await tx.delete(characterSkillBar).where(eq(characterSkillBar.characterId, characterId));
+        await tx.delete(currencyTransactions).where(eq(currencyTransactions.characterId, characterId));
+        await tx.delete(gameAnalytics).where(eq(gameAnalytics.characterId, characterId));
+
+        await tx
+          .update(characters)
+          .set({ level: 1, experiencePoints: lvl1exp?.experiencePoints ?? 0, freeSkillPoints: 0, totalPlayTimeSec: 0, lastSessionPlayTimeSec: 0 })
+          .where(eq(characters.id, characterId));
+
+        await tx
+          .insert(characterCurrentState)
+          .values({ characterId, currentHealth: 10, currentMana: 10, isDead: false })
+          .onConflictDoUpdate({
+            target: characterCurrentState.characterId,
+            set: { currentHealth: 10, currentMana: 10, isDead: false, updatedAt: new Date() },
+          });
+
+        if (char.bindZoneId != null && char.bindX != null && char.bindY != null && char.bindZ != null) {
+          await tx
+            .update(characterPosition)
+            .set({ zoneId: char.bindZoneId, x: char.bindX, y: char.bindY, z: char.bindZ })
+            .where(eq(characterPosition.characterId, characterId));
+        }
+      });
+
+      await logGmAction({ actionType: 'reset_character', targetType: 'character', targetId: characterId, oldValue: { name: char.name }, gmUserId: input.gmUserId ?? null });
+      return { success: true };
+    }),
+
+  // Все позиции персонажей для карты
+  positions: gmProcedure
+    .input(z.object({ filter: z.enum(['all', 'online', 'offline']).default('all') }).default({}))
+    .query(async ({ ctx, input }) => {
+      const conditions = [isNull(characters.deletedAt)];
+      if (input.filter === 'online') conditions.push(eq(characters.isOnline, true));
+      if (input.filter === 'offline') conditions.push(eq(characters.isOnline, false));
+
+      return ctx.db
+        .select({
+          id: characters.id,
+          name: characters.name,
+          level: characters.level,
+          isOnline: characters.isOnline,
+          posX: characterPosition.x,
+          posY: characterPosition.y,
+          posZ: characterPosition.z,
+          zoneId: characterPosition.zoneId,
+          rotZ: characterPosition.rotZ,
+          className: characterClass.name,
+          ownerLogin: users.login,
+        })
+        .from(characters)
+        .leftJoin(characterPosition, eq(characterPosition.characterId, characters.id))
+        .leftJoin(characterClass, eq(characterClass.id, characters.classId))
+        .leftJoin(users, eq(users.id, characters.ownerId))
+        .where(and(...conditions));
+    }),
+
+  // Телепортация персонажа на заданные координаты
+  teleportToCoords: gmProcedure
+    .input(z.object({
+      characterId: z.number(),
+      x: z.number(),
+      y: z.number(),
+      z: z.number(),
+      zoneId: z.number().optional(),
+      rotZ: z.number().optional(),
+      gmUserId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { characterId, x, y, z: pz, zoneId, rotZ } = input;
+
+      await ctx.db
+        .insert(characterPosition)
+        .values({ characterId, x: String(x), y: String(y), z: String(pz), zoneId: zoneId ?? 1, rotZ: rotZ ?? 0 })
+        .onConflictDoUpdate({
+          target: characterPosition.characterId,
+          set: { x: String(x), y: String(y), z: String(pz), zoneId: zoneId ?? 1, rotZ: rotZ ?? 0 },
+        });
+
+      const [char] = await ctx.db.select({ name: characters.name }).from(characters).where(eq(characters.id, characterId));
+      await logGmAction({
+        actionType: 'teleport_to_coords',
+        targetType: 'character',
+        targetId: characterId,
+        newValue: { x, y, z: pz, zoneId: zoneId ?? 1, rotZ: rotZ ?? 0 },
+        oldValue: { name: char?.name },
+        gmUserId: input.gmUserId ?? null,
+      });
+      return { success: true };
+    }),
+
+  // Телепортация персонажа к другому игроку по никнейму
+  teleportToPlayer: gmProcedure
+    .input(z.object({
+      sourceCharacterId: z.number(),
+      targetNickname: z.string().min(1),
+      gmUserId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const target = await ctx.db
+        .select({
+          id: characters.id,
+          name: characters.name,
+          x: characterPosition.x,
+          y: characterPosition.y,
+          z: characterPosition.z,
+          zoneId: characterPosition.zoneId,
+          rotZ: characterPosition.rotZ,
+        })
+        .from(characters)
+        .leftJoin(characterPosition, eq(characterPosition.characterId, characters.id))
+        .where(and(
+          ilike(characters.name, input.targetNickname),
+          isNull(characters.deletedAt),
+        ))
+        .limit(1)
+        .then((r) => r[0]);
+
+      if (!target || target.x == null) throw new Error(`Игрок «${input.targetNickname}» не найден или не имеет позиции`);
+
+      await ctx.db
+        .insert(characterPosition)
+        .values({
+          characterId: input.sourceCharacterId,
+          x: String(target.x),
+          y: String(target.y),
+          z: String(target.z),
+          zoneId: target.zoneId ?? 1,
+          rotZ: target.rotZ ?? 0,
+        })
+        .onConflictDoUpdate({
+          target: characterPosition.characterId,
+          set: {
+            x: String(target.x),
+            y: String(target.y),
+            z: String(target.z),
+            zoneId: target.zoneId ?? 1,
+            rotZ: target.rotZ ?? 0,
+          },
+        });
+
+      const [source] = await ctx.db.select({ name: characters.name }).from(characters).where(eq(characters.id, input.sourceCharacterId));
+      await logGmAction({
+        actionType: 'teleport_to_player',
+        targetType: 'character',
+        targetId: input.sourceCharacterId,
+        newValue: { toPlayer: target.name, x: Number(target.x), y: Number(target.y), z: Number(target.z), zoneId: target.zoneId },
+        oldValue: { name: source?.name },
+        gmUserId: input.gmUserId ?? null,
+      });
+      return { success: true, targetName: target.name };
+    }),
+
+  // Массовая очистка ВСЕХ персонажей (все данные, персонажи остаются)
+  wipeAll: gmProcedure
+    .input(z.object({ gmUserId: z.number().optional() }).default({}))
+    .mutation(async ({ ctx, input }) => {
+      const [totalChars] = await ctx.db.select({ v: sql<number>`COUNT(*)::int`.as('v') }).from(characters).where(isNull(characters.deletedAt));
+      const charCount = totalChars?.v ?? 0;
+
+      await ctx.db.transaction(async (tx) => {
+        await tx.delete(characterPermanentModifiers);
+        await tx.delete(characterSkills);
+        await tx.delete(playerInventory);
+        await tx.delete(characterEquipment);
+        await tx.delete(playerQuest);
+        await tx.delete(playerFlag);
+        await tx.delete(playerActiveEffect);
+        await tx.delete(characterTitles);
+        await tx.delete(characterReputation);
+        await tx.delete(characterPity);
+        await tx.delete(characterBestiary);
+        await tx.delete(characterEmotes);
+        await tx.delete(characterSkillMastery);
+        await tx.delete(characterSkillBar);
+        await tx.delete(currencyTransactions);
+        await tx.delete(gameAnalytics);
+
+        await tx.execute(sql`
+          INSERT INTO character_current_state (character_id, current_health, current_mana, is_dead, updated_at)
+          SELECT c.id, c.level * 10, c.level * 10, false, now()
+          FROM characters c
+          ON CONFLICT (character_id) DO UPDATE
+          SET current_health = EXCLUDED.current_health,
+              current_mana   = EXCLUDED.current_mana,
+              is_dead        = EXCLUDED.is_dead,
+              updated_at     = EXCLUDED.updated_at
+        `);
+      });
+
+      await logGmAction({ actionType: 'wipe_all_characters', targetType: 'all', oldValue: { totalCharacters: charCount }, gmUserId: input.gmUserId ?? null });
+      return { success: true, totalCharacters: charCount };
     }),
 });

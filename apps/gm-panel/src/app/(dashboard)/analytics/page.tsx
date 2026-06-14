@@ -1,20 +1,23 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, Legend, PieChart, Pie, Cell,
 } from 'recharts';
 import {
     Users, Sword, ShieldBan, Wifi, ScrollText, Clock,
-    TrendingUp, MapPin, Trophy, Coins,
+    TrendingUp, MapPin, Trophy, Coins, Radio, Activity,
+    Filter, Download,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
-import { formatDate } from '@/lib/utils';
+import { formatDate, downloadCsv } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 // ─── Константы ───────────────────────────────────────────────────────────────
 
@@ -73,7 +76,17 @@ type OverviewData = Partial<{
     activeSessions: number;
     totalQuestTracks: number;
     loginLast24h: number;
+    onlinePlayers: number;
+    mau: number;
+    wau: number;
 }>;
+
+const DAYS_OPTIONS = [
+    { value: '7', label: '7 дней' },
+    { value: '14', label: '14 дней' },
+    { value: '30', label: '30 дней' },
+    { value: '90', label: '90 дней' },
+];
 
 function StatCard({
     icon: Icon,
@@ -118,11 +131,14 @@ function StatCard({
 
 function OverviewCards({ data, isLoading }: { data?: OverviewData; isLoading: boolean }) {
     return (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <StatCard icon={Users} label="Аккаунты" value={data?.totalUsers ?? 0} isLoading={isLoading} />
             <StatCard icon={Sword} label="Персонажи" value={data?.totalCharacters ?? 0} isLoading={isLoading} />
+            <StatCard icon={Radio} label="Онлайн" value={data?.onlinePlayers ?? 0} isLoading={isLoading} iconClass="bg-emerald-500/10" />
+            <StatCard icon={Activity} label="MAU (30д)" value={data?.mau ?? 0} isLoading={isLoading} iconClass="bg-violet-500/10" />
+            <StatCard icon={Activity} label="WAU (7д)" value={data?.wau ?? 0} isLoading={isLoading} iconClass="bg-cyan-500/10" />
             <StatCard icon={ShieldBan} label="Активных банов" value={data?.activeBans ?? 0} isLoading={isLoading} iconClass="bg-destructive/10" />
-            <StatCard icon={Wifi} label="Активных сессий" value={data?.activeSessions ?? 0} isLoading={isLoading} iconClass="bg-emerald-500/10" />
+            <StatCard icon={Wifi} label="Активных сессий" value={data?.activeSessions ?? 0} isLoading={isLoading} iconClass="bg-blue-500/10" />
             <StatCard icon={ScrollText} label="Квест-трекеров" value={data?.totalQuestTracks ?? 0} isLoading={isLoading} />
             <StatCard icon={Clock} label="Логинов за 24ч" value={data?.loginLast24h ?? 0} isLoading={isLoading} iconClass="bg-amber-500/10" />
         </div>
@@ -449,19 +465,45 @@ type TopCharRow = {
     level: number;
     className: string | null;
     raceName: string | null;
-    playTimeSec: number;
+    totalPlayTimeSec: number;
     lastOnlineAt: Date | null;
 };
 
 function TopCharactersTable({ data, isLoading }: { data?: TopCharRow[]; isLoading: boolean }) {
+    function handleExport() {
+        if (!data?.length) return;
+        downloadCsv(
+            'top-characters.csv',
+            ['#', 'Персонаж', 'Уровень', 'Класс', 'Раса', 'Время в игре', 'Последний онлайн'],
+            data.map((char, idx) => [
+                String(idx + 1),
+                char.name,
+                String(char.level),
+                char.className ?? '—',
+                char.raceName ?? '—',
+                formatPlayTime(char.totalPlayTimeSec),
+                char.lastOnlineAt ? formatDate(char.lastOnlineAt.toISOString()) : '—',
+            ]),
+        );
+    }
+
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-                    <Trophy className="h-4 w-4 text-primary" />
-                    Топ персонажей
-                </CardTitle>
-                <CardDescription>По суммарному времени в игре</CardDescription>
+                <div className="flex items-start justify-between gap-2">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                            <Trophy className="h-4 w-4 text-primary" />
+                            Топ персонажей
+                        </CardTitle>
+                        <CardDescription>По суммарному времени в игре</CardDescription>
+                    </div>
+                    {!!data?.length && (
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={handleExport}>
+                            <Download className="mr-1 h-3 w-3" />CSV
+                        </Button>
+                    )}
+                </div>
             </CardHeader>
             <CardContent className="p-0">
                 {isLoading ? (
@@ -494,7 +536,7 @@ function TopCharactersTable({ data, isLoading }: { data?: TopCharRow[]; isLoadin
                                     <TableCell className="text-muted-foreground">{char.className ?? '—'}</TableCell>
                                     <TableCell className="text-muted-foreground">{char.raceName ?? '—'}</TableCell>
                                     <TableCell className="text-right font-mono text-sm tabular-nums">
-                                        {formatPlayTime(char.playTimeSec)}
+                                        {formatPlayTime(char.totalPlayTimeSec)}
                                     </TableCell>
                                     <TableCell className="text-right text-xs text-muted-foreground">
                                         {char.lastOnlineAt ? formatDate(char.lastOnlineAt.toISOString()) : '—'}
@@ -554,6 +596,50 @@ function CurrencyFlowChart({ data, isLoading }: {
     );
 }
 
+// ─── Online Timeline ──────────────────────────────────────────────────────────
+
+function OnlineTimelineChart({ data, isLoading }: {
+    data?: { hour: string; online: number }[];
+    isLoading: boolean;
+}) {
+    const chartData = useMemo(
+        () => data?.map((d) => ({
+            time: new Date(d.hour).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }),
+            online: d.online,
+        })) ?? [],
+        [data],
+    );
+
+    return (
+        <Card className="h-full">
+            <CardHeader className="pb-0">
+                <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                    <Activity className="h-4 w-4 text-emerald-500" />
+                    Онлайн по часам (7 дней)
+                </CardTitle>
+                <CardDescription>Приблизительный одновременный онлайн, вычисленный по сессиям</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+                {isLoading ? (
+                    <Skeleton className="h-44 w-full" />
+                ) : !chartData.length ? (
+                    <EmptyState />
+                ) : (
+                    <ResponsiveContainer width="100%" height={180}>
+                        <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                            <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
+                            <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                            <Tooltip content={<ChartTooltip />} />
+                            <Line type="monotone" dataKey="online" name="Онлайн" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
 function EmptyState() {
@@ -577,6 +663,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AnalyticsPage() {
+    const [daysStr, setDaysStr] = useState('30');
+    const days = Number(daysStr);
+
     const overview = trpc.analytics.overview.useQuery(undefined, { refetchInterval: 30_000 });
     const levelDist = trpc.analytics.levelDistribution.useQuery();
     const classDist = trpc.analytics.classDistribution.useQuery();
@@ -586,6 +675,7 @@ export default function AnalyticsPage() {
     const zonePop = trpc.analytics.zonePopulation.useQuery(undefined, { refetchInterval: 30_000 });
     const registrations = trpc.analytics.registrationsByDay.useQuery();
     const currencyFlow = trpc.analytics.currencyFlowByDay.useQuery();
+    const onlineTimeline = trpc.analytics.onlineTimeline.useQuery();
 
     const classData = useMemo(
         () => classDist.data?.map((d) => ({ name: d.className ?? '—', count: d.count })) ?? [],
@@ -599,25 +689,44 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Аналитика</h1>
-                <p className="text-sm text-muted-foreground">
-                    Статистика игрового мира · обновляется раз в 30 сек
-                </p>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">Аналитика</h1>
+                    <p className="text-sm text-muted-foreground">
+                        Статистика игрового мира · обновляется раз в 30 сек
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Select value={daysStr} onValueChange={setDaysStr}>
+                        <SelectTrigger className="h-8 w-28 text-xs">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {DAYS_OPTIONS.map((o) => (
+                                <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             {/* Overview */}
             <OverviewCards data={overview.data} isLoading={overview.isLoading} />
 
+            {/* Online Timeline */}
+            <div className="space-y-2">
+                <SectionLabel>Онлайн за 7 дней</SectionLabel>
+                <OnlineTimelineChart data={onlineTimeline.data} isLoading={onlineTimeline.isLoading} />
+            </div>
+
             {/* Player Distribution */}
             <div className="space-y-2">
                 <SectionLabel>Прогрессия и состав</SectionLabel>
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                    {/* Level Chart — wide */}
                     <div className="lg:col-span-7">
                         <LevelDistributionChart data={levelDist.data} isLoading={levelDist.isLoading} />
                     </div>
-                    {/* Class + Race stacked */}
                     <div className="flex flex-col gap-4 lg:col-span-5">
                         <HorizontalBarChart
                             title="Классы"

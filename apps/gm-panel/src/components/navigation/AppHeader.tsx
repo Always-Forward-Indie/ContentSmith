@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, Users, Sword, Sun, Moon, ScrollText, Settings, BarChart2, Activity, LogOut } from 'lucide-react';
+import { Shield, Users, Sword, Sun, Moon, ScrollText, Settings, BarChart2, Activity, LogOut, Map } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { signOut } from 'next-auth/react';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
     { href: '/analytics', label: 'Аналитика', icon: BarChart2 },
     { href: '/game-analytics', label: 'Game Events', icon: Activity },
+    { href: '/map', label: 'Карта', icon: Map },
     { href: '/accounts', label: 'Аккаунты', icon: Users },
     { href: '/characters', label: 'Персонажи', icon: Sword },
     { href: '/game-config', label: 'Конфиг', icon: Settings },

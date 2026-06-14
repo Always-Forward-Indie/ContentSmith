@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 import {
-    ChevronRight, Sword, HeartPulse, Zap, Skull, Trash2, Plus, Pencil,
+    ChevronRight, Sword, HeartPulse, Zap, Skull, Trash2, Plus, Pencil, MapPin,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
@@ -319,6 +319,10 @@ export default function CharacterPage() {
     // ── Mutations ──
     const revive = trpc.characters.revive.useMutation({ onSuccess: () => { refetchChar(); toast.success('Персонаж воскрешён'); }, onError: (e) => toast.error(e.message) });
     const delChar = trpc.characters.delete.useMutation({ onSuccess: () => { toast.success('Персонаж удалён'); router.push('/characters'); }, onError: (e) => toast.error(e.message) });
+    const wipeChar = trpc.characters.wipe.useMutation({ onSuccess: () => { refetchAll(); toast.success('Персонаж очищен'); }, onError: (e) => toast.error(e.message) });
+    const resetChar = trpc.characters.reset.useMutation({ onSuccess: () => { refetchAll(); toast.success('Персонаж сброшен до Lv.1'); }, onError: (e) => toast.error(e.message) });
+    const teleportCoords = trpc.characters.teleportToCoords.useMutation({ onSuccess: () => { refetchChar(); toast.success('Персонаж телепортирован'); }, onError: (e) => toast.error(e.message) });
+    const teleportPlayer = trpc.characters.teleportToPlayer.useMutation({ onSuccess: (data) => { refetchChar(); toast.success(`Телепортирован к ${data.targetName}`); }, onError: (e) => toast.error(e.message) });
 
     const setValue = trpc.attributes.setValue.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Модификатор сохранён'); }, onError: (e) => toast.error(e.message) });
     const delAttr = trpc.attributes.deleteAttribute.useMutation({ onSuccess: () => { refetchAttrs(); toast.success('Модификатор удалён'); }, onError: (e) => toast.error(e.message) });
@@ -365,6 +369,23 @@ export default function CharacterPage() {
 
     const grantCurrency = trpc.transactions.grant.useMutation({ onSuccess: () => { refetchTx(); refetchBalance(); toast.success('Транзакция добавлена'); }, onError: (e) => toast.error(e.message) });
 
+    function refetchAll() {
+      refetchChar();
+      refetchAttrs();
+      refetchInv();
+      refetchQuests();
+      refetchFlags();
+      refetchEffects();
+      refetchSkills();
+      refetchEquip();
+      refetchTx();
+      refetchBalance();
+      refetchTitles();
+      refetchRep();
+      refetchMastery();
+      refetchEmotes();
+    }
+
     // ── Local state ──
 
     // Equip form
@@ -407,6 +428,13 @@ export default function CharacterPage() {
     const [newEmoteSlug, setNewEmoteSlug] = useState('');
     const [newRepFaction, setNewRepFaction] = useState('');
     const [newRepValue, setNewRepValue] = useState('0');
+
+    // Teleport forms
+    const [tpX, setTpX] = useState('');
+    const [tpY, setTpY] = useState('');
+    const [tpZ, setTpZ] = useState('');
+    const [tpTargetNick, setTpTargetNick] = useState('');
+    const [tpDialogOpen, setTpDialogOpen] = useState(false);
 
     if (charLoading) {
         return (
@@ -474,6 +502,105 @@ export default function CharacterPage() {
                                 char={{ id: characterId, name: char.name, classId: char.classId ?? null, raceId: char.raceId ?? null, currentHealth: char.currentHealth ?? null, currentMana: char.currentMana ?? null, isDead: char.isDead ?? null, level: char.level ?? null, experiencePoints: char.experiencePoints ?? null, freeSkillPoints: char.freeSkillPoints ?? null, gender: char.gender ?? null, ownerId: char.ownerId, ownerLogin: char.ownerLogin }}
                                 onSuccess={() => refetchChar()}
                             />
+
+                            {/* Teleport dialog */}
+                            <Dialog open={tpDialogOpen} onOpenChange={setTpDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="gap-1.5">
+                                        <MapPin className="h-3.5 w-3.5" />Телепорт
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Телепортировать «{char.name}»</DialogTitle>
+                                        <DialogDescription>На координаты или к другому игроку.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-2">
+                                        <div>
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">По координатам</p>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <div className="space-y-1">
+                                                    <Label>X</Label>
+                                                    <Input type="number" value={tpX} onChange={e => setTpX(e.target.value)} placeholder={char.posX != null ? String(Number(char.posX).toFixed(0)) : '0'} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label>Y</Label>
+                                                    <Input type="number" value={tpY} onChange={e => setTpY(e.target.value)} placeholder={char.posY != null ? String(Number(char.posY).toFixed(0)) : '0'} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label>Z</Label>
+                                                    <Input type="number" value={tpZ} onChange={e => setTpZ(e.target.value)} placeholder={char.posZ != null ? String(Number(char.posZ).toFixed(0)) : '0'} />
+                                                </div>
+                                            </div>
+                                            <Button size="sm" className="mt-2 w-full" disabled={!tpX || !tpY || !tpZ || teleportCoords.isLoading}
+                                                onClick={() => {
+                                                    teleportCoords.mutate({ characterId, x: Number(tpX), y: Number(tpY), z: Number(tpZ) });
+                                                    setTpDialogOpen(false);
+                                                }}>
+                                                Телепортировать
+                                            </Button>
+                                        </div>
+                                        <div className="border-t pt-4">
+                                            <p className="text-xs font-medium text-muted-foreground mb-2">К игроку по никнейму</p>
+                                            <div className="flex gap-2">
+                                                <Input placeholder="Никнейм игрока" value={tpTargetNick} onChange={e => setTpTargetNick(e.target.value)}
+                                                    onKeyDown={e => { if (e.key === 'Enter' && tpTargetNick) { teleportPlayer.mutate({ sourceCharacterId: characterId, targetNickname: tpTargetNick }); setTpDialogOpen(false); setTpTargetNick(''); } }} />
+                                                <Button size="sm" disabled={!tpTargetNick || teleportPlayer.isLoading}
+                                                    onClick={() => { teleportPlayer.mutate({ sourceCharacterId: characterId, targetNickname: tpTargetNick }); setTpDialogOpen(false); setTpTargetNick(''); }}>
+                                                    {teleportPlayer.isLoading ? '...' : '→'}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+
+                            {/* Wipe dialog */}
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="gap-1.5 text-orange-600 border-orange-300 hover:bg-orange-50 dark:hover:bg-orange-950">
+                                        <Trash2 className="h-3.5 w-3.5" />Очистить
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Очистить «{char.name}»?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Все данные персонажа (инвентарь, квесты, скилы, эффекты, титулы и т.д.) будут удалены. Персонаж останется в слоте аккаунта с текущим уровнем.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => wipeChar.mutate({ characterId })}>
+                                            Очистить
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
+                            {/* Reset dialog */}
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="gap-1.5 text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-950">
+                                        <Trash2 className="h-3.5 w-3.5" />Сброс Lv.1
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Сбросить «{char.name}» до Lv.1?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Все данные будут удалены, уровень сброшен до 1, позиция — к точке привязки. Это действие необратимо.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => resetChar.mutate({ characterId })}>
+                                            Сбросить
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
                                     <Button size="sm" variant="ghost"
@@ -544,7 +671,7 @@ export default function CharacterPage() {
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5">Время игры</p>
-                            <p className="font-medium">{formatPlayTime(char.playTimeSec)}</p>
+                            <p className="font-medium">{formatPlayTime(char.totalPlayTimeSec)}</p>
                         </div>
                         <div>
                             <p className="text-muted-foreground text-xs mb-0.5">Слот аккаунта</p>

@@ -9,6 +9,9 @@ export default function middleware(req: NextRequest) {
   if (!publicPaths.some((p) => pathname.startsWith(p))) {
     const sessionToken = req.cookies.get('next-auth.session-token');
     if (!sessionToken) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
       return NextResponse.redirect(new URL('/login', req.url));
     }
   }

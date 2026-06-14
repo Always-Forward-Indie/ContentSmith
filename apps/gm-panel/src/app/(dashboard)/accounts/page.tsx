@@ -219,6 +219,9 @@ export default function AccountsPage() {
     const { data: roles } = trpc.accounts.allRoles.useQuery();
     const kick = trpc.accounts.kick.useMutation({ onSuccess: () => { refetch(); toast.success('Игрок кикнут'); }, onError: (e) => toast.error(e.message) });
     const del = trpc.accounts.delete.useMutation({ onSuccess: () => { refetch(); toast.success('Аккаунт удалён'); }, onError: (e) => toast.error(e.message) });
+    const delWithChars = trpc.accounts.deleteWithCharacters.useMutation({ onSuccess: (data) => { refetch(); toast.success(`Аккаунт удалён (${data.charactersDeleted} перс.)`); }, onError: (e) => toast.error(e.message) });
+    const wipe = trpc.accounts.wipe.useMutation({ onSuccess: (data) => { refetch(); toast.success(`Аккаунт очищен (${data.charactersWiped} перс.)`); }, onError: (e) => toast.error(e.message) });
+    const wipeAllM = trpc.accounts.wipeAll.useMutation({ onSuccess: (data) => { refetch(); toast.success(`Все аккаунты очищены (${data.totalUsers} польз.)`); }, onError: (e) => toast.error(e.message) });
     const unban = trpc.bans.unban.useMutation({ onSuccess: () => { refetch(); toast.success('Блокировка снята'); }, onError: (e) => toast.error(e.message) });
 
     const rows = data?.data ?? [];
@@ -237,6 +240,25 @@ export default function AccountsPage() {
                 <div className="ml-auto flex items-center gap-3">
                     <span className="text-sm text-muted-foreground">{pagination ? `${pagination.total} аккаунтов` : ''}</span>
                     <CreateAccountDialog onSuccess={() => refetch()} />
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10" disabled={wipeAllM.isLoading}>
+                                <Trash2 className="h-3.5 w-3.5" />Очистить всё
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Очистить ВСЕ аккаунты?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Все данные всех персонажей будут удалены. Сессии всех пользователей будут сброшены. Баны удалены. Это действие НЕОБРАТИМО.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => wipeAllM.mutate({})}>Очистить всё</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 
@@ -354,15 +376,29 @@ export default function AccountsPage() {
                                                 )}
                                                 <AlertDialog>
                                                     <AlertDialogTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-orange-600 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950" title="Очистить">
+                                                            <RotateCcw className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader><AlertDialogTitle>Очистить «{row.login}»?</AlertDialogTitle><AlertDialogDescription>Все данные персонажей будут удалены, персонажи останутся в слотах. Сессии и баны также будут сброшены.</AlertDialogDescription></AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Отмена</AlertDialogCancel>
+                                                            <AlertDialogAction onClick={() => wipe.mutate({ userId: row.userId })}>Очистить</AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" disabled={del.isLoading}>
                                                             <Trash2 className="h-3.5 w-3.5" />
                                                         </Button>
                                                     </AlertDialogTrigger>
                                                     <AlertDialogContent>
-                                                        <AlertDialogHeader><AlertDialogTitle>Удалить «{row.login}»?</AlertDialogTitle><AlertDialogDescription>Аккаунт и все его персонажи будут удалены безвозвратно.</AlertDialogDescription></AlertDialogHeader>
+                                                        <AlertDialogHeader><AlertDialogTitle>Удалить «{row.login}»?</AlertDialogTitle><AlertDialogDescription>Аккаунт, все персонажи и все их данные будут удалены безвозвратно.</AlertDialogDescription></AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Отмена</AlertDialogCancel>
-                                                            <AlertDialogAction onClick={() => del.mutate({ userId: row.userId })}>Удалить</AlertDialogAction>
+                                                            <AlertDialogAction onClick={() => delWithChars.mutate({ userId: row.userId })}>Удалить</AlertDialogAction>
                                                         </AlertDialogFooter>
                                                     </AlertDialogContent>
                                                 </AlertDialog>

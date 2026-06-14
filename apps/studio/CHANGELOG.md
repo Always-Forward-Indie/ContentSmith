@@ -1,5 +1,21 @@
 # Studio — Changelog
 
+## [Unreleased] — 2026-06-14
+
+### API
+
+- **Загрузка карт** — маршрут `/api/upload` теперь использует `MAP_UPLOAD_DIR` из переменных окружения (вместо жёсткого пути `public/uploads/maps`). Добавлено логирование пути сохранённого файла.
+- **Отдача изображений** — URL загруженной карты изменён с `/uploads/maps/...` на `/api/map-image/...` (отдача через API, а не статическая раздача)
+
+### Инфраструктура (Docker)
+
+- `HOSTNAME=0.0.0.0` и `NODE_NO_WARNINGS=1` добавлены в Dockerfile
+- Директории `/app/data/map-uploads` и `/app/config` создаются в контейнере
+- Volume `studio_uploads` и `studio_config` для сохранения данных между перезапусками
+- Сервис подключается к внешней сети `mmo_network` и внутренней `default`
+
+---
+
 ## [Unreleased] — 2026-06-10
 
 ### Новый раздел: Balance Calculator
